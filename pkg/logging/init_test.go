@@ -8,9 +8,9 @@ import (
 	"testing"
 )
 
-func TestShouldWriteToBothFileAndConsole(t *testing.T) {
+func Test_WriteToBothFileAndConsole(t *testing.T) {
 	// Arrange
-	logFile := "test-file.log"
+	logFile := "test_file.log"
 	testMessage := uuid.New().String()
 
 	// Act

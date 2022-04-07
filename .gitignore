@@ -2,3 +2,7 @@
 cmd/cops-hq/hq.log
 
 coverage.out
+
+pkg/commands/exec_tests.log
+
+pkg/logging/test_file.log

@@ -14,6 +14,8 @@ var DefaultLogLevel = logrus.InfoLevel
 // Init will initialize the Logrus system, which per default sets up logging to
 // console and to file at the same time. Features are file rotation,
 // fixed colors on Windows etc.
+// Init is a global initialization (without return value), since Logrus and the
+// logging systems are also globally available singletons
 func Init(logFileName string) {
 	var logLevel = DefaultLogLevel
 
