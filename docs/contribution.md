@@ -18,4 +18,14 @@ then, execute
 go mod tidy
 ```
 
-Required dependency, and all transient dependencies, will be recorded in the go.mod and go.sum files. 
+Required dependency, and all transient dependencies, will be recorded in the go.mod and go.sum files.
+
+## Tests
+
+- Please use testify/assert assertions!
+- To check coverage, use (from the project root):
+
+````shell 
+go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out
+````
