@@ -48,10 +48,11 @@ func (s *ExecutorTestSuite) Test_ReturnsCommandStdoutOutput() {
 	s.Equal("test", out)
 }
 
-func (s *ExecutorTestSuite) Test_FailWithError() {
-	_, err := s.exec.Execute("no-such-thing-to-do bla")
+func (s *ExecutorTestSuite) Test_NotFoundCommandsFailWithErrorsAndNoOutput() {
+	out, err := s.exec.Execute("no-such-thing-to-do bla")
 	s.Error(err)
 	s.Contains(err.Error(), "executable file not found")
+	s.Equal("", out)
 }
 
 func (s *ExecutorTestSuite) Test_ExecuteCommandInTTYMode() {
@@ -61,6 +62,18 @@ func (s *ExecutorTestSuite) Test_ExecuteCommandInTTYMode() {
 func (s *ExecutorTestSuite) Test_ExecuteCommandWithArgumentsWithSpacesAndQuotations() {
 	out, _ := s.exec.Execute("echo \"this is a long string\"")
 	s.Equal("this is a long string", out)
+}
+
+func (s *ExecutorTestSuite) Test_SuccessfulCommandReturnNoErrors() {
+	_, err := s.exec.Execute("echo test")
+	s.NoError(err)
+}
+
+func (s *ExecutorTestSuite) Test_CommandStdErrIsNotCollectedForTheOutput() {
+	out, err := s.exec.Execute("ls this-file-does-not-exist")
+	s.Error(err)
+	s.Contains(err.Error(), "exit status 1")
+	s.NotContains(out, "No such file")
 }
 
 func (s *ExecutorTestSuite) Test_Integration_ParsingComplexTypeFromCommandsIsPossible() {

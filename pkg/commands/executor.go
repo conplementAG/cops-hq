@@ -13,6 +13,9 @@ type Executor struct {
 	logFileName string
 }
 
+// Execute will run the given command, returning the stdout output and errors (if any).
+// Stdout is collected as return output, Stderr is shown on console and logged, but not collected in the output.
+// Any errors are returned as err return value.
 func (e *Executor) Execute(command string) (output string, err error) {
 	cmd := commands.Create(command)
 
@@ -55,17 +58,16 @@ func (e *Executor) Execute(command string) (output string, err error) {
 	}()
 
 	err = cmd.Wait()
-	if err != nil {
-		return "", err
-	}
-
 	multiWritingSteps.Wait()
 
 	// some consoles always append a \n at the end, but this is safe to be removed
 	cleanedStringOutput := strings.TrimSuffix(stdoutCollector.String(), "\n")
-	return cleanedStringOutput, nil
+	return cleanedStringOutput, err
 }
 
+// ExecuteTTY is a special executor for cases where the called command needs to detect it runs in a TTY session.
+// One example of such command is Docker. Commands executed via ExecuteTTY have their output shown on the console,
+// but the output is not saved to a log file.
 func (e *Executor) ExecuteTTY(command string) error {
 	cmd := commands.Create(command)
 
