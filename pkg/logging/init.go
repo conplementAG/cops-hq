@@ -14,9 +14,11 @@ var DefaultLogLevel = logrus.InfoLevel
 // Init will initialize the Logrus system, which per default sets up logging to
 // console and to file at the same time. Features are file rotation,
 // fixed colors on Windows etc.
-// Init is a global initialization (without return value), since Logrus and the
-// logging systems are also globally available singletons
-func Init(logFileName string) {
+// Init is a global initialization, since Logrus and the logging systems are also
+// globally available singletons. This global instance of logrus.Logger is returned,
+// so that if needed, it can be still used for dependency injection. Still, using logrus.Info()
+// and other methods directly is not evil.
+func Init(logFileName string) *logrus.Logger {
 	var logLevel = DefaultLogLevel
 
 	// main reason we use the prefixed library TextFormatter, instead of the default logrus.TextFormatter,
@@ -64,4 +66,6 @@ func Init(logFileName string) {
 
 	// this hook will also route logs to file
 	logrus.AddHook(rotateFileHook)
+
+	return logrus.StandardLogger()
 }
