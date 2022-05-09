@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"github.com/denisbiondic/cops-hq/internal/testing_utils"
 	"github.com/denisbiondic/cops-hq/pkg/logging"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
 	"os"
 	"testing"
@@ -17,66 +16,65 @@ import (
 
 const testLogFileName = "exec_tests.log"
 
-type ExecutorTestSuite struct {
+type ExecutorChattyTestSuite struct {
 	suite.Suite
-	exec *Executor
+	exec Executor
 }
 
-func (s *ExecutorTestSuite) SetupTest() {
-	logging.Init(testLogFileName)
-	logrus.Info("I am running from the tests...")
+func (s *ExecutorChattyTestSuite) SetupTest() {
+	logger := logging.Init(testLogFileName)
 
 	// executor initialized with same file as the logging system to test conflicts when writing to the same file
-	s.exec = NewExecutor(testLogFileName)
+	s.exec = NewChatty(testLogFileName, logger)
 }
 
-func (s *ExecutorTestSuite) AfterTest(suiteName string, testName string) {
+func (s *ExecutorChattyTestSuite) AfterTest(suiteName string, testName string) {
 	fmt.Printf("Cleanup after test %s/%s\n", suiteName, testName)
 	os.Remove(testLogFileName)
 }
 
-func TestExampleTestSuite(t *testing.T) {
-	suite.Run(t, new(ExecutorTestSuite))
+func TestChattyTestSuite(t *testing.T) {
+	suite.Run(t, new(ExecutorChattyTestSuite))
 }
 
-func (s *ExecutorTestSuite) Test_ExecuteNormalCommand() {
+func (s *ExecutorChattyTestSuite) Test_ExecuteNormalCommand() {
 	s.exec.Execute("ls -la")
 }
 
-func (s *ExecutorTestSuite) Test_ReturnsCommandStdoutOutput() {
+func (s *ExecutorChattyTestSuite) Test_ReturnsCommandStdoutOutput() {
 	out, _ := s.exec.Execute("echo test")
 	s.Equal("test", out)
 }
 
-func (s *ExecutorTestSuite) Test_NotFoundCommandsFailWithErrorsAndNoOutput() {
+func (s *ExecutorChattyTestSuite) Test_NotFoundCommandsFailWithErrorsAndNoOutput() {
 	out, err := s.exec.Execute("no-such-thing-to-do bla")
 	s.Error(err)
 	s.Contains(err.Error(), "executable file not found")
 	s.Equal("", out)
 }
 
-func (s *ExecutorTestSuite) Test_ExecuteCommandInTTYMode() {
+func (s *ExecutorChattyTestSuite) Test_ExecuteCommandInTTYMode() {
 	s.exec.ExecuteTTY("ls -la") // simply run the command, confirm it does not fail
 }
 
-func (s *ExecutorTestSuite) Test_ExecuteCommandWithArgumentsWithSpacesAndQuotations() {
+func (s *ExecutorChattyTestSuite) Test_ExecuteCommandWithArgumentsWithSpacesAndQuotations() {
 	out, _ := s.exec.Execute("echo \"this is a long string\"")
 	s.Equal("this is a long string", out)
 }
 
-func (s *ExecutorTestSuite) Test_SuccessfulCommandReturnNoErrors() {
+func (s *ExecutorChattyTestSuite) Test_SuccessfulCommandReturnNoErrors() {
 	_, err := s.exec.Execute("echo test")
 	s.NoError(err)
 }
 
-func (s *ExecutorTestSuite) Test_CommandStdErrIsNotCollectedForTheOutput() {
+func (s *ExecutorChattyTestSuite) Test_CommandStdErrIsNotCollectedForTheOutput() {
 	out, err := s.exec.Execute("ls this-file-does-not-exist")
 	s.Error(err)
 	s.Contains(err.Error(), "exit status 1")
 	s.NotContains(out, "No such file")
 }
 
-func (s *ExecutorTestSuite) Test_Integration_ParsingComplexTypeFromCommandsIsPossible() {
+func (s *ExecutorChattyTestSuite) Test_Integration_ParsingComplexTypeFromCommandsIsPossible() {
 	// the two methods here can be further optimized in the future if we have more integrations tests, for example
 	// by having a list of conditions passed to a single CheckIntegrationTestPrerequisites method?
 	testing_utils.SkipTestIfOnlyShortTests(s.T())
