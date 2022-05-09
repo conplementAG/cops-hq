@@ -29,17 +29,23 @@ func main() {
 }
 
 func simpleHqSetup() {
-	hq := hq.Init("hq", "0.0.1", "hq.log")
-	hq.Executor.Execute("echo hello")
+	hq := hq.New("hq", "0.0.1", "hq.log")
+	hq.Cli.AddBaseCommand("infrastructure", "Infrastructure command", "Infrastructure command", func() {
+		logrus.Info("infra command running...")
+	})
+
+	hq.Run()
+
+	hq.Executor.ExecuteWithProgressInfo("echo hello")
 }
 
 func stepByStepSetup() {
 	// Logging features -> initializing logging system will log to both console and the configured file
-	logging.Init("hq.log")
+	logger := logging.Init("hq.log")
 	logrus.Info("Running the test CLI...")
 
 	// Executor features -> this is a wrapper which can be used for running any command, incl. output parsing, error handling etc.
-	exec := commands.NewExecutor("hq.log")
+	exec := commands.NewChatty("hq.log", logger)
 
 	// for example, TTY works as well
 	logrus.Info("Testing the docker correctly outputs in TTY...")
@@ -54,8 +60,8 @@ func stepByStepSetup() {
 
 	// CLI features -> cops-hq offers a simple CLI builder, based on Cobra
 	// to test the code below, call 'infrastructure create -e abc -a def'
-	cli := cli.Init("hq", "0.0.1")
-	infraCommand := cli.AddRootCommand("infrastructure", "command group for infrastructure commands", "command group for infrastructure commands", nil)
+	cli := cli.New("hq", "0.0.1")
+	infraCommand := cli.AddBaseCommand("infrastructure", "command group for infrastructure commands", "command group for infrastructure commands", nil)
 	infraCommand.AddPersistentParameterString("environment-tag", "", true, "e", "")
 
 	createCommand := infraCommand.AddCommand("create", "create the infrastructure", "create the infrastructure", func() {
