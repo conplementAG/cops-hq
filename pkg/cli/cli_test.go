@@ -11,10 +11,10 @@ import (
 func Test_SubcommandsWithParametersAndViper(t *testing.T) {
 	// Arrange
 	correctCommandActionExecuted := false
-	cli := Init("myprog", "0.0.1")
+	cli := New("myprog", "0.0.1")
 
 	// Act
-	command := cli.AddRootCommand("test", "Simple test command", "big description", func() {
+	command := cli.AddBaseCommand("test", "Simple test command", "big description", func() {
 		fmt.Println("some action")
 	})
 
@@ -30,7 +30,7 @@ func Test_SubcommandsWithParametersAndViper(t *testing.T) {
 	subCommand.AddParameterString("argX", "Y", true, "a", "first arg")
 	subCommand.AddParameterString("argY", "X", false, "b", "second arg")
 
-	testing_utils.PrepareCommandForTesting(cli.rootCmd, "test", "me", "--argX", "W")
+	testing_utils.PrepareCommandForTesting(cli.GetRootCommand(), "test", "me", "--argX", "W")
 	cli.Run()
 
 	// Assert
@@ -41,9 +41,9 @@ func Test_SubcommandsWithParametersAndViper(t *testing.T) {
 
 func Test_CommandShouldShowHelpWhenNoRunFunctionGiven(t *testing.T) {
 	// Arrange
-	cli := Init("myprog", "0.0.1")
-	cli.AddRootCommand("test", "Simple test command", "big description", nil)
-	outputBuffer := testing_utils.PrepareCommandForTesting(cli.rootCmd, "test")
+	cli := New("myprog", "0.0.1")
+	cli.AddBaseCommand("test", "Simple test command", "big description", nil)
+	outputBuffer := testing_utils.PrepareCommandForTesting(cli.GetRootCommand(), "test")
 
 	// Act
 	cli.Run()
@@ -56,12 +56,12 @@ func Test_RequiredParametersShouldPreventCommandExecutionWhenNotProvided(t *test
 	// Arrange
 	commandActionCalled := false
 
-	cli := Init("myprog", "0.0.1")
-	testCommand := cli.AddRootCommand("test", "Simple test command", "big description", func() {
+	cli := New("myprog", "0.0.1")
+	testCommand := cli.AddBaseCommand("test", "Simple test command", "big description", func() {
 		commandActionCalled = true
 	})
 	testCommand.AddParameterString("param", "", true, "p", "test arg")
-	outputBuffer := testing_utils.PrepareCommandForTesting(cli.rootCmd, "test")
+	outputBuffer := testing_utils.PrepareCommandForTesting(cli.GetRootCommand(), "test")
 
 	// Act
 	cli.Run()
@@ -73,14 +73,14 @@ func Test_RequiredParametersShouldPreventCommandExecutionWhenNotProvided(t *test
 
 func Test_PersistentParametersAreSharedWithSubcommands(t *testing.T) {
 	// Arrange
-	cli := Init("myprog", "0.0.1")
+	cli := New("myprog", "0.0.1")
 
-	testCommand := cli.AddRootCommand("infra", "infra command group", "", nil)
+	testCommand := cli.AddBaseCommand("infra", "infra command group", "", nil)
 	testCommand.AddPersistentParameterString("environment-tag", "", true, "e", "env tag")
 
 	testCommand.AddCommand("create", "create infra", "", func() {})
 
-	outputBuffer := testing_utils.PrepareCommandForTesting(cli.rootCmd, "infra", "create")
+	outputBuffer := testing_utils.PrepareCommandForTesting(cli.GetRootCommand(), "infra", "create")
 
 	// Act
 	cli.Run()
@@ -94,9 +94,9 @@ func Test_PersistentParametersAreSharedWithSubcommands(t *testing.T) {
 func Test_PersistentParametersAreAvailableThroughViperInSubcommands(t *testing.T) {
 	// Arrange
 	expectedActionCalled := false
-	cli := Init("myprog", "0.0.1")
+	cli := New("myprog", "0.0.1")
 
-	testCommand := cli.AddRootCommand("infra", "infra command group", "", nil)
+	testCommand := cli.AddBaseCommand("infra", "infra command group", "", nil)
 	testCommand.AddPersistentParameterString("environment-tag", "", true, "e", "env tag")
 
 	testCommand.AddCommand("create", "create infra", "", func() {
@@ -104,7 +104,7 @@ func Test_PersistentParametersAreAvailableThroughViperInSubcommands(t *testing.T
 		assert.Equal(t, "prod", viper.GetString("environment-tag"))
 	})
 
-	testing_utils.PrepareCommandForTesting(cli.rootCmd, "infra", "create", "-e", "prod")
+	testing_utils.PrepareCommandForTesting(cli.GetRootCommand(), "infra", "create", "-e", "prod")
 
 	// Act
 	cli.Run()

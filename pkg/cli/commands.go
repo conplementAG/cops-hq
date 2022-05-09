@@ -9,32 +9,11 @@ type Command struct {
 	cobraCommand *cobra.Command
 }
 
-func (cli *Cli) AddRootCommand(use string, short string, long string, runFunction func()) *Command {
-	command := &cobra.Command{
-		Use:   use,
-		Short: short,
-		Long:  long,
-		Run: func(cmd *cobra.Command, args []string) {
-			if runFunction != nil {
-				runFunction()
-			} else {
-				cmd.Help()
-			}
-		},
-	}
-
-	cli.rootCmd.AddCommand(command)
-
-	return &Command{
-		cobraCommand: command,
-	}
-}
-
-func (command *Command) AddCommand(use string, short string, long string, runFunction func()) *Command {
+func (command *Command) AddCommand(use string, shortInfo string, longDescription string, runFunction func()) *Command {
 	newCommand := &cobra.Command{
 		Use:   use,
-		Short: short,
-		Long:  long,
+		Short: shortInfo,
+		Long:  longDescription,
 		Run: func(cmd *cobra.Command, args []string) {
 			runFunction()
 		},

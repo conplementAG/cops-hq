@@ -6,9 +6,9 @@ import (
 	"testing"
 )
 
-func Test_InitCreatesFunctioningCli(t *testing.T) {
+func Test_FactoryCreatesFunctioningCli(t *testing.T) {
 	// Arrange & Act
-	cli := Init("myprogram", "1.0.0")
+	cli := New("myprogram", "1.0.0")
 
 	// Assert
 	err := cli.Run()
@@ -16,10 +16,10 @@ func Test_InitCreatesFunctioningCli(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func Test_InitializedCliSupportsVersionFlag(t *testing.T) {
+func Test_CreatedCliSupportsVersionFlag(t *testing.T) {
 	// Arrange
-	cli := Init("myprog", "0.0.1")
-	outputBuffer := testing_utils.PrepareCommandForTesting(cli.rootCmd, "--version")
+	cli := New("myprog", "0.0.1")
+	outputBuffer := testing_utils.PrepareCommandForTesting(cli.GetRootCommand(), "--version")
 
 	// Act
 	cli.Run()
