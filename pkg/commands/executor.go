@@ -95,7 +95,7 @@ func (e *executor) execute(command string, silent bool) (output string, err erro
 	if !silent {
 		logFileWriter = logging.NewLogFileAppender(e.logFileName)
 
-		if e.chatty {
+		if e.chatty || viper.GetBool("verbose") {
 			stdoutWriter = os.Stdout
 			stderrWriter = os.Stderr
 		}
