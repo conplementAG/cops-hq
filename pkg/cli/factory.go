@@ -29,6 +29,17 @@ func New(programName string, version string) Cli {
 		Version: version,
 	}
 
+	// these flags should be available on every command
+	rootCmd.Flags().BoolP("verbose", "v", false, "Set to override the executor to always "+
+		"show the output on the console. Useful in CI scenarios, if using quiet mode.")
+
+	viper.BindPFlag("verbose", rootCmd.Flags().Lookup("verbose"))
+
+	rootCmd.Flags().BoolP("silence-long-running-progress-indicators", "s", false, "Set to "+
+		"silence long running operation indicator. Useful for CI.")
+
+	viper.BindPFlag("silence-long-running-progress-indicators", rootCmd.Flags().Lookup("silence-long-running-progress-indicators"))
+
 	return &cli{
 		programName: programName,
 		version:     version,
