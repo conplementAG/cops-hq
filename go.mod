@@ -3,6 +3,7 @@ module github.com/denisbiondic/cops-hq
 go 1.18
 
 require (
+	github.com/ahmetb/go-linq v3.0.0+incompatible
 	github.com/briandowns/spinner v1.18.1
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/google/uuid v1.3.0
