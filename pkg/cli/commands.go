@@ -15,7 +15,11 @@ func (command *Command) AddCommand(use string, shortInfo string, longDescription
 		Short: shortInfo,
 		Long:  longDescription,
 		Run: func(cmd *cobra.Command, args []string) {
-			runFunction()
+			if runFunction != nil {
+				runFunction()
+			} else {
+				cmd.Help()
+			}
 		},
 	}
 
