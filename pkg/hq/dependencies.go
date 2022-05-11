@@ -16,10 +16,7 @@ const (
 	ExpectedMinCopsctlVersion   = "0.8.0"
 )
 
-// CheckToolingDependencies can be called to check if installed tooling (Azure CLI, Terraform, Helm etc.) is of minimal
-// expected version for all of HQ functionality to work. It is highly recommended to call this method in your code, and fail
-// in case of errors.
-func (hq *HQ) CheckToolingDependencies() error {
+func (hq *hqContainer) CheckToolingDependencies() error {
 	logrus.Info("Checking tooling dependencies...")
 
 	err1 := hq.checkAzureCli()
@@ -35,7 +32,7 @@ func (hq *HQ) CheckToolingDependencies() error {
 	return nil
 }
 
-func (hq *HQ) checkAzureCli() error {
+func (hq *hqContainer) checkAzureCli() error {
 	logrus.Info("Checking azure cli...")
 	azureCliVersion, err := hq.Executor.Execute("az version -o json")
 
@@ -61,7 +58,7 @@ func (hq *HQ) checkAzureCli() error {
 	return nil
 }
 
-func (hq *HQ) checkHelm() error {
+func (hq *hqContainer) checkHelm() error {
 	logrus.Info("Checking helm...")
 	helmVersion, err := hq.Executor.Execute("helm version --template={{.Version}}")
 
@@ -82,7 +79,7 @@ func (hq *HQ) checkHelm() error {
 	return nil
 }
 
-func (hq *HQ) checkTerraform() error {
+func (hq *hqContainer) checkTerraform() error {
 	logrus.Info("Checking terraform...")
 	terraformVersion, err := hq.Executor.Execute("terraform --version -json")
 
@@ -108,7 +105,7 @@ func (hq *HQ) checkTerraform() error {
 	return nil
 }
 
-func (hq *HQ) checkKubectl() error {
+func (hq *hqContainer) checkKubectl() error {
 	logrus.Info("Checking kubectl...")
 	kubectlVersion, err := hq.Executor.Execute("kubectl version --client=true -o json")
 
@@ -134,7 +131,7 @@ func (hq *HQ) checkKubectl() error {
 	return nil
 }
 
-func (hq *HQ) checkCopsctl() error {
+func (hq *hqContainer) checkCopsctl() error {
 	logrus.Info("Checking copsctl...")
 	copsctlVersion, err := hq.Executor.Execute("copsctl --version")
 

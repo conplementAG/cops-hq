@@ -17,7 +17,7 @@ func TestHQ_CheckToolingDependencies_ShouldPassWhenDependenciesSatisfied(t *test
 	executorMock.On("Execute", mock.Anything).Maybe()
 
 	hq := New("hq", "0.0.1", "test.logs")
-	hq.Executor = executorMock
+	hq.(*hqContainer).Executor = executorMock
 
 	// Act & Assert
 	error := hq.CheckToolingDependencies()
@@ -33,7 +33,7 @@ func TestHQ_CheckToolingDependencies_ShouldFailWhenDependencyOutOfDate(t *testin
 	executorMock.On("Execute", mock.Anything).Maybe()
 
 	hq := New("hq", "0.0.1", "test.logs")
-	hq.Executor = executorMock
+	hq.(*hqContainer).Executor = executorMock
 
 	// Act & Assert
 	err := hq.CheckToolingDependencies()

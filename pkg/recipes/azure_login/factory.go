@@ -12,8 +12,8 @@ type Login struct {
 	executor               commands.Executor
 }
 
-// New creates a new Login instance by relying on Viper for necessary configuration. Expected
-// viper flags are :
+// New creates a new Login instance by relying on Viper for necessary configuration. Supported
+// viper flags are:
 // - service-principal-id
 // - service-principal-secret
 // - service-principal-tenant
