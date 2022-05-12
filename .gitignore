@@ -6,3 +6,5 @@ coverage.out
 pkg/commands/exec_tests.log
 
 pkg/logging/test_file.log
+
+pkg/hq/test.logs

@@ -7,16 +7,20 @@ import (
 )
 
 type Cli interface {
-	// AddBaseCommand adds a top level command on the root level.
-	AddBaseCommand(use string, shortInfo string, longDescription string, runFunction func()) *Command
+	// AddBaseCommand adds a command on the root (base) level of the command tree. Use the *Command return value to add
+	// additional subcommands. Parameters: use (command mnemonic), shortInfo (short info shown in help),
+	// longDescription (long description shown in help), runFunction (function to be run when command is invoked)
+	AddBaseCommand(use string, shortInfo string, longDescription string, runFunction func()) Command
 
-	// Run runs the Cli itself, starting the parsing of the provided os.Args
+	// Run starts the cli, parsing the given os.Args and executing the matching command
 	Run() error
 
-	// GetRootCommand returns the top-level Cobra command
+	// GetRootCommand returns the root top level command, directly as cobra.Command which is the library used
+	// under the hood.
 	GetRootCommand() *cobra.Command
 }
 
+// New creates a new Cli instance
 func New(programName string, version string) Cli {
 	viper.AutomaticEnv()
 

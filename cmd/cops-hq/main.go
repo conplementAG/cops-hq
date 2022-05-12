@@ -30,14 +30,14 @@ func main() {
 
 func simpleHqSetup() {
 	hq := hq.NewQuiet("hq", "0.0.1", "hq.log")
-	hq.Cli.AddBaseCommand("infrastructure", "Infrastructure command", "Infrastructure command", func() {
+	hq.GetCli().AddBaseCommand("infrastructure", "Infrastructure command", "Infrastructure command", func() {
 		logrus.Info("infra command running...")
 	})
 
 	hq.Run()
 	hq.CheckToolingDependencies()
 
-	hq.Executor.ExecuteWithProgressInfo("echo hello")
+	hq.GetExecutor().ExecuteWithProgressInfo("echo hello")
 }
 
 func stepByStepSetup() {

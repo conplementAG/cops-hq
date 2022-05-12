@@ -8,7 +8,7 @@ type cli struct {
 	rootCmd     *cobra.Command
 }
 
-func (cli *cli) AddBaseCommand(use string, shortInfo string, longDescription string, runFunction func()) *Command {
+func (cli *cli) AddBaseCommand(use string, shortInfo string, longDescription string, runFunction func()) Command {
 	command := &cobra.Command{
 		Use:   use,
 		Short: shortInfo,
@@ -24,7 +24,7 @@ func (cli *cli) AddBaseCommand(use string, shortInfo string, longDescription str
 
 	cli.rootCmd.AddCommand(command)
 
-	return &Command{
+	return &commandWrapper{
 		cobraCommand: command,
 	}
 }

@@ -7,7 +7,8 @@ import (
 )
 
 // HQ is an easy one-stop setup for typical IaC projects. Don't forget to call the Run() method after you complete
-// setting up (e.g. all CLI commands added to HQ.Cli)
+// setting up (e.g. all CLI commands added to HQ.Cli). Consider this object similar to an IoC container, which can be
+// used to retrieve main dependencies for other objects, such as the command executor or the CLI.
 type HQ interface {
 	// Run starts the HQ CLI parsing functionality
 	Run() error
