@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"bufio"
 	"github.com/briandowns/spinner"
 	"github.com/denisbiondic/cops-hq/internal/commands"
 	"github.com/denisbiondic/cops-hq/internal/logging"
@@ -18,6 +19,8 @@ type executor struct {
 	logFileName string
 	logger      *logrus.Logger
 	chatty      bool
+
+	stdin io.Reader
 }
 
 func (e *executor) Execute(command string) (output string, err error) {
@@ -125,4 +128,29 @@ func (e *executor) execute(command string, silent bool) (output string, err erro
 	// some consoles always append a \n at the end, but this is safe to be removed
 	cleanedStringOutput := strings.TrimSuffix(stdoutCollector.String(), "\n")
 	return cleanedStringOutput, err
+}
+
+func (e *executor) AskUserToConfirm(displayMessage string) bool {
+	// Asks the user for confirmation, returns true if the user inputs yes, otherwise false
+	logrus.Info(displayMessage + " [yes|no]")
+
+	confirmation := bufio.NewScanner(e.stdin)
+	confirmation.Scan()
+
+	acceptedValues := []string{"yes", "YES", "y", "Y"}
+
+	for okValueIndex := range acceptedValues {
+		okText := acceptedValues[okValueIndex]
+		text := confirmation.Text()
+
+		if text == okText {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (e *executor) OverrideStdIn(override io.Reader) {
+	e.stdin = override
 }

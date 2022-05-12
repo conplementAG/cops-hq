@@ -1,7 +1,3 @@
-//go:build linux || darwin
-
-// go build directive above because most of the commands below do not work on Windows
-
 package commands
 
 import (
@@ -10,71 +6,73 @@ import (
 	"github.com/denisbiondic/cops-hq/internal/testing_utils"
 	"github.com/denisbiondic/cops-hq/pkg/logging"
 	"github.com/stretchr/testify/suite"
+	"io"
 	"os"
+	"strings"
 	"testing"
 )
 
 const testLogFileName = "exec_tests.log"
 
-type ExecutorChattyTestSuite struct {
+type ExecutorTestSuite struct {
 	suite.Suite
 	exec Executor
 }
 
-func (s *ExecutorChattyTestSuite) SetupTest() {
+func (s *ExecutorTestSuite) SetupTest() {
 	logger := logging.Init(testLogFileName)
 
 	// executor initialized with same file as the logging system to test conflicts when writing to the same file
 	s.exec = NewChatty(testLogFileName, logger)
 }
 
-func (s *ExecutorChattyTestSuite) AfterTest(suiteName string, testName string) {
+func (s *ExecutorTestSuite) AfterTest(suiteName string, testName string) {
 	fmt.Printf("Cleanup after test %s/%s\n", suiteName, testName)
 	os.Remove(testLogFileName)
 }
 
 func TestChattyTestSuite(t *testing.T) {
-	suite.Run(t, new(ExecutorChattyTestSuite))
+	suite.Run(t, new(ExecutorTestSuite))
 }
 
-func (s *ExecutorChattyTestSuite) Test_ExecuteNormalCommand() {
+func (s *ExecutorTestSuite) Test_ExecuteNormalCommand() {
 	s.exec.Execute("ls -la")
 }
 
-func (s *ExecutorChattyTestSuite) Test_ReturnsCommandStdoutOutput() {
+func (s *ExecutorTestSuite) Test_ReturnsCommandStdoutOutput() {
 	out, _ := s.exec.Execute("echo test")
 	s.Equal("test", out)
 }
 
-func (s *ExecutorChattyTestSuite) Test_NotFoundCommandsFailWithErrorsAndNoOutput() {
+func (s *ExecutorTestSuite) Test_NotFoundCommandsFailWithErrorsAndNoOutput() {
 	out, err := s.exec.Execute("no-such-thing-to-do bla")
 	s.Error(err)
 	s.Contains(err.Error(), "executable file not found")
 	s.Equal("", out)
 }
 
-func (s *ExecutorChattyTestSuite) Test_ExecuteCommandInTTYMode() {
+func (s *ExecutorTestSuite) Test_ExecuteCommandInTTYMode() {
 	s.exec.ExecuteTTY("ls -la") // simply run the command, confirm it does not fail
 }
 
-func (s *ExecutorChattyTestSuite) Test_ExecuteCommandWithArgumentsWithSpacesAndQuotations() {
+func (s *ExecutorTestSuite) Test_ExecuteCommandWithArgumentsWithSpacesAndQuotations() {
 	out, _ := s.exec.Execute("echo \"this is a long string\"")
 	s.Equal("this is a long string", out)
 }
 
-func (s *ExecutorChattyTestSuite) Test_SuccessfulCommandReturnNoErrors() {
+func (s *ExecutorTestSuite) Test_SuccessfulCommandReturnNoErrors() {
 	_, err := s.exec.Execute("echo test")
 	s.NoError(err)
 }
 
-func (s *ExecutorChattyTestSuite) Test_CommandStdErrIsNotCollectedForTheOutput() {
+func (s *ExecutorTestSuite) Test_CommandStdErrIsNotCollectedForTheOutput() {
 	out, err := s.exec.Execute("ls this-file-does-not-exist")
 	s.Error(err)
 	s.Contains(err.Error(), "exit status 1")
 	s.NotContains(out, "No such file")
 }
 
-func (s *ExecutorChattyTestSuite) Test_Integration_ParsingComplexTypeFromCommandsIsPossible() {
+func (s *ExecutorTestSuite) Test_Integration_ParsingComplexTypeFromCommandsIsPossible() {
 	// the two methods here can be further optimized in the future if we have more integrations tests, for example
 	// by having a list of conditions passed to a single CheckIntegrationTestPrerequisites method?
 	testing_utils.SkipTestIfOnlyShortTests(s.T())
@@ -89,4 +87,34 @@ func (s *ExecutorChattyTestSuite) Test_Integration_ParsingComplexTypeFromCommand
 
 	_, ok := resultingMap["azure-cli"] // this key is always expected
 	s.True(ok)
+}
+
+func (s *ExecutorTestSuite) Test_AskUserToConfirm() {
+	tests := []struct {
+		testName       string
+		userInput      string
+		expectedResult bool
+	}{
+		{"false for random input", "$blabla", false},
+		{"true for confirmation with yes", "yes", true},
+		{"true for confirmation with Y", "Y", true},
+		{"true for confirmation with YES", "YES", true},
+		{"false for confirmation with no", "no", false},
+		{"false for confirmation with newline", "\n", false},
+		{"false for confirmation with no input", "", false},
+	}
+
+	for _, tt := range tests {
+		fmt.Println("Running test: " + tt.testName)
+		var reader io.Reader = strings.NewReader(tt.userInput)
+		s.exec.(*executor).OverrideStdIn(reader)
+
+		s.Equal(s.exec.AskUserToConfirm("Should I?"), tt.expectedResult)
+	}
+}
+
+func Test_QuietExecutorWorksAsWell(t *testing.T) {
+	logger := logging.Init(testLogFileName)
+	e := NewQuiet(testLogFileName, logger)
+	e.Execute("ls -la")
 }

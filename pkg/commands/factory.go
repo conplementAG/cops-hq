@@ -1,6 +1,9 @@
 package commands
 
-import "github.com/sirupsen/logrus"
+import (
+	"github.com/sirupsen/logrus"
+	"os"
+)
 
 type Executor interface {
 	// Execute will run the given command, returning the stdout output and errors (if any).
@@ -25,6 +28,10 @@ type Executor interface {
 	// One example of such command is Docker. Commands executed via ExecuteTTY have their output shown on the console,
 	// but the output is NOT saved to a log file. Chatty / Quiet settings have no effect on this method.
 	ExecuteTTY(command string) error
+
+	// AskUserToConfirm pauses the execution, and awaits for user to confirm (by either typing yes, Y or y).
+	// Parameter displayMessage can be used to show a message on the screen.
+	AskUserToConfirm(displayMessage string) bool
 }
 
 // NewChatty creates a new Executor instance. Chatty executor outputs the command output to both file and console at
@@ -34,11 +41,7 @@ type Executor interface {
 // interfering with formatting. Logging system is an explicit dependency, so that it is clear that the logging system
 // need to bo be initialized first, before creating an Executor.
 func NewChatty(logFileName string, logger *logrus.Logger) Executor {
-	return &executor{
-		logFileName: logFileName,
-		logger:      logger,
-		chatty:      true,
-	}
+	return create(logFileName, logger, true)
 }
 
 // NewQuiet creates a new Executor instance. Quiet executor outputs the command output only to a file, console output is
@@ -51,9 +54,17 @@ func NewChatty(logFileName string, logger *logrus.Logger) Executor {
 // interfering with formatting. Logging system is an explicit dependency, so that it is clear that the logging system
 // need to bo be initialized first, before creating an Executor.
 func NewQuiet(logFileName string, logger *logrus.Logger) Executor {
-	return &executor{
+	return create(logFileName, logger, false)
+}
+
+func create(logFileName string, logger *logrus.Logger, chatty bool) Executor {
+	e := &executor{
 		logFileName: logFileName,
 		logger:      logger,
-		chatty:      false,
+		chatty:      chatty,
 	}
+
+	e.stdin = os.Stdin
+
+	return e
 }
