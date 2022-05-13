@@ -61,11 +61,3 @@ func create(programName string, version string, logFileName string, quiet bool) 
 	addInbuiltHqCliCommands(cli, container)
 	return container
 }
-
-func addInbuiltHqCliCommands(cli cli.Cli, container *hqContainer) {
-	hqBaseCommand := cli.AddBaseCommand("hq", "in-build HQ command group", "Command predefined by cops-hq.", nil)
-	hqBaseCommand.AddCommand("check-dependencies", "Checks the installed tools and their versions", "Use this command "+
-		"to check the installed versions of tools such as azure-cli, kubectl etc.", func() {
-		container.CheckToolingDependencies()
-	})
-}
