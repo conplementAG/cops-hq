@@ -2,6 +2,7 @@ package commands
 
 import (
 	"bufio"
+	"fmt"
 	"github.com/briandowns/spinner"
 	"github.com/conplementag/cops-hq/internal/commands"
 	"github.com/conplementag/cops-hq/internal/logging"
@@ -123,6 +124,7 @@ func (e *executor) execute(command string, silent bool) (output string, err erro
 	stderrWriter := ioutil.Discard
 	logFileWriter := ioutil.Discard
 	var stdoutCollector strings.Builder
+	var stderrCollector strings.Builder
 
 	if !silent {
 		logFileWriter = logging.NewLogFileAppender(e.logFileName)
@@ -134,7 +136,7 @@ func (e *executor) execute(command string, silent bool) (output string, err erro
 	}
 
 	writerStdout := io.MultiWriter(stdoutWriter, logFileWriter, &stdoutCollector)
-	writerStderr := io.MultiWriter(stderrWriter, logFileWriter)
+	writerStderr := io.MultiWriter(stderrWriter, logFileWriter, &stderrCollector)
 
 	// 3. We connect the reader(s) to writer(s) via io.Copy, executed asynchronously. We wait until both are completed.
 	// Note: only after the io.Copy is done will our stdoutCollector be filled, so we have to wait!
@@ -151,12 +153,21 @@ func (e *executor) execute(command string, silent bool) (output string, err erro
 		multiWritingSteps.Done()
 	}()
 
-	err = cmd.Wait()
+	commandError := cmd.Wait()
 	multiWritingSteps.Wait()
 
 	// some consoles always append a \n at the end, but this is safe to be removed
 	cleanedStringOutput := strings.TrimSuffix(stdoutCollector.String(), "\n")
-	return cleanedStringOutput, err
+
+	// composite error will be used to return stderr in case an error occurs, otherwise
+	// stderr will be ignored completely (unless verbose mode is used, or chatty executor)
+	var compositeError error
+
+	if commandError != nil {
+		compositeError = fmt.Errorf("%w; Stderr stream: "+stderrCollector.String(), commandError)
+	}
+
+	return cleanedStringOutput, compositeError
 }
 
 func (e *executor) AskUserToConfirm(displayMessage string) bool {
