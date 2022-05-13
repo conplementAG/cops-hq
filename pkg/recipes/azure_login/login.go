@@ -47,6 +47,12 @@ func (l *Login) Login() error {
 	return nil
 }
 
+// SetSubscription sets the current Azure subscription on the running system (for Azure CLI)
+func (l *Login) SetSubscription(subscriptionId string) error {
+	_, err := l.executor.Execute("az account set -s " + subscriptionId)
+	return err
+}
+
 func (l *Login) useServicePrincipalLogin() bool {
 	return l.servicePrincipalId != ""
 }
