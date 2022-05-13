@@ -2,7 +2,7 @@ package naming
 
 import (
 	"github.com/ahmetb/go-linq"
-	"github.com/denisbiondic/cops-hq/pkg/naming/resources"
+	"github.com/conplementag/cops-hq/pkg/naming/resources"
 	"regexp"
 	"strconv"
 	"strings"

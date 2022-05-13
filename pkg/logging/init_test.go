@@ -1,7 +1,7 @@
 package logging
 
 import (
-	"github.com/denisbiondic/cops-hq/internal/testing_utils"
+	"github.com/conplementag/cops-hq/internal/testing_utils"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"os"

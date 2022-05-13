@@ -3,9 +3,9 @@ package naming
 import (
 	"errors"
 	"github.com/ahmetb/go-linq"
-	"github.com/denisbiondic/cops-hq/pkg/naming/patterns"
-	"github.com/denisbiondic/cops-hq/pkg/naming/regions"
-	"github.com/denisbiondic/cops-hq/pkg/naming/resources"
+	"github.com/conplementag/cops-hq/pkg/naming/patterns"
+	"github.com/conplementag/cops-hq/pkg/naming/regions"
+	"github.com/conplementag/cops-hq/pkg/naming/resources"
 	"strings"
 )
 
@@ -13,7 +13,7 @@ type Service struct {
 	pattern     patterns.Pattern
 	context     string
 	module      string
-	region      regions.Region
+	region      string
 	environment string
 }
 
@@ -22,9 +22,10 @@ type Service struct {
 // Context should be set to the application name. In case of a complex system with multiple modules / subsystems,
 // 'module' should be set as well.
 // Environment provides you the possibility to isolate your resources per environment, e.g. prod, int, stage, dev, etc.
+// Regions should be in form of Azure long regions string, e.g. westeurope or northeurope.
 // Per default, normal naming convention pattern is used. If required, you can override the pattern using the
 // SetPattern() method
-func New(context string, region regions.Region, environment string, module string) (*Service, error) {
+func New(context string, region string, environment string, module string) (*Service, error) {
 	if context == "" {
 		return nil, errors.New("context must be provided")
 	}

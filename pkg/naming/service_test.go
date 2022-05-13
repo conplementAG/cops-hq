@@ -1,9 +1,8 @@
 package naming
 
 import (
-	"github.com/denisbiondic/cops-hq/pkg/naming/patterns"
-	"github.com/denisbiondic/cops-hq/pkg/naming/regions"
-	"github.com/denisbiondic/cops-hq/pkg/naming/resources"
+	"github.com/conplementag/cops-hq/pkg/naming/patterns"
+	"github.com/conplementag/cops-hq/pkg/naming/resources"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -15,7 +14,7 @@ func Test_GenerateResourceName(t *testing.T) {
 		resourceType resources.AzureResourceType
 	}
 
-	namingService, err := New("acme", regions.WestEurope, "dev", "front")
+	namingService, err := New("acme", "westeurope", "dev", "front")
 	assert.NoError(t, err)
 
 	var newPattern patterns.Pattern = "{resource_suffix}{module}{name}{environment}{region}{context}"
@@ -71,7 +70,7 @@ func Test_GenerateResourceName(t *testing.T) {
 }
 
 func Test_SetPattern(t *testing.T) {
-	namingService, err := New("acme", regions.WestEurope, "dev", "front")
+	namingService, err := New("acme", "westeurope", "dev", "front")
 	assert.NoError(t, err)
 
 	var customPattern patterns.Pattern = "{resource_suffix}{module}{name}{environment}{region}{context}"

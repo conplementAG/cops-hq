@@ -1,8 +1,8 @@
 package hq
 
 import (
-	"github.com/denisbiondic/cops-hq/pkg/cli"
-	"github.com/denisbiondic/cops-hq/pkg/commands"
+	"github.com/conplementag/cops-hq/pkg/cli"
+	"github.com/conplementag/cops-hq/pkg/commands"
 )
 
 type hqContainer struct {

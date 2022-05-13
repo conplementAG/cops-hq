@@ -1,4 +1,4 @@
-module github.com/denisbiondic/cops-hq
+module github.com/conplementag/cops-hq
 
 go 1.18
 

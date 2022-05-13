@@ -3,8 +3,8 @@ package commands
 import (
 	"bufio"
 	"github.com/briandowns/spinner"
-	"github.com/denisbiondic/cops-hq/internal/commands"
-	"github.com/denisbiondic/cops-hq/internal/logging"
+	"github.com/conplementag/cops-hq/internal/commands"
+	"github.com/conplementag/cops-hq/internal/logging"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"io"

@@ -1,9 +1,9 @@
 package hq
 
 import (
-	"github.com/denisbiondic/cops-hq/pkg/cli"
-	"github.com/denisbiondic/cops-hq/pkg/commands"
-	"github.com/denisbiondic/cops-hq/pkg/logging"
+	"github.com/conplementag/cops-hq/pkg/cli"
+	"github.com/conplementag/cops-hq/pkg/commands"
+	"github.com/conplementag/cops-hq/pkg/logging"
 )
 
 // HQ is an easy one-stop setup for typical IaC projects. Don't forget to call the Run() method after you complete

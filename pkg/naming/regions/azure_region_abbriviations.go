@@ -1,17 +1,17 @@
 package regions
 
-var azureRegionAbbreviations = map[Region]string{
+var azureRegionAbbreviations = map[string]string{
 	// naming convention is region code (e.g. n as in north, one letter) and country code (e.g. eu as in europe, two letter)
-	NorthEurope:   "neu",
-	WestEurope:    "weu",
-	FranceCentral: "cfr",
-	EastUs:        "eus",
-	WestUs:        "wus",
-	CentralUs:     "cus",
-	CanadaEast:    "eca",
+	"northeurope":   "neu",
+	"westeurope":    "weu",
+	"francecentral": "cfr",
+	"eastus":        "eus",
+	"westus":        "wus",
+	"centralus":     "cus",
+	"canadaeast":    "eca",
 }
 
-func GetAbbreviatedRegion(region Region) string {
+func GetAbbreviatedRegion(region string) string {
 	abbreviatedRegion, regionSupported := azureRegionAbbreviations[region]
 
 	if !regionSupported {

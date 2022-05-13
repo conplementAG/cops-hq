@@ -2,7 +2,7 @@ package cli
 
 import (
 	"fmt"
-	"github.com/denisbiondic/cops-hq/internal/testing_utils"
+	"github.com/conplementag/cops-hq/internal/testing_utils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"testing"

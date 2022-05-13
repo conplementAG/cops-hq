@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"github.com/denisbiondic/cops-hq/internal/testing_utils"
+	"github.com/conplementag/cops-hq/internal/testing_utils"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

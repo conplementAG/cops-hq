@@ -3,8 +3,8 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/denisbiondic/cops-hq/internal/testing_utils"
-	"github.com/denisbiondic/cops-hq/pkg/logging"
+	"github.com/conplementag/cops-hq/internal/testing_utils"
+	"github.com/conplementag/cops-hq/pkg/logging"
 	"github.com/stretchr/testify/suite"
 	"io"
 	"os"
