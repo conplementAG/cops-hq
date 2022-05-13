@@ -3,9 +3,17 @@ package azure_login
 import (
 	"encoding/json"
 	"errors"
+	"github.com/conplementag/cops-hq/pkg/commands"
 	"github.com/sirupsen/logrus"
 	"strings"
 )
+
+type Login struct {
+	servicePrincipalId     string
+	servicePrincipalSecret string
+	tenant                 string
+	executor               commands.Executor
+}
 
 // Login logs the currently configured user in Azure. If configured with service principal, it will attempt a non-interactive login,
 // otherwise a normal user login will be started.

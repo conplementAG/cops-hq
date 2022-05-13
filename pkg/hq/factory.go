@@ -6,25 +6,6 @@ import (
 	"github.com/conplementag/cops-hq/pkg/logging"
 )
 
-// HQ is an easy one-stop setup for typical IaC projects. Don't forget to call the Run() method after you complete
-// setting up (e.g. all CLI commands added to HQ.Cli). Consider this object similar to an IoC container, which can be
-// used to retrieve main dependencies for other objects, such as the command executor or the CLI.
-type HQ interface {
-	// Run starts the HQ CLI parsing functionality
-	Run() error
-
-	// GetExecutor retrieves the currently configured executor
-	GetExecutor() commands.Executor
-
-	// GetCli retrieves the current cli instance
-	GetCli() cli.Cli
-
-	// CheckToolingDependencies can be called to check if installed tooling (Azure CLI, Terraform, Helm etc.) is of minimal
-	// expected version for all of HQ functionality to work. It is highly recommended to call this method in your code, and fail
-	// in case of errors.
-	CheckToolingDependencies() error
-}
-
 // New creates a new HQ instance, configuring internally used modules for usage. Keep the created HQ instance and
 // avoid re-instantiation since some setup steps might have global impacts (like logging setup).
 // It will create a chatty executor, piping all commands and outputs to both the console and the file (e.g. like

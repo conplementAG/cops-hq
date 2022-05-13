@@ -5,13 +5,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Login struct {
-	servicePrincipalId     string
-	servicePrincipalSecret string
-	tenant                 string
-	executor               commands.Executor
-}
-
 // New creates a new Login instance by relying on Viper for necessary configuration. Supported
 // viper flags are:
 // - service-principal-id
