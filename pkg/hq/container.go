@@ -32,7 +32,10 @@ func (hq *hqContainer) GetCli() cli.Cli {
 
 func (hq *hqContainer) LoadEnvironmentConfigFile() error {
 	configFilePath := filepath.Join(ProjectBasePath, "config", viper.GetString("environment-tag")+".yaml")
-	configFile, err := hq.Executor.Execute("sops -d " + configFilePath)
+
+	// this should be kept as ExecuteSilent for security reasons, not to leak the whole config file in plaintext
+	// to the log file!
+	configFile, err := hq.Executor.ExecuteSilent("sops -d " + configFilePath)
 
 	if err != nil {
 		return fmt.Errorf("error recieved while reading the config file: %w", err)
