@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/conplementag/cops-hq/pkg/cli"
 	"github.com/conplementag/cops-hq/pkg/commands"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"path/filepath"
 	"strings"
@@ -16,6 +17,7 @@ var ProjectBasePath = filepath.Join(".", "../", "../")
 type hqContainer struct {
 	Executor commands.Executor
 	Cli      cli.Cli
+	Logger   *logrus.Logger
 }
 
 func (hq *hqContainer) Run() error {
@@ -28,6 +30,10 @@ func (hq *hqContainer) GetExecutor() commands.Executor {
 
 func (hq *hqContainer) GetCli() cli.Cli {
 	return hq.Cli
+}
+
+func (hq *hqContainer) GetLogrusLogger() *logrus.Logger {
+	return hq.Logger
 }
 
 func (hq *hqContainer) LoadEnvironmentConfigFile() error {

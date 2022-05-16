@@ -3,6 +3,7 @@ package hq
 import (
 	"github.com/conplementag/cops-hq/pkg/cli"
 	"github.com/conplementag/cops-hq/pkg/commands"
+	"github.com/sirupsen/logrus"
 )
 
 // HQ is an easy one-stop setup for typical IaC projects. Don't forget to call the Run() method after you complete
@@ -17,6 +18,9 @@ type HQ interface {
 
 	// GetCli retrieves the current cli instance
 	GetCli() cli.Cli
+
+	// GetLogrusLogger retrieves the currently initialized logrus logger
+	GetLogrusLogger() *logrus.Logger
 
 	// LoadEnvironmentConfigFile loads the environment config file, which is expected to be saved encrypted (with sops)
 	// on disk, in the location 'config/<<environment_tag>>.yaml'. This command relies on the defined variable

@@ -37,6 +37,7 @@ func create(programName string, version string, logFileName string, quiet bool) 
 	container := &hqContainer{
 		Executor: exec,
 		Cli:      cli,
+		Logger:   logger,
 	}
 
 	addInbuiltHqCliCommands(cli, container)
