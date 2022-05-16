@@ -19,10 +19,10 @@ type Service struct {
 
 // New creates a new naming convention service.
 // Parameters 'context', 'region' and 'environment' are mandatory.
-// Context should be set to the application name. In case of a complex system with multiple modules / subsystems,
-// 'module' should be set as well.
-// Environment provides you the possibility to isolate your resources per environment, e.g. prod, int, stage, dev, etc.
-// Regions should be in form of Azure long regions string, e.g. westeurope or northeurope.
+//     Context should be set to the application name. In case of a complex system with multiple modules / subsystems,
+//       'module' should be set as well.
+//     Environment provides you the possibility to isolate your resources per environment, e.g. prod, int, stage, dev, etc.
+//     Regions should be in form of Azure long regions string, e.g. westeurope or northeurope.
 // Per default, normal naming convention pattern is used. If required, you can override the pattern using the
 // SetPattern() method
 func New(context string, region string, environment string, module string) (*Service, error) {
@@ -48,9 +48,10 @@ func New(context string, region string, environment string, module string) (*Ser
 }
 
 // SetPattern changes the naming convention pattern to a user defined value. To set a custom pattern, combine the
-// placeholders in any order you wish, but without spaces, hyphens or any other characters. Placeholders supported are
-// {context} {module} {name} {region} {environment} and {resource_suffix}. For example, you can declare a new pattern
-// like this: var myPattern patterns.Pattern = "{resource_suffix}{environment}{context}{module}{region}{name}"
+// placeholders in any order you wish, but without spaces, hyphens or any other characters.
+//     Placeholders supported are {context} {module} {name} {region} {environment} and {resource_suffix}.
+// For example, you can declare a new pattern like this:
+//     var myPattern patterns.Pattern = "{resource_suffix}{environment}{context}{module}{region}{name}"
 func (service *Service) SetPattern(pattern patterns.Pattern) error {
 	numberOfPlaceholders := 6
 	mandatoryPlaceholders := []string{"{resource_suffix}", "{environment}", "{context}", "{module}", "{region}", "{name}"}

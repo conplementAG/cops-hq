@@ -49,6 +49,7 @@ func (l *Login) Login() error {
 
 // SetSubscription sets the current Azure subscription on the running system (for Azure CLI)
 func (l *Login) SetSubscription(subscriptionId string) error {
+	logrus.Info("Setting current Azure subscription to: " + subscriptionId)
 	_, err := l.executor.Execute("az account set -s " + subscriptionId)
 	return err
 }

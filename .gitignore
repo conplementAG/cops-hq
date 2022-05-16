@@ -8,3 +8,5 @@ pkg/commands/exec_tests.log
 pkg/logging/test_file.log
 
 pkg/hq/test.logs
+
+pkg/recipes/terraform/test.tfvars

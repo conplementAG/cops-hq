@@ -7,9 +7,9 @@ import (
 
 // New creates a new Login instance by relying on Viper for necessary configuration. Supported
 // viper flags are:
-// - service-principal-id
-// - service-principal-secret
-// - service-principal-tenant
+//   - service-principal-id
+//   - service-principal-secret
+//   - service-principal-tenant
 func New(executor commands.Executor) *Login {
 	return &Login{
 		servicePrincipalId:     viper.GetString("service-principal-id"),
