@@ -43,12 +43,20 @@ type Executor interface {
 	// AskUserToConfirm pauses the execution, and awaits for user to confirm (by either typing yes, Y or y).
 	// Parameter displayMessage can be used to show a message on the screen.
 	AskUserToConfirm(displayMessage string) bool
+
+	// SetPanicOnAnyError will issue panic if any of Execute or other methods returns an error. Beware that using this method
+	// will stop the program execution, and you will not be able to inspect the error in your code (although panic
+	// will log everything to stdout/stderr, and the error will be written into logs too). This mode might be interesting for
+	// code equivalent to Bash scripts running with 'set -e'. Setting panic mode only affects the commands executed after calling
+	// this method, and the mode can also be reverted by setting to false.
+	SetPanicOnAnyError(panicOnError bool)
 }
 
 type executor struct {
-	logFileName string
-	logger      *logrus.Logger
-	chatty      bool
+	logFileName  string
+	logger       *logrus.Logger
+	chatty       bool
+	panicOnError bool
 
 	stdin io.Reader
 }
@@ -82,7 +90,13 @@ func (e *executor) ExecuteTTY(command string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	return cmd.Run()
+	err := cmd.Run()
+
+	if err != nil {
+		e.panicWhenInPanicMode(err)
+	}
+
+	return err
 }
 
 func (e *executor) execute(command string, silent bool) (output string, err error) {
@@ -101,21 +115,24 @@ func (e *executor) execute(command string, silent bool) (output string, err erro
 	// Logic of conditional pipe-ing of command outputs here:
 	// 1. We "capture" the sources of command output from the command itself, by assigning the pipes to local variables.
 	//    These variables are of type io.Reader.
-	cmdStdOut, err := cmd.StdoutPipe()
-	if err != nil {
-		return "", err
+	cmdStdOut, pipeError := cmd.StdoutPipe()
+	if pipeError != nil {
+		e.panicWhenInPanicMode(pipeError)
+		return "", pipeError
 	}
 
-	cmdStdErr, err := cmd.StderrPipe()
-	if err != nil {
-		return "", err
+	cmdStdErr, pipeError := cmd.StderrPipe()
+	if pipeError != nil {
+		e.panicWhenInPanicMode(pipeError)
+		return "", pipeError
 	}
 
 	// Start command
-	err = cmd.Start()
+	commandStartError := cmd.Start()
 
-	if err != nil {
-		return "", err
+	if commandStartError != nil {
+		e.panicWhenInPanicMode(commandStartError)
+		return "", commandStartError
 	}
 
 	// 2. We create a composite io.Writer consisting of multiple sinks. Depending on the configuration, these writers
@@ -165,6 +182,7 @@ func (e *executor) execute(command string, silent bool) (output string, err erro
 
 	if commandError != nil {
 		compositeError = fmt.Errorf("%w; Stderr stream: "+stderrCollector.String(), commandError)
+		e.panicWhenInPanicMode(compositeError)
 	}
 
 	return cleanedStringOutput, compositeError
@@ -191,6 +209,16 @@ func (e *executor) AskUserToConfirm(displayMessage string) bool {
 	return false
 }
 
+func (e *executor) SetPanicOnAnyError(panicOnError bool) {
+	e.panicOnError = panicOnError
+}
+
 func (e *executor) OverrideStdIn(override io.Reader) {
 	e.stdin = override
+}
+
+func (e *executor) panicWhenInPanicMode(err error) {
+	if e.panicOnError {
+		panic(err)
+	}
 }
