@@ -1,5 +1,21 @@
 # Contribution
 
+## Local Development with a "client" project
+
+If you want to directly work on both cops-hq and your IaC project, without having the need to publish cops-hq changes to upstream, 
+a `go.work` file can be used (in the root of your project):
+
+``` 
+go 1.18
+
+use (
+   .
+    ../../../Conplement/CoreOps/cops-hq
+)
+```
+
+The path should simply point to a local directory where you stored the cops-hq sources. Go will do the rest.
+
 ## Dependencies
 
 ### Adding new dependencies
