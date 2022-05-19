@@ -1,25 +1,22 @@
 package terraform
 
 import (
+	"errors"
+	"fmt"
 	"github.com/conplementag/cops-hq/pkg/commands"
-	"github.com/conplementag/cops-hq/pkg/hq"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
 func Test_SettingsAreNotSharedByReferenceBetweenMultipleInstances(t *testing.T) {
 	// we want to make sure that the design of non-shared settings is always kept, even after refactorings
 	// Arrange
-	tf1 := New(&executorMock{}, "app1", "1234", "3214",
-		"westeurope", "testrg", "storeaccount", hq.ProjectBasePath,
-		DefaultBackendStorageSettings, DefaultDeploymentSettings)
-
-	tf2 := New(&executorMock{}, "app2", "1234", "3214",
-		"westeurope", "testrg", "storeaccount", hq.ProjectBasePath,
-		DefaultBackendStorageSettings, DefaultDeploymentSettings)
+	tf1, _ := createSimpleTerraformWithDefaultSettings("app1")
+	tf2, _ := createSimpleTerraformWithDefaultSettings("app2")
 
 	// Act
 	tf1.GetDeploymentSettings().AlwaysCleanLocalCache = false
@@ -37,10 +34,7 @@ func Test_SettingsAreNotSharedByReferenceBetweenMultipleInstances(t *testing.T) 
 
 func Test_SetVariablesCanSerializeAnySimpleOrComplexValue(t *testing.T) {
 	// Arrange
-	tf := New(&executorMock{}, "test", "1234", "3214",
-		"westeurope", "testrg", "storeaccount",
-		filepath.Join("."),
-		DefaultBackendStorageSettings, DefaultDeploymentSettings)
+	tf, _ := createSimpleTerraformWithDefaultSettings("test")
 
 	var variables = make(map[string]interface{})
 
@@ -76,13 +70,114 @@ func Test_SetVariablesCanSerializeAnySimpleOrComplexValue(t *testing.T) {
 	assert.Contains(t, string(fileBytes), "my_complex_type={\"aString\":\"What is the answer to life?\",\"anInt\":42,\"aBool\":true}")
 }
 
+func Test_DeployFlow_ApplyWithExistingPlan(t *testing.T) {
+	tests := []struct {
+		testName        string
+		mockSetup       func(executor *executorMock)
+		planOnly        bool
+		useExistingPlan bool
+		expectedError   error
+	}{
+		{"apply with existing plan",
+			func(executor *executorMock) {
+				// we only expect the existing plan to be applied
+				executor.On("Execute", mock.MatchedBy(func(command string) bool {
+					return strings.Contains(command, "apply -auto-approve") && strings.Contains(command, "test.deploy.tfplan")
+				})).Once()
+			},
+			false,
+			true,
+			nil,
+		},
+
+		{"full apply flow",
+			func(executor *executorMock) {
+				// first, a plan should be executed, saving the file
+				executor.On("Execute", mock.MatchedBy(func(command string) bool {
+					return strings.Contains(command, "plan -input=false") && strings.Contains(command, "test.deploy.tfplan")
+				})).Once()
+
+				// then the user confirmation is expected
+				executor.On("AskUserToConfirm", mock.Anything).Once()
+
+				// then the fully apply is expected
+				executor.On("Execute", mock.MatchedBy(func(command string) bool {
+					return strings.Contains(command, "apply -auto-approve") && strings.Contains(command, "test.deploy.tfplan")
+				})).Once()
+			},
+			false,
+			false,
+			nil,
+		},
+
+		{"only execute the plan",
+			func(executor *executorMock) {
+				// a plan should be executed, saving the file
+				executor.On("Execute", mock.MatchedBy(func(command string) bool {
+					return strings.Contains(command, "plan -input=false") && strings.Contains(command, "test.deploy.tfplan")
+				})).Once()
+			},
+			true,
+			false,
+			nil,
+		},
+
+		{"only plan with existing plan throws error since it makes no sense",
+			func(executor *executorMock) {},
+			true,
+			true,
+			errors.New("planOnly with useExistingPlan makes no sense as a combination"),
+		},
+	}
+
+	for _, tt := range tests {
+		// Arrange
+		fmt.Println("Executing test " + tt.testName)
+
+		tf, executorMock := createSimpleTerraformWithDefaultSettings("test")
+		tt.mockSetup(executorMock)
+		tf.SetVariables(nil)
+
+		// Act
+		err := tf.DeployFlow(tt.planOnly, tt.useExistingPlan)
+
+		// Assert
+		if tt.expectedError == nil {
+			assert.NoError(t, err)
+		} else {
+			assert.Equal(t, tt.expectedError, err)
+		}
+
+		executorMock.AssertExpectations(t)
+	}
+}
+
 type executorMock struct {
 	mock.Mock
 	commands.Executor
+}
+
+func (e *executorMock) Execute(command string) (string, error) {
+	e.Called(command)
+	return "success", nil
+}
+
+func (e *executorMock) AskUserToConfirm(displayMessage string) bool {
+	e.Called(displayMessage)
+	return true
 }
 
 type variablesStruct struct {
 	AString string `mapstructure:"aString" json:"aString" yaml:"aString"`
 	AnInt   int    `mapstructure:"anInt" json:"anInt" yaml:"anInt"`
 	ABool   bool   `mapstructure:"aBool" json:"aBool" yaml:"aBool"`
+}
+
+func createSimpleTerraformWithDefaultSettings(projectName string) (Terraform, *executorMock) {
+	executor := &executorMock{}
+
+	return New(executor, projectName, "1234", "3214",
+		"westeurope", "testrg", "storeaccount",
+		filepath.Join("."),
+		DefaultBackendStorageSettings, DefaultDeploymentSettings), executor
 }

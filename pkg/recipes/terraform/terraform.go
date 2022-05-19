@@ -17,27 +17,46 @@ type Terraform interface {
 	// (if not overridden via BackendStorageSettings)
 	Init() error
 
-	// SetVariables is required, before any of the following methods, like PlanDeploy or Deploy are called. Variables set
+	// SetVariables is required, before any of the following methods like PlanDeploy or Deploy are called. Variables set
 	// will be applied on any subsequent operation. Parameters are:
 	//     terraformVariables (this is a map of terraform variables, defined as string keys, and serialized via json serializer,
-	//         which means any complex or simple type is supported)
+	//         which means any complex or simple type is supported. Simply set the value to whatever type you want, as long as
+	//         it is properly serializable. For example, make sure complex types have the required json or mapstruct annotations,
+	//         and keep in mind that only the public struct members will be serialized!)
 	SetVariables(terraformVariables map[string]interface{}) error
 
+	// DeployFlow is the method which most deployments should use. It provides a single method, which can be used for all
+	// IaC cases, like local deployment, or deployment in CI systems.
+	// Parameters support are
+	//     planOnly (will only create the plan)
+	//     useExistingPlan (will reuse existing plan from the disk)
+	// Here is a short explanation:
+	//     DeployFlow(false, false) will show the plan, prompt the user, and apply if confirmed
+	//     DeployFlow(true, false) will only show the plan, but also persist it on disk (use GetDeployPlanFileName() for details)
+	//     DeployFlow(false, true) will reuse the plan already saved on disk, and apply it without any user confirmations
+	//     DeployFlow(true, true) will just show the plan persisted on the disk, without generating a new plan.
+	// It is best practice to set the both planOnly and useExistingPlan from the CLI, so that CI scripts can simply override
+	// the variables depending on the current CI step (usually a plan is presented, user is awaited for approval, then the existing
+	// plan is applied).
+	DeployFlow(planOnly bool, useExistingPlan bool) error
+
+	// DestroyFlow is same as DeployFlow, but only for destroy.
+	DestroyFlow(planOnly bool, useExistingPlan bool) error
+
 	// PlanDeploy executes the terraform plan for deployment, returning the changes as a string. Plan output is always
-	// saved to a file as well, which is mandatory for Deploy. Common pattern is to show the changes to the user, ask
-	// for confirmation, and then to Deploy the plan.
+	// saved to a file as well. Common pattern is to show the changes to the user, ask for confirmation, and then to Deploy the plan.
+	// For this purpose, you could use the DeployFlow method.
 	PlanDeploy() (string, error)
 
-	// PlanDestroy executes the terraform plan for destroy, returning the changes as a string. Plan output is always
-	// saved to a file as well, which is mandatory for Destroy. Common pattern is to show the changes to the user, ask
-	// for confirmation, and then to Destroy the plan.
+	// PlanDestroy is same as PlanDeploy, but only for destroy. Consider using DestroyFlow method as well.
 	PlanDestroy() (string, error)
 
-	// Deploy deploys the plan persisted on disk via PlanDeploy
-	Deploy() error
+	// ForceDeploy deploys the plan persisted on disk via PlanDeploy. User will not be asked for any confirmations, so it is
+	// your job in code to present the plan, and prompt for confirmation! For this purpose, you can use the DeployFlow method.
+	ForceDeploy() error
 
-	// Destroy deploys the plan persisted on disk via PlanDestroy
-	Destroy() error
+	// ForceDestroy is same as ForceDeploy, but only for destroy. Consider using DestroyFlow method as well.
+	ForceDestroy() error
 
 	// GetBackendStorageSettings returns the backend remote state storage settings, which can be read or modified if desired
 	GetBackendStorageSettings() *BackendStorageSettings
@@ -154,15 +173,9 @@ func (tf *terraformWrapper) Init() error {
 func (tf *terraformWrapper) SetVariables(terraformVariables map[string]interface{}) error {
 	logrus.Info("Setting the terraform variables...")
 
-	// add the default variables which should always be available
-	err := tf.addDefaultVariables(terraformVariables)
-
-	if err != nil {
-		return err
-	}
-
 	variablesPath := filepath.Join(tf.terraformDirectory, tf.GetVariablesFileName())
 
+	// terraform will get the variables via a file on disk, so we create it and fill out the values
 	f, err := os.Create(variablesPath)
 
 	if err != nil {
@@ -189,40 +202,28 @@ func (tf *terraformWrapper) SetVariables(terraformVariables map[string]interface
 	return nil
 }
 
+func (tf *terraformWrapper) DeployFlow(planOnly bool, useExistingPlan bool) error {
+	return tf.applyFlow(false, planOnly, useExistingPlan)
+}
+
+func (tf *terraformWrapper) DestroyFlow(planOnly bool, useExistingPlan bool) error {
+	return tf.applyFlow(true, planOnly, useExistingPlan)
+}
+
 func (tf *terraformWrapper) PlanDeploy() (string, error) {
-	logrus.Info("Calculating terraform deployment plan...")
-	err := tf.guardAgainstUnsetVariables()
-
-	if err != nil {
-		return "", err
-	}
-
-	planOutput, err := tf.executor.Execute("terraform" +
-		" -chdir=" + tf.terraformDirectory +
-		" plan -input=false " +
-		" -var-file=\"" + tf.GetVariablesFileName() + "\"" +
-		" -out=\"" + tf.GetDeployPlanFileName() + "\"")
-
-	if err != nil {
-		return "", err
-	}
-
-	return planOutput, err
+	return tf.plan(false)
 }
 
 func (tf *terraformWrapper) PlanDestroy() (string, error) {
-	//TODO implement me
-	panic("implement me")
+	return tf.plan(true)
 }
 
-func (tf *terraformWrapper) Deploy() error {
-	//TODO implement me
-	panic("implement me")
+func (tf *terraformWrapper) ForceDeploy() error {
+	return tf.forceApply(false)
 }
 
-func (tf *terraformWrapper) Destroy() error {
-	//TODO implement me
-	panic("implement me")
+func (tf *terraformWrapper) ForceDestroy() error {
+	return tf.forceApply(true)
 }
 
 func (tf *terraformWrapper) GetBackendStorageSettings() *BackendStorageSettings {
@@ -253,25 +254,121 @@ func (tf *terraformWrapper) guardAgainstUnsetVariables() error {
 	return nil
 }
 
-func (tf *terraformWrapper) addDefaultVariables(terraformVariables map[string]interface{}) error {
-	if _, ok := terraformVariables["subscription_id"]; ok {
-		return errors.New("key subscription_id was already set in terraform variables. This was unexpected, as this variable " +
-			"should be set by cops-hq. Please rename your variable to something else")
+func (tf *terraformWrapper) plan(isDestroy bool) (string, error) {
+	if isDestroy {
+		logrus.Info("Creating the terraform destroy plan...")
+	} else {
+		logrus.Info("Creating the terraform deployment plan...")
 	}
 
-	if _, ok := terraformVariables["tenant_id"]; ok {
-		return errors.New("key tenant_id was already set in terraform variables. This was unexpected, as this variable " +
-			"should be set by cops-hq. Please rename your variable to something else")
+	err := tf.guardAgainstUnsetVariables()
+	if err != nil {
+		return "", err
 	}
 
-	if _, ok := terraformVariables["region"]; ok {
-		return errors.New("key region was already set in terraform variables. This was unexpected, as this variable " +
-			"should be set by cops-hq. Please rename your variable to something else")
+	tfCommand := "terraform" +
+		" -chdir=" + tf.terraformDirectory +
+		" plan -input=false " +
+		" -var-file=\"" + tf.GetVariablesFileName() + "\""
+
+	if isDestroy {
+		tfCommand += " -destroy"
+		tfCommand += " -out=\"" + tf.GetDestroyPlanFileName() + "\""
+	} else {
+		tfCommand += " -out=\"" + tf.GetDeployPlanFileName() + "\""
 	}
 
-	terraformVariables["subscription_id"] = tf.subscriptionId
-	terraformVariables["tenant_id"] = tf.tenantId
-	terraformVariables["region"] = tf.region
+	planOutput, err := tf.executor.Execute(tfCommand)
+
+	if err != nil {
+		return "", err
+	}
+
+	return planOutput, nil
+}
+
+func (tf *terraformWrapper) applyFlow(isDestroy bool, planOnly bool, useExistingPlan bool) error {
+	var err error
+	var plan string
+
+	if planOnly && useExistingPlan {
+		return errors.New("planOnly with useExistingPlan makes no sense as a combination")
+	}
+
+	if useExistingPlan {
+		if isDestroy {
+			err = tf.ForceDestroy()
+		} else {
+			err = tf.ForceDeploy()
+		}
+
+		if err != nil {
+			return err
+		}
+	} else {
+		if isDestroy {
+			plan, err = tf.PlanDestroy()
+		} else {
+			plan, err = tf.PlanDeploy()
+		}
+
+		if err != nil {
+			return err
+		}
+
+		// we show the plan to the user, but since the command output already logged it to the file, it is enough to pipe it
+		// to console directly, so that duplicate log line in the file is avoided
+		fmt.Println(plan)
+
+		if !planOnly {
+			if tf.executor.AskUserToConfirm("Do you want to apply the plan?") {
+				if isDestroy {
+					err = tf.ForceDestroy()
+				} else {
+					err = tf.ForceDeploy()
+				}
+
+				if err != nil {
+					return err
+				}
+			} else {
+				logrus.Info("Plan was not approved.")
+			}
+		}
+	}
+
+	return nil
+}
+
+func (tf *terraformWrapper) forceApply(isDestroy bool) error {
+	if isDestroy {
+		logrus.Info("Starting the terraform destroy...")
+	} else {
+		logrus.Info("Starting the terraform apply")
+	}
+
+	err := tf.guardAgainstUnsetVariables()
+	if err != nil {
+		return err
+	}
+
+	tfCommand := "terraform" +
+		" -chdir=" + tf.terraformDirectory +
+		" apply" +
+		" -auto-approve -input=false"
+
+	if isDestroy {
+		tfCommand += " -destroy"
+		tfCommand += " \"" + tf.GetDestroyPlanFileName() + "\""
+	} else {
+		tfCommand += " \"" + tf.GetDeployPlanFileName() + "\""
+	}
+
+	_, err = tf.executor.Execute(tfCommand)
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
