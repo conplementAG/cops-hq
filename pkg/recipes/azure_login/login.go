@@ -28,17 +28,18 @@ func (l *Login) Login() error {
 		}
 
 		logrus.Info("Login as service-principal: " + l.servicePrincipalId)
-		l.servicePrincipalLogin(l.servicePrincipalId, l.servicePrincipalSecret, l.tenant)
+		return l.servicePrincipalLogin(l.servicePrincipalId, l.servicePrincipalSecret, l.tenant)
 	} else {
 		loggedIn, err := l.isUserAlreadyLoggedIn()
 
 		if err != nil {
-			logrus.Debug("Checking user already logged in returned error: " + err.Error())
+			logrus.Debug("Checking user already logged in returned error: " + err.Error() + ". " +
+				"Will will to re-login the user.")
 		}
 
 		if !loggedIn {
 			logrus.Info("Login as user interactive")
-			l.interactiveLogin()
+			return l.interactiveLogin()
 		} else {
 			logrus.Info("User is already logged in")
 		}
@@ -58,17 +59,25 @@ func (l *Login) useServicePrincipalLogin() bool {
 	return l.servicePrincipalId != ""
 }
 
-func (l *Login) interactiveLogin() {
-	l.executor.Execute("az login")
+func (l *Login) interactiveLogin() error {
+	_, err := l.executor.Execute("az login")
+	return err
 }
 
-func (l *Login) servicePrincipalLogin(servicePrincipal string, secret string, tenant string) {
+func (l *Login) servicePrincipalLogin(servicePrincipal string, secret string, tenant string) error {
 	commandText := "az login -u " + servicePrincipal + " -p " + secret + " -t " + tenant + " --service-principal"
-	l.executor.ExecuteSilent(commandText)
+	_, err := l.executor.ExecuteSilent(commandText)
+	return err
 }
 
 func (l *Login) isUserAlreadyLoggedIn() (bool, error) {
-	output, err := l.executor.Execute("az account show")
+	// since we actually rely on errors to test if user is logged in, we will shortly supress the executor panics
+	previousPanicSetting := l.executor.GetPanicOnAnyError()
+	l.executor.SetPanicOnAnyError(false)
+
+	output, err := l.executor.ExecuteSilent("az account show")
+
+	l.executor.SetPanicOnAnyError(previousPanicSetting)
 
 	if err != nil {
 		return false, err
@@ -85,9 +94,10 @@ func (l *Login) isUserAlreadyLoggedIn() (bool, error) {
 	return strings.EqualFold(response.User.Type, "user"), nil
 }
 
-func (l *Login) setSubscription(subscription string) {
+func (l *Login) setSubscription(subscription string) error {
 	commandText := "az account set -s " + subscription
-	l.executor.Execute(commandText)
+	_, err := l.executor.Execute(commandText)
+	return err
 }
 
 type account struct {
