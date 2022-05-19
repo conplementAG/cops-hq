@@ -18,10 +18,18 @@ type hqContainer struct {
 	Executor commands.Executor
 	Cli      cli.Cli
 	Logger   *logrus.Logger
+
+	panicOnError bool
 }
 
 func (hq *hqContainer) Run() error {
-	return hq.Cli.Run()
+	err := hq.Cli.Run()
+
+	if hq.panicOnError && err != nil {
+		panic(err)
+	}
+
+	return err
 }
 
 func (hq *hqContainer) GetExecutor() commands.Executor {
@@ -37,6 +45,8 @@ func (hq *hqContainer) GetLogrusLogger() *logrus.Logger {
 }
 
 func (hq *hqContainer) LoadEnvironmentConfigFile() error {
+	var err error
+
 	configFilePath := filepath.Join(ProjectBasePath, "config", viper.GetString("environment-tag")+".yaml")
 
 	// this should be kept as ExecuteSilent for security reasons, not to leak the whole config file in plaintext
@@ -44,11 +54,38 @@ func (hq *hqContainer) LoadEnvironmentConfigFile() error {
 	configFile, err := hq.Executor.ExecuteSilent("sops -d " + configFilePath)
 
 	if err != nil {
-		return fmt.Errorf("error recieved while reading the config file: %w", err)
+		err = fmt.Errorf("error recieved while reading the config file: %w", err)
+
+		if hq.panicOnError {
+			panic(err)
+		}
+
+		return err
 	}
 
 	viper.SetConfigType("yaml")
-	viper.MergeConfig(strings.NewReader(configFile))
+	err = viper.MergeConfig(strings.NewReader(configFile))
+
+	if err != nil {
+		err = fmt.Errorf("error recieved while reading the config file: %w", err)
+
+		if hq.panicOnError {
+			panic(err)
+		}
+
+		return err
+	}
 
 	return nil
+}
+
+func (hq *hqContainer) SetPanicOnAnyError(panicOnError bool) {
+	hq.GetCli().SetPanicOnAnyError(panicOnError)
+	hq.GetExecutor().SetPanicOnAnyError(panicOnError)
+
+	hq.panicOnError = panicOnError
+}
+
+func (hq *hqContainer) GetPanicOnAnyError() bool {
+	return hq.panicOnError
 }

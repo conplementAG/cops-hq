@@ -18,6 +18,12 @@ type Cli interface {
 	// GetRootCommand returns the root top level command, directly as cobra.Command which is the library used
 	// under the hood.
 	GetRootCommand() *cobra.Command
+
+	// SetPanicOnAnyError - check HQ.SetPanicOnAnyError for reference
+	SetPanicOnAnyError(panicOnError bool)
+
+	// GetPanicOnAnyError gets the current panic on any error setting
+	GetPanicOnAnyError() bool
 }
 
 // New creates a new Cli instance

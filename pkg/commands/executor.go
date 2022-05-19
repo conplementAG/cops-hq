@@ -44,12 +44,11 @@ type Executor interface {
 	// Parameter displayMessage can be used to show a message on the screen.
 	AskUserToConfirm(displayMessage string) bool
 
-	// SetPanicOnAnyError will issue panic if any of Execute or other methods returns an error. Beware that using this method
-	// will stop the program execution, and you will not be able to inspect the error in your code (although panic
-	// will log everything to stdout/stderr, and the error will be written into logs too). This mode might be interesting for
-	// code equivalent to Bash scripts running with 'set -e'. Setting panic mode only affects the commands executed after calling
-	// this method, and the mode can also be reverted by setting to false.
+	// SetPanicOnAnyError - check HQ.SetPanicOnAnyError for reference
 	SetPanicOnAnyError(panicOnError bool)
+
+	// GetPanicOnAnyError gets the current panic on any error setting
+	GetPanicOnAnyError() bool
 }
 
 type executor struct {
@@ -211,6 +210,10 @@ func (e *executor) AskUserToConfirm(displayMessage string) bool {
 
 func (e *executor) SetPanicOnAnyError(panicOnError bool) {
 	e.panicOnError = panicOnError
+}
+
+func (e *executor) GetPanicOnAnyError() bool {
+	return e.panicOnError
 }
 
 func (e *executor) OverrideStdIn(override io.Reader) {
