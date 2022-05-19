@@ -3,6 +3,8 @@
 Base infrastructure as code libraries for projects using Golang instead of Bash, Python and other languages. Highly opinionated, 
 but useful if you are using Azure and Kubernetes. 
 
+Core concepts behind IaC are explained here: [7 Principles of Infrastructure as Code (on Azure and beyond)](https://blog.coffeeapplied.com/7-principles-of-infrastructure-as-code-on-azure-and-beyond-51842e13b00) 
+
 ## Concepts
 
 This is an opinionated library, which sets the following goals and hard dependencies:
