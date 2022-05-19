@@ -112,3 +112,31 @@ func Test_PersistentParametersAreAvailableThroughViperInSubcommands(t *testing.T
 	// Assert
 	assert.True(t, expectedActionCalled)
 }
+
+func Test_ParametersFromDifferentCommandsShouldNotOverwriteEachOtherInViper(t *testing.T) {
+	// Arrange
+
+	cli := New("myprog", "0.0.1")
+
+	// Act
+	command1 := cli.AddBaseCommand("first", "Simple test command", "big description", func() {})
+	subCommand1 := command1.AddCommand("first-a", "Simple", "desc", func() {})
+
+	command2 := cli.AddBaseCommand("second", "Simple test command", "big description", func() {})
+	subCommand2 := command2.AddCommand("first-b", "Simple", "desc", func() {})
+
+	command1.AddPersistentParameterString("my-arg", "", false, "u", "first test arg")
+	command2.AddPersistentParameterString("my-arg", "", false, "u", "second test arg")
+	subCommand1.AddParameterBool("truth", false, false, "", "desc")
+	subCommand2.AddParameterBool("truth", false, false, "", "desc")
+
+	testing_utils.PrepareCommandForTesting(cli.GetRootCommand(), "first", "first-a", "--my-arg", "johndoe", "--truth")
+	cli.Run()
+
+	// Assert
+	// logic for assertion is as follows: the second command2.AddParameterString was overwriting the viper.BindPFlag to a wrong
+	// cobra command at the time, so by checking that the argument my-arg is resolvable, we essentially check that the viper
+	// binding was not overwritten
+	assert.Equal(t, "johndoe", viper.GetString("my-arg"))
+	assert.Equal(t, true, viper.GetBool("truth"))
+}

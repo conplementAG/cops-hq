@@ -41,10 +41,17 @@ type Command interface {
 }
 
 type commandWrapper struct {
-	cobraCommand *cobra.Command
+	cobraCommand         *cobra.Command
+	parameters           []string
+	persistentParameters []string
+	parentCommand        *commandWrapper
 }
 
 func (command *commandWrapper) AddCommand(use string, shortInfo string, longDescription string, runFunction func()) Command {
+	cw := &commandWrapper{
+		parentCommand: command,
+	}
+
 	newCommand := &cobra.Command{
 		Use:   use,
 		Short: shortInfo,
@@ -56,13 +63,35 @@ func (command *commandWrapper) AddCommand(use string, shortInfo string, longDesc
 				cmd.Help()
 			}
 		},
+		PreRun: func(cmd *cobra.Command, args []string) {
+			// we have to map the viper parameters on runtime, when the command is executing, to prevent
+			// overwriting of viper mappings in case multiple commands have the same named parameters
+			for _, p := range cw.parameters {
+				viper.BindPFlag(p, cmd.Flags().Lookup(p))
+			}
+
+			// as for the persistent parameters, only one PreRun is running at the time (of the executing command),
+			// so we have to traverse and find all persistent parameters of the parent commands as well
+			traverseAndBindFlagsToViper(cw)
+		},
 	}
 
+	cw.cobraCommand = newCommand
 	command.cobraCommand.AddCommand(newCommand)
 
-	return &commandWrapper{
-		cobraCommand: newCommand,
+	return cw
+}
+
+func traverseAndBindFlagsToViper(command *commandWrapper) {
+	if command == nil {
+		return
 	}
+
+	for _, p := range command.persistentParameters {
+		viper.BindPFlag(p, command.GetCobraCommand().PersistentFlags().Lookup(p))
+	}
+
+	traverseAndBindFlagsToViper(command.parentCommand)
 }
 
 func (command *commandWrapper) AddParameterString(name string, defaultValue string, required bool, shorthand string, description string) {
@@ -72,7 +101,7 @@ func (command *commandWrapper) AddParameterString(name string, defaultValue stri
 		command.cobraCommand.MarkFlagRequired(name)
 	}
 
-	viper.BindPFlag(name, command.cobraCommand.Flags().Lookup(name))
+	command.parameters = append(command.parameters, name)
 }
 
 func (command *commandWrapper) AddParameterBool(name string, defaultValue bool, required bool, shorthand string, description string) {
@@ -82,7 +111,7 @@ func (command *commandWrapper) AddParameterBool(name string, defaultValue bool, 
 		command.cobraCommand.MarkFlagRequired(name)
 	}
 
-	viper.BindPFlag(name, command.cobraCommand.Flags().Lookup(name))
+	command.parameters = append(command.parameters, name)
 }
 
 func (command *commandWrapper) AddParameterInt(name string, defaultValue int, required bool, shorthand string, description string) {
@@ -92,7 +121,7 @@ func (command *commandWrapper) AddParameterInt(name string, defaultValue int, re
 		command.cobraCommand.MarkFlagRequired(name)
 	}
 
-	viper.BindPFlag(name, command.cobraCommand.Flags().Lookup(name))
+	command.parameters = append(command.parameters, name)
 }
 
 func (command *commandWrapper) AddPersistentParameterString(name string, defaultValue string, required bool, shorthand string, description string) {
@@ -102,7 +131,7 @@ func (command *commandWrapper) AddPersistentParameterString(name string, default
 		command.cobraCommand.MarkPersistentFlagRequired(name)
 	}
 
-	viper.BindPFlag(name, command.cobraCommand.PersistentFlags().Lookup(name))
+	command.persistentParameters = append(command.persistentParameters, name)
 }
 
 func (command *commandWrapper) AddPersistentParameterBool(name string, defaultValue bool, required bool, shorthand string, description string) {
@@ -112,7 +141,7 @@ func (command *commandWrapper) AddPersistentParameterBool(name string, defaultVa
 		command.cobraCommand.MarkPersistentFlagRequired(name)
 	}
 
-	viper.BindPFlag(name, command.cobraCommand.PersistentFlags().Lookup(name))
+	command.persistentParameters = append(command.persistentParameters, name)
 }
 
 func (command *commandWrapper) AddPersistentParameterInt(name string, defaultValue int, required bool, shorthand string, description string) {
@@ -122,7 +151,7 @@ func (command *commandWrapper) AddPersistentParameterInt(name string, defaultVal
 		command.cobraCommand.MarkPersistentFlagRequired(name)
 	}
 
-	viper.BindPFlag(name, command.cobraCommand.PersistentFlags().Lookup(name))
+	command.persistentParameters = append(command.persistentParameters, name)
 }
 
 func (command *commandWrapper) GetCobraCommand() *cobra.Command {
