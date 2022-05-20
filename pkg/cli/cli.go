@@ -1,15 +1,15 @@
 package cli
 
 import (
+	"github.com/conplementag/cops-hq/internal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 type cli struct {
-	programName     string
-	version         string
-	rootCmd         *cobra.Command
-	panicOnAnyError bool
+	programName string
+	version     string
+	rootCmd     *cobra.Command
 }
 
 func (cli *cli) AddBaseCommand(use string, shortInfo string, longDescription string, runFunction func()) Command {
@@ -49,22 +49,9 @@ func (cli *cli) AddBaseCommand(use string, shortInfo string, longDescription str
 
 func (cli *cli) Run() error {
 	err := cli.rootCmd.Execute()
-
-	if cli.panicOnAnyError {
-		panic(err)
-	}
-
-	return err
+	return internal.ReturnErrorOrPanic(err)
 }
 
 func (cli *cli) GetRootCommand() *cobra.Command {
 	return cli.rootCmd
-}
-
-func (cli *cli) SetPanicOnAnyError(panicOnError bool) {
-	cli.panicOnAnyError = panicOnError
-}
-
-func (cli *cli) GetPanicOnAnyError() bool {
-	return cli.panicOnAnyError
 }

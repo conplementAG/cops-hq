@@ -1,6 +1,9 @@
 package hq
 
-import "github.com/conplementag/cops-hq/pkg/cli"
+import (
+	"github.com/conplementag/cops-hq/pkg/cli"
+	"github.com/sirupsen/logrus"
+)
 
 func addInbuiltHqCliCommands(cli cli.Cli, container *hqContainer) {
 	hqBaseCommand := cli.AddBaseCommand("hq", "in-build HQ command group", "Command predefined by cops-hq.", nil)
@@ -11,6 +14,7 @@ func addInbuiltHqCliCommands(cli cli.Cli, container *hqContainer) {
 			err := container.CheckToolingDependencies()
 
 			if err != nil {
+				logrus.Error(err)
 				panic(err)
 			}
 		})

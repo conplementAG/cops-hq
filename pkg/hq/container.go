@@ -2,6 +2,7 @@ package hq
 
 import (
 	"fmt"
+	"github.com/conplementag/cops-hq/internal"
 	"github.com/conplementag/cops-hq/pkg/cli"
 	"github.com/conplementag/cops-hq/pkg/commands"
 	"github.com/sirupsen/logrus"
@@ -18,18 +19,11 @@ type hqContainer struct {
 	Executor commands.Executor
 	Cli      cli.Cli
 	Logger   *logrus.Logger
-
-	panicOnError bool
 }
 
 func (hq *hqContainer) Run() error {
 	err := hq.Cli.Run()
-
-	if hq.panicOnError && err != nil {
-		panic(err)
-	}
-
-	return err
+	return internal.ReturnErrorOrPanic(err)
 }
 
 func (hq *hqContainer) GetExecutor() commands.Executor {
@@ -54,38 +48,15 @@ func (hq *hqContainer) LoadEnvironmentConfigFile() error {
 	configFile, err := hq.Executor.ExecuteSilent("sops -d " + configFilePath)
 
 	if err != nil {
-		err = fmt.Errorf("error recieved while reading the config file: %w", err)
-
-		if hq.panicOnError {
-			panic(err)
-		}
-
-		return err
+		return internal.ReturnErrorOrPanic(fmt.Errorf("error recieved while reading the config file: %w", err))
 	}
 
 	viper.SetConfigType("yaml")
 	err = viper.MergeConfig(strings.NewReader(configFile))
 
 	if err != nil {
-		err = fmt.Errorf("error recieved while reading the config file: %w", err)
-
-		if hq.panicOnError {
-			panic(err)
-		}
-
-		return err
+		return internal.ReturnErrorOrPanic(fmt.Errorf("error recieved while reading the config file: %w", err))
 	}
 
 	return nil
-}
-
-func (hq *hqContainer) SetPanicOnAnyError(panicOnError bool) {
-	hq.GetCli().SetPanicOnAnyError(panicOnError)
-	hq.GetExecutor().SetPanicOnAnyError(panicOnError)
-
-	hq.panicOnError = panicOnError
-}
-
-func (hq *hqContainer) GetPanicOnAnyError() bool {
-	return hq.panicOnError
 }

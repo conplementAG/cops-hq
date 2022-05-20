@@ -3,7 +3,9 @@ package azure_login
 import (
 	"encoding/json"
 	"errors"
+	"github.com/conplementag/cops-hq/internal"
 	"github.com/conplementag/cops-hq/pkg/commands"
+	"github.com/conplementag/cops-hq/pkg/error_handling"
 	"github.com/sirupsen/logrus"
 	"strings"
 )
@@ -20,7 +22,7 @@ type Login struct {
 func (l *Login) Login() error {
 	if l.useServicePrincipalLogin() {
 		if l.servicePrincipalSecret == "" {
-			return errors.New("service principal secret must be given, when using service principal credentials")
+			return internal.ReturnErrorOrPanic(errors.New("service principal secret must be given, when using service principal credentials"))
 		}
 
 		if l.tenant == "" {
@@ -28,7 +30,8 @@ func (l *Login) Login() error {
 		}
 
 		logrus.Info("Login as service-principal: " + l.servicePrincipalId)
-		return l.servicePrincipalLogin(l.servicePrincipalId, l.servicePrincipalSecret, l.tenant)
+		err := l.servicePrincipalLogin(l.servicePrincipalId, l.servicePrincipalSecret, l.tenant)
+		return internal.ReturnErrorOrPanic(err)
 	} else {
 		loggedIn, err := l.isUserAlreadyLoggedIn()
 
@@ -39,7 +42,7 @@ func (l *Login) Login() error {
 
 		if !loggedIn {
 			logrus.Info("Login as user interactive")
-			return l.interactiveLogin()
+			return internal.ReturnErrorOrPanic(l.interactiveLogin())
 		} else {
 			logrus.Info("User is already logged in")
 		}
@@ -52,7 +55,7 @@ func (l *Login) Login() error {
 func (l *Login) SetSubscription(subscriptionId string) error {
 	logrus.Info("Setting current Azure subscription to: " + subscriptionId)
 	_, err := l.executor.Execute("az account set -s " + subscriptionId)
-	return err
+	return internal.ReturnErrorOrPanic(err)
 }
 
 func (l *Login) useServicePrincipalLogin() bool {
@@ -72,12 +75,12 @@ func (l *Login) servicePrincipalLogin(servicePrincipal string, secret string, te
 
 func (l *Login) isUserAlreadyLoggedIn() (bool, error) {
 	// since we actually rely on errors to test if user is logged in, we will shortly supress the executor panics
-	previousPanicSetting := l.executor.GetPanicOnAnyError()
-	l.executor.SetPanicOnAnyError(false)
+	previousPanicSetting := error_handling.PanicOnAnyError
+	error_handling.PanicOnAnyError = false
 
 	output, err := l.executor.ExecuteSilent("az account show")
 
-	l.executor.SetPanicOnAnyError(previousPanicSetting)
+	error_handling.PanicOnAnyError = previousPanicSetting
 
 	if err != nil {
 		return false, err

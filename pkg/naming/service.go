@@ -2,6 +2,7 @@ package naming
 
 import (
 	"github.com/ahmetb/go-linq"
+	"github.com/conplementag/cops-hq/internal"
 	"github.com/conplementag/cops-hq/pkg/naming/patterns"
 	"github.com/conplementag/cops-hq/pkg/naming/regions"
 	"github.com/conplementag/cops-hq/pkg/naming/resources"
@@ -27,11 +28,11 @@ func (service *Service) SetPattern(pattern patterns.Pattern) error {
 
 	for _, placeholder := range mandatoryPlaceholders {
 		if !strings.Contains(string(pattern), placeholder) {
-			return NewNamingError("placeholder " + placeholder + " not found in the pattern")
+			return internal.ReturnErrorOrPanic(NewNamingError("placeholder " + placeholder + " not found in the pattern"))
 		}
 
 		if strings.Count(string(pattern), placeholder) != 1 {
-			return NewNamingError("multiple occurrences of " + placeholder + " found in the pattern")
+			return internal.ReturnErrorOrPanic(NewNamingError("multiple occurrences of " + placeholder + " found in the pattern"))
 		}
 	}
 
@@ -41,7 +42,7 @@ func (service *Service) SetPattern(pattern patterns.Pattern) error {
 	if strings.Count(string(pattern), "}{") != (numberOfPlaceholders-1) ||
 		!strings.HasPrefix(string(pattern), "{") ||
 		!strings.HasSuffix(string(pattern), "}") {
-		return NewNamingError("invalid characters found in the pattern, make sure only the placeholders and no other characters are specified")
+		return internal.ReturnErrorOrPanic(NewNamingError("invalid characters found in the pattern, make sure only the placeholders and no other characters are specified"))
 	}
 
 	service.pattern = pattern
@@ -113,8 +114,8 @@ func (service *Service) GenerateResourceName(resourceType resources.AzureResourc
 	valid, err := currentNamingConvention.isValid(result)
 
 	if !valid {
-		return "", err
+		return "", internal.ReturnErrorOrPanic(err)
 	}
 
-	return result, err
+	return result, internal.ReturnErrorOrPanic(err)
 }

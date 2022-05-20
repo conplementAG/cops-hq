@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/briandowns/spinner"
+	"github.com/conplementag/cops-hq/internal"
 	"github.com/conplementag/cops-hq/internal/commands"
 	"github.com/conplementag/cops-hq/internal/logging"
 	"github.com/sirupsen/logrus"
@@ -43,19 +44,12 @@ type Executor interface {
 	// AskUserToConfirm pauses the execution, and awaits for user to confirm (by either typing yes, Y or y).
 	// Parameter displayMessage can be used to show a message on the screen.
 	AskUserToConfirm(displayMessage string) bool
-
-	// SetPanicOnAnyError - check HQ.SetPanicOnAnyError for reference
-	SetPanicOnAnyError(panicOnError bool)
-
-	// GetPanicOnAnyError gets the current panic on any error setting
-	GetPanicOnAnyError() bool
 }
 
 type executor struct {
-	logFileName  string
-	logger       *logrus.Logger
-	chatty       bool
-	panicOnError bool
+	logFileName string
+	logger      *logrus.Logger
+	chatty      bool
 
 	stdin io.Reader
 }
@@ -91,11 +85,7 @@ func (e *executor) ExecuteTTY(command string) error {
 
 	err := cmd.Run()
 
-	if err != nil {
-		e.panicWhenInPanicMode(err)
-	}
-
-	return err
+	return internal.ReturnErrorOrPanic(err)
 }
 
 func (e *executor) execute(command string, silent bool) (output string, err error) {
@@ -116,22 +106,19 @@ func (e *executor) execute(command string, silent bool) (output string, err erro
 	//    These variables are of type io.Reader.
 	cmdStdOut, pipeError := cmd.StdoutPipe()
 	if pipeError != nil {
-		e.panicWhenInPanicMode(pipeError)
-		return "", pipeError
+		return "", internal.ReturnErrorOrPanic(pipeError)
 	}
 
 	cmdStdErr, pipeError := cmd.StderrPipe()
 	if pipeError != nil {
-		e.panicWhenInPanicMode(pipeError)
-		return "", pipeError
+		return "", internal.ReturnErrorOrPanic(pipeError)
 	}
 
 	// Start command
 	commandStartError := cmd.Start()
 
 	if commandStartError != nil {
-		e.panicWhenInPanicMode(commandStartError)
-		return "", commandStartError
+		return "", internal.ReturnErrorOrPanic(commandStartError)
 	}
 
 	// 2. We create a composite io.Writer consisting of multiple sinks. Depending on the configuration, these writers
@@ -181,10 +168,9 @@ func (e *executor) execute(command string, silent bool) (output string, err erro
 
 	if commandError != nil {
 		compositeError = fmt.Errorf("%w; Stderr stream: "+stderrCollector.String(), commandError)
-		e.panicWhenInPanicMode(compositeError)
 	}
 
-	return cleanedStringOutput, compositeError
+	return cleanedStringOutput, internal.ReturnErrorOrPanic(compositeError)
 }
 
 func (e *executor) AskUserToConfirm(displayMessage string) bool {
@@ -208,20 +194,6 @@ func (e *executor) AskUserToConfirm(displayMessage string) bool {
 	return false
 }
 
-func (e *executor) SetPanicOnAnyError(panicOnError bool) {
-	e.panicOnError = panicOnError
-}
-
-func (e *executor) GetPanicOnAnyError() bool {
-	return e.panicOnError
-}
-
 func (e *executor) OverrideStdIn(override io.Reader) {
 	e.stdin = override
-}
-
-func (e *executor) panicWhenInPanicMode(err error) {
-	if e.panicOnError {
-		panic(err)
-	}
 }

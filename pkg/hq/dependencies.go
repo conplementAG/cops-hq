@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Masterminds/semver"
+	"github.com/conplementag/cops-hq/internal"
+	"github.com/conplementag/cops-hq/pkg/error_handling"
 	"github.com/sirupsen/logrus"
 	"strings"
 )
@@ -28,7 +30,8 @@ func (hq *hqContainer) CheckToolingDependencies() error {
 	err5 := hq.checkCopsctl()
 
 	if err1 != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil {
-		return fmt.Errorf("mandatory tooling dependencies check failed: %v %v %v %v %v", err1, err2, err3, err4, err5)
+		compositeErr := fmt.Errorf("mandatory tooling dependencies check failed: %v %v %v %v %v", err1, err2, err3, err4, err5)
+		return internal.ReturnErrorOrPanic(compositeErr)
 	}
 
 	// optional but recommended dependencies
@@ -163,7 +166,13 @@ func (hq *hqContainer) checkCopsctl() error {
 
 func (hq *hqContainer) checkSops() error {
 	logrus.Info("Checking sops...")
+	// sops is an optional dependency, so in case we are in panic mode, we should survive it
+	previousPanicSetting := error_handling.PanicOnAnyError
+	error_handling.PanicOnAnyError = false
+
 	sopsVersion, err := hq.Executor.Execute("sops --version")
+	
+	error_handling.PanicOnAnyError = previousPanicSetting
 
 	if err != nil {
 		return err

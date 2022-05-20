@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/conplementag/cops-hq/internal"
 	"github.com/conplementag/cops-hq/pkg/commands"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -101,7 +102,7 @@ func (tf *terraformWrapper) Init() error {
 		_, err := tf.executor.Execute("az group create -l " + tf.region + " -n " + tf.resourceGroupName)
 
 		if err != nil {
-			return err
+			return internal.ReturnErrorOrPanic(err)
 		}
 	}
 
@@ -118,7 +119,7 @@ func (tf *terraformWrapper) Init() error {
 		" --https-only true")
 
 	if err != nil {
-		return err
+		return internal.ReturnErrorOrPanic(err)
 	}
 
 	logrus.Info("Reading the storage account key, which will be give to terraform to initialize the remote state...")
@@ -128,7 +129,7 @@ func (tf *terraformWrapper) Init() error {
 		" --query [0].value -o tsv")
 
 	if err != nil {
-		return err
+		return internal.ReturnErrorOrPanic(err)
 	}
 
 	logrus.Info("Creating the remote state blob container named " + tf.storageSettings.BlobContainerName + "...")
@@ -138,7 +139,7 @@ func (tf *terraformWrapper) Init() error {
 		" --name " + tf.storageSettings.BlobContainerName)
 
 	if err != nil {
-		return err
+		return internal.ReturnErrorOrPanic(err)
 	}
 
 	if tf.deploymentSettings.AlwaysCleanLocalCache {
@@ -148,7 +149,7 @@ func (tf *terraformWrapper) Init() error {
 		err3 := os.RemoveAll(filepath.Join(tf.terraformDirectory, tf.GetVariablesFileName()))
 
 		if err1 != nil || err2 != nil || err3 != nil {
-			return fmt.Errorf("errors while clearing terraform cache: %v %v %v", err1, err2, err3)
+			return internal.ReturnErrorOrPanic(fmt.Errorf("errors while clearing terraform cache: %v %v %v", err1, err2, err3))
 		}
 	}
 
@@ -164,7 +165,7 @@ func (tf *terraformWrapper) Init() error {
 		" --backend-config=\"key=" + tf.storageSettings.BlobContainerKey + "\"")
 
 	if err != nil {
-		return err
+		return internal.ReturnErrorOrPanic(err)
 	}
 
 	return nil
@@ -179,7 +180,7 @@ func (tf *terraformWrapper) SetVariables(terraformVariables map[string]interface
 	f, err := os.Create(variablesPath)
 
 	if err != nil {
-		return err
+		return internal.ReturnErrorOrPanic(err)
 	}
 
 	defer f.Close()
@@ -188,13 +189,13 @@ func (tf *terraformWrapper) SetVariables(terraformVariables map[string]interface
 		valueJson, err := json.Marshal(value)
 
 		if err != nil {
-			return err
+			return internal.ReturnErrorOrPanic(err)
 		}
 
 		_, err = f.WriteString(fmt.Sprintf("%s=%s\n", key, string(valueJson)))
 
 		if err != nil {
-			return err
+			return internal.ReturnErrorOrPanic(err)
 		}
 	}
 
@@ -263,7 +264,7 @@ func (tf *terraformWrapper) plan(isDestroy bool) (string, error) {
 
 	err := tf.guardAgainstUnsetVariables()
 	if err != nil {
-		return "", err
+		return "", internal.ReturnErrorOrPanic(err)
 	}
 
 	tfCommand := "terraform" +
@@ -281,7 +282,7 @@ func (tf *terraformWrapper) plan(isDestroy bool) (string, error) {
 	planOutput, err := tf.executor.Execute(tfCommand)
 
 	if err != nil {
-		return "", err
+		return "", internal.ReturnErrorOrPanic(err)
 	}
 
 	return planOutput, nil
@@ -303,7 +304,7 @@ func (tf *terraformWrapper) applyFlow(isDestroy bool, planOnly bool, useExisting
 		}
 
 		if err != nil {
-			return err
+			return internal.ReturnErrorOrPanic(err)
 		}
 	} else {
 		if isDestroy {
@@ -313,7 +314,7 @@ func (tf *terraformWrapper) applyFlow(isDestroy bool, planOnly bool, useExisting
 		}
 
 		if err != nil {
-			return err
+			return internal.ReturnErrorOrPanic(err)
 		}
 
 		// we show the plan to the user, but since the command output already logged it to the file, it is enough to pipe it
@@ -329,7 +330,7 @@ func (tf *terraformWrapper) applyFlow(isDestroy bool, planOnly bool, useExisting
 				}
 
 				if err != nil {
-					return err
+					return internal.ReturnErrorOrPanic(err)
 				}
 			} else {
 				logrus.Info("Plan was not approved.")
@@ -348,8 +349,9 @@ func (tf *terraformWrapper) forceApply(isDestroy bool) error {
 	}
 
 	err := tf.guardAgainstUnsetVariables()
+
 	if err != nil {
-		return err
+		return internal.ReturnErrorOrPanic(err)
 	}
 
 	tfCommand := "terraform" +
@@ -367,7 +369,7 @@ func (tf *terraformWrapper) forceApply(isDestroy bool) error {
 	_, err = tf.executor.Execute(tfCommand)
 
 	if err != nil {
-		return err
+		return internal.ReturnErrorOrPanic(err)
 	}
 
 	return nil

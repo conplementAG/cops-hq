@@ -45,3 +45,20 @@ Required dependency, and all transient dependencies, will be recorded in the go.
 go test -coverprofile=coverage.out ./...
 go tool cover -html=coverage.out
 ````
+
+## Error handling
+
+We use a dual approach of handling errors in cops-hq: errors are returned to the caller, but we also support panics 
+in case the global settings PanicOnAnyError is set. This means that any public member of cops-hq, exposing errors as 
+return values, should be wrapped in something similar to this:
+
+```go
+	if err != nil && error_handling.PanicOnAnyError {
+		logurs.Fatal(err)
+		panic(err)
+	}
+
+	return err
+```
+
+Please check code for references on this behaviour, as any public member implements it. 
