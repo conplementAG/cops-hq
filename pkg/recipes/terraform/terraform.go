@@ -333,7 +333,9 @@ func (tf *terraformWrapper) applyFlow(isDestroy bool, planOnly bool, useExisting
 					return internal.ReturnErrorOrPanic(err)
 				}
 			} else {
-				logrus.Info("Plan was not approved.")
+				err := errors.New("plan was not approved")
+				logrus.Error(err)
+				return internal.ReturnErrorOrPanic(err)
 			}
 		}
 	}
