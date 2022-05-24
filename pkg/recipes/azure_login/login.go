@@ -3,10 +3,12 @@ package azure_login
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/conplementag/cops-hq/internal"
 	"github.com/conplementag/cops-hq/pkg/commands"
 	"github.com/conplementag/cops-hq/pkg/error_handling"
 	"github.com/sirupsen/logrus"
+	"os"
 	"strings"
 )
 
@@ -17,8 +19,8 @@ type Login struct {
 	executor               commands.Executor
 }
 
-// Login logs the currently configured user in Azure. If configured with service principal, it will attempt a non-interactive login,
-// otherwise a normal user login will be started.
+// Login logs the currently configured user in AzureCLI and Terraform. If configured with service principal, it will
+// attempt a non-interactive login, otherwise a normal user login will be started.
 func (l *Login) Login() error {
 	if l.useServicePrincipalLogin() {
 		if l.servicePrincipalSecret == "" {
@@ -68,9 +70,21 @@ func (l *Login) interactiveLogin() error {
 }
 
 func (l *Login) servicePrincipalLogin(servicePrincipal string, secret string, tenant string) error {
+	// First, we log into the Azure CLI
 	commandText := "az login -u " + servicePrincipal + " -p " + secret + " -t " + tenant + " --service-principal"
 	_, err := l.executor.ExecuteSilent(commandText)
-	return err
+
+	// Then, we also need to set the env variables required for Terraform if working with service principals
+	err1 := os.Setenv("ARM_CLIENT_ID", servicePrincipal)
+	err2 := os.Setenv("ARM_CLIENT_SECRET", secret)
+	err3 := os.Setenv("ARM_TENANT_ID", tenant)
+
+	if err != nil || err1 != nil || err2 != nil || err3 != nil {
+		return internal.ReturnErrorOrPanic(fmt.Errorf("errors while logging in via azure service principal: %v %v %v %v",
+			err, err1, err2, err3))
+	}
+
+	return nil
 }
 
 func (l *Login) isUserAlreadyLoggedIn() (bool, error) {
@@ -100,7 +114,15 @@ func (l *Login) isUserAlreadyLoggedIn() (bool, error) {
 func (l *Login) setSubscription(subscription string) error {
 	commandText := "az account set -s " + subscription
 	_, err := l.executor.Execute(commandText)
-	return err
+
+	errEnvVar := os.Setenv("ARM_SUBSCRIPTION_ID", subscription)
+
+	if err != nil || errEnvVar != nil {
+		return internal.ReturnErrorOrPanic(fmt.Errorf("errors while setting the subscription: %v %v ",
+			err, errEnvVar))
+	}
+
+	return nil
 }
 
 type account struct {
