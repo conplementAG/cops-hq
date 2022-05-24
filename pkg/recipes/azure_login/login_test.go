@@ -31,15 +31,15 @@ func Test_TriggersNoLogin_WhenUserAlreadyLoggedIn(t *testing.T) {
 	executor.userLoggedIn = true
 
 	azureLogin := New(executor)
-
-	executor.On("Execute", mock.MatchedBy(func(command string) bool {
-		return !strings.Contains(command, "az login")
-	}))
+	executor.On("ExecuteSilent", mock.Anything)
 
 	// Act
 	azureLogin.Login()
 
 	// Assert
+	executor.AssertNotCalled(t, "Execute", mock.MatchedBy(func(command string) bool {
+		return strings.Contains(command, "az login")
+	}))
 	executor.AssertExpectations(t)
 }
 
@@ -50,9 +50,9 @@ func Test_TriggersUserLogin_WhenNoCredentialsProvidedAndNotLoggedIn(t *testing.T
 
 	azureLogin := New(executor)
 
-	// sadly, testify expects that every call made has a matching expect, so we need to add this comamnd as well,
+	// sadly, testify expects that every call made has a matching expect, so we need to add this command as well,
 	// although it makes the test just more brittle
-	executor.On("Execute", mock.MatchedBy(func(command string) bool {
+	executor.On("ExecuteSilent", mock.MatchedBy(func(command string) bool {
 		return strings.Contains(command, "az account show")
 	})).Once()
 
@@ -102,9 +102,14 @@ func (e *loginExecutorMock) ExecuteSilent(command string) (string, error) {
 		return "sp login output", nil
 	} else if strings.Contains(command, "az account show") {
 		a := &account{}
-		a.User.Type = "User"
-		b, err := json.Marshal(a)
-		return string(b), err
+
+		if e.userLoggedIn {
+			a.User.Type = "User"
+			b, err := json.Marshal(a)
+			return string(b), err
+		} else {
+			return "not logged in", errors.New("not logged int")
+		}
 	}
 
 	return "unknown command for the ExecuteSilent mock called, but let's return successfully anyways", nil

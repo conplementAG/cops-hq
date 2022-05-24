@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	ExpectedMinAzureCliVersion  = "2.36.0"
-	ExpectedMinTerraformVersion = "1.1.9"
+	ExpectedMinAzureCliVersion  = "2.37.0"
+	ExpectedMinTerraformVersion = "1.2.1"
 	ExpectedMinHelmVersion      = "3.8.2"
 	ExpectedMinKubectlVersion   = "1.23.5"
 	ExpectedMinCopsctlVersion   = "0.8.0"
@@ -171,7 +171,7 @@ func (hq *hqContainer) checkSops() error {
 	error_handling.PanicOnAnyError = false
 
 	sopsVersion, err := hq.Executor.Execute("sops --version")
-	
+
 	error_handling.PanicOnAnyError = previousPanicSetting
 
 	if err != nil {
@@ -184,7 +184,7 @@ func (hq *hqContainer) checkSops() error {
 	versionConstraint, _ := semver.NewConstraint(">=" + ExpectedMinSopsVersion)
 	installedVersion, _ := semver.NewVersion(sopsVersion)
 
-	if !versionConstraint.Check(installedVersion) {
+	if installedVersion == nil || !versionConstraint.Check(installedVersion) {
 		return fmt.Errorf("sops version mismatch. expected >= %v, got %v", ExpectedMinSopsVersion, installedVersion)
 	}
 

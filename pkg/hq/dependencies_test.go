@@ -94,6 +94,7 @@ func (e *versionCheckExecutorMock) Execute(command string) (string, error) {
 		return e.copsctlVersion, nil
 	}
 
+	// we explicitly don't set sops as installed, because it should just issue a warning
 	return "unknown command for the Execute mock called, but let's return successfully anyways", nil
 }
 
