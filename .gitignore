@@ -10,3 +10,5 @@ pkg/logging/test_file.log
 pkg/hq/test.logs
 
 pkg/recipes/terraform/test.tfvars
+
+cmd/example-infra/example-infra.log
