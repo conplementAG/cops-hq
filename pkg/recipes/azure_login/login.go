@@ -53,11 +53,19 @@ func (l *Login) Login() error {
 	return nil
 }
 
-// SetSubscription sets the current Azure subscription on the running system (for Azure CLI)
+// SetSubscription sets the current Azure subscription on the running system (for Azure CLI & Terraform)
 func (l *Login) SetSubscription(subscriptionId string) error {
 	logrus.Info("Setting current Azure subscription to: " + subscriptionId)
 	_, err := l.executor.Execute("az account set -s " + subscriptionId)
-	return internal.ReturnErrorOrPanic(err)
+
+	errEnvVar := os.Setenv("ARM_SUBSCRIPTION_ID", subscriptionId)
+
+	if err != nil || errEnvVar != nil {
+		return internal.ReturnErrorOrPanic(fmt.Errorf("errors while setting the subscription: %v %v ",
+			err, errEnvVar))
+	}
+
+	return nil
 }
 
 func (l *Login) useServicePrincipalLogin() bool {
@@ -109,20 +117,6 @@ func (l *Login) isUserAlreadyLoggedIn() (bool, error) {
 
 	// case-insensitive comparison because Azure CLI is known to introduce these breaking changes sometimes
 	return strings.EqualFold(response.User.Type, "user"), nil
-}
-
-func (l *Login) setSubscription(subscription string) error {
-	commandText := "az account set -s " + subscription
-	_, err := l.executor.Execute(commandText)
-
-	errEnvVar := os.Setenv("ARM_SUBSCRIPTION_ID", subscription)
-
-	if err != nil || errEnvVar != nil {
-		return internal.ReturnErrorOrPanic(fmt.Errorf("errors while setting the subscription: %v %v ",
-			err, errEnvVar))
-	}
-
-	return nil
 }
 
 type account struct {
