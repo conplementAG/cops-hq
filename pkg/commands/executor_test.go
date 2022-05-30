@@ -113,6 +113,26 @@ func (s *ExecutorTestSuite) Test_AskUserToConfirm() {
 	}
 }
 
+func (s *ExecutorTestSuite) Test_AskUserToConfirmWithKeyword() {
+	tests := []struct {
+		testName       string
+		userInput      string
+		keyword        string
+		expectedResult bool
+	}{
+		{"false for random input", "$blabla", "test", false},
+		{"true for correct input", "core", "core", true},
+	}
+
+	for _, tt := range tests {
+		fmt.Println("Running test: " + tt.testName)
+		var reader io.Reader = strings.NewReader(tt.userInput)
+		s.exec.(*executor).OverrideStdIn(reader)
+
+		s.Equal(s.exec.AskUserToConfirmWithKeyword("Should I?", tt.keyword), tt.expectedResult)
+	}
+}
+
 func Test_QuietExecutorWorksAsWell(t *testing.T) {
 	logger := logging.Init(testLogFileName)
 	e := NewQuiet(testLogFileName, logger)
