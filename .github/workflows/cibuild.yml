@@ -14,4 +14,3 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag cops-hq:$(date +%s)
-diff --git a/.github/workflows/cibuild b/.github/workflows/cibuild
