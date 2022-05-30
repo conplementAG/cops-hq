@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Terraform is a wrapper around common terraform functionality used in IaC projects with Azure. In includes remote state
@@ -131,6 +132,8 @@ func (tf *terraformWrapper) Init() error {
 	if err != nil {
 		return internal.ReturnErrorOrPanic(err)
 	}
+
+	storageAccountKey = trimLinebreakSuffixes(storageAccountKey)
 
 	logrus.Info("Creating the remote state blob container named " + tf.storageSettings.BlobContainerName + "...")
 	_, err = tf.executor.Execute("az storage container create" +
@@ -375,4 +378,8 @@ func (tf *terraformWrapper) forceApply(isDestroy bool) error {
 	}
 
 	return nil
+}
+
+func trimLinebreakSuffixes(storageAccountKey string) string {
+	return strings.TrimRight(storageAccountKey, "\r\n")
 }
