@@ -44,6 +44,10 @@ type Executor interface {
 	// AskUserToConfirm pauses the execution, and awaits for user to confirm (by either typing yes, Y or y).
 	// Parameter displayMessage can be used to show a message on the screen.
 	AskUserToConfirm(displayMessage string) bool
+
+	// AskUserToConfirmWithKeyword pauses the execution, and awaits for user to confirm with the requested keyword.
+	// Parameter displayMessage can be used to show a message on the screen.
+	AskUserToConfirmWithKeyword(displayMessage string, keyword string) bool
 }
 
 type executor struct {
@@ -189,6 +193,21 @@ func (e *executor) AskUserToConfirm(displayMessage string) bool {
 		if text == okText {
 			return true
 		}
+	}
+
+	return false
+}
+
+func (e *executor) AskUserToConfirmWithKeyword(displayMessage string, keyword string) bool {
+	logrus.Info(displayMessage)
+
+	confirmation := bufio.NewScanner(e.stdin)
+	confirmation.Scan()
+
+	text := confirmation.Text()
+
+	if text == keyword {
+		return true
 	}
 
 	return false

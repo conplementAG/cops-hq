@@ -22,12 +22,16 @@ type HQ interface {
 	// GetLogrusLogger retrieves the currently initialized logrus logger
 	GetLogrusLogger() *logrus.Logger
 
-	// LoadEnvironmentConfigFile loads the environment config file, which is expected to be saved encrypted (with sops)
-	// on disk, in the location 'config/<<environment_tag>>.yaml'. This command relies on the defined variable
+	// LoadEnvironmentConfigFile is a special version of LoadConfigFile in which the config file is expected in
+	// the location 'config/<<environment_tag>>.yaml'. This command relies on the defined variable
 	// 'environment-tag', available through Viper. Most common way to provide the 'environment-tag' is through cli
-	// parameters, which are automatically bound to Viper. Sops is expected to be available in PATH, and in correct version
-	// (use the CheckToolingDependencies method or call hq 'check-dependencies'
+	// parameters, which are automatically bound to Viper.
 	LoadEnvironmentConfigFile() error
+
+	// LoadConfigFile loads the specified config file, which is expected to be saved encrypted (with sops) on disk.
+	// You can generate the path using filepath.Join and the hq.ProjectBasePath variable. Sops is expected to be
+	// available in PATH, and in correct version (use the CheckToolingDependencies method or call hq 'check-dependencies')
+	LoadConfigFile(filePath string) error
 
 	// CheckToolingDependencies can be called to check if installed tooling (Azure CLI, Terraform, Helm etc.) is of minimal
 	// expected version for all of HQ functionality to work. It is highly recommended to call this method in your code, and fail
