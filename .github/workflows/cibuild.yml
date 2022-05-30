@@ -1,0 +1,17 @@
+name: cibuild
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag cops-hq:$(date +%s)
+diff --git a/.github/workflows/cibuild b/.github/workflows/cibuild
