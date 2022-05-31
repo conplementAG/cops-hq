@@ -75,6 +75,13 @@ func (service *Service) GenerateResourceName(resourceType resources.AzureResourc
 		{"{resource_suffix}", 0, string(resourceType)},
 	}
 
+	// if module not provided, we need to omit the {module} field from the naming completely
+	if service.module == "" {
+		linq.From(placeholderMappings).WhereT(func(mapping placeholderMapping) bool {
+			return mapping.placeholder != "{module}"
+		}).ToSlice(&placeholderMappings)
+	}
+
 	// if name not provided, we need to omit the {name} field from the naming completely
 	if name == "" {
 		linq.From(placeholderMappings).WhereT(func(mapping placeholderMapping) bool {
