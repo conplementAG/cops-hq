@@ -9,13 +9,11 @@ import (
 
 func Test_GenerateResourceName(t *testing.T) {
 	type args struct {
+		module       string
 		name         string
 		pattern      patterns.Pattern
 		resourceType resources.AzureResourceType
 	}
-
-	namingService, err := New("acme", "westeurope", "dev", "front")
-	assert.NoError(t, err)
 
 	var newPattern patterns.Pattern = "{resource_suffix}{module}{name}{environment}{region}{context}"
 
@@ -26,32 +24,44 @@ func Test_GenerateResourceName(t *testing.T) {
 		args           args
 	}{
 		{"normal azure resource", "acme-front-green-weu-dev-rg", nil,
-			args{"green", patterns.Normal, resources.ResourceGroup},
+			args{"front", "green", patterns.Normal, resources.ResourceGroup},
 		},
 		{"short length azure resource", "acmefrontgreenweudevsa", nil,
-			args{"green", patterns.Normal, resources.StorageAccount},
+			args{"front", "green", patterns.Normal, resources.StorageAccount},
 		},
 		{"short length azure resource - too long", "", NewNamingError("Max length exceeded"),
-			args{"alongname", patterns.Normal, resources.StorageAccount},
+			args{"front", "alongname", patterns.Normal, resources.StorageAccount},
 		},
 		{"invalid char used", "", NewNamingError("Invalid char used"),
-			args{"la&la", patterns.Normal, resources.StorageAccount},
+			args{"front", "la&la", patterns.Normal, resources.StorageAccount},
 		},
 		{"lowercase test", "acme-front-thename-weu-dev-sqls", nil,
-			args{"TheName", patterns.Normal, resources.SqlServer},
+			args{"front", "TheName", patterns.Normal, resources.SqlServer},
 		},
 		{"changed pattern", "sqls-front-green-dev-weu-acme", nil,
-			args{"green", newPattern, resources.SqlServer},
+			args{"front", "green", newPattern, resources.SqlServer},
 		},
 		{"name can be omitted", "acmefrontweudevsa", nil,
-			args{"", patterns.Normal, resources.StorageAccount},
+			args{"front", "", patterns.Normal, resources.StorageAccount},
+		},
+		{"name can be omitted when resource name with dashes requested", "acme-front-weu-dev-rg", nil,
+			args{"front", "", patterns.Normal, resources.ResourceGroup},
 		},
 		{"changed pattern with omitted name", "sqls-front-dev-weu-acme", nil,
-			args{"", newPattern, resources.SqlServer},
+			args{"front", "", newPattern, resources.SqlServer},
+		},
+		{"module can be omitted - normal azure resource", "acme-green-weu-dev-rg", nil,
+			args{"", "green", patterns.Normal, resources.ResourceGroup},
+		},
+		{"module can be omitted - short length azure resource", "acmegreenweudevsa", nil,
+			args{"", "green", patterns.Normal, resources.StorageAccount},
 		},
 	}
 
 	for _, tt := range tests {
+		namingService, err := New("acme", "westeurope", "dev", tt.args.module)
+		assert.NoError(t, err)
+
 		namingService.SetPattern(tt.args.pattern)
 		got, err := namingService.GenerateResourceName(tt.args.resourceType, tt.args.name)
 
