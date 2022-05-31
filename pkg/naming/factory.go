@@ -9,7 +9,7 @@ import (
 // New creates a new naming convention service.
 // Parameters 'context', 'region' and 'environment' are mandatory.
 //     Context should be set to the application name. In case of a complex system with multiple modules / subsystems,
-//       'module' should be set as well.
+//       'module' should be set as well (but it is not required).
 //     Environment provides you the possibility to isolate your resources per environment, e.g. prod, int, stage, dev, etc.
 //     Regions should be in form of Azure long regions string, e.g. westeurope or northeurope.
 // Per default, normal naming convention pattern is used. If required, you can override the pattern using the
