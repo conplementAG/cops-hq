@@ -102,7 +102,7 @@ func serializeToJson(input interface{}) string {
 	encoded, err := json.Marshal(input)
 
 	if err != nil {
-		fmt.Errorf("problem serializing to json: " + err.Error())
+		panic(fmt.Errorf("problem serializing to json: " + err.Error()))
 	}
 
 	return string(encoded)
