@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/conplementAG/cops-hq/compare/v0.2.0...v0.3.0) (2022-06-01)
+
+
+### Features
+
+* terraform files now saved to separate directory ([de5b09e](https://github.com/conplementAG/cops-hq/commit/de5b09e2cdd637ec47cf33bba5869a4f5ada35f4))
+
 ## [0.2.0](https://github.com/conplementAG/cops-hq/compare/v0.1.0...v0.2.0) (2022-06-01)
 
 
