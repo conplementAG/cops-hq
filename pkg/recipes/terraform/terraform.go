@@ -66,18 +66,20 @@ type Terraform interface {
 	// GetDeploymentSettings returns the current deployment settings, which can be read or modified if desired
 	GetDeploymentSettings() *DeploymentSettings
 
-	// GetDeployPlanFileName returns the file name in which the terraform deploy plan will be stored. This name is convention based
+	// GetDeployPlanFilePath returns the file path for the file in which the terraform deploy plan will be stored. This name is convention based
 	// on the currently set project parameter while creating the terraform wrapper instance
-	GetDeployPlanFileName() string
+	GetDeployPlanFilePath() (string, error)
 
-	// GetDestroyPlanFileName returns the file name in which the terraform destroy plan will be stored. This name is convention based
+	// GetDestroyPlanFilePath returns the file path for the file in which the terraform destroy plan will be stored. This name is convention based
 	// on the currently set project parameter while creating the terraform wrapper instance
-	GetDestroyPlanFileName() string
+	GetDestroyPlanFilePath() (string, error)
 
 	// GetVariablesFileName returns the file name in which the terraform variables will be stored. This name is convention based
 	// on the currently set project parameter while creating the terraform wrapper instance
 	GetVariablesFileName() string
 }
+
+var plansDirectory = ".plans"
 
 type terraformWrapper struct {
 	executor commands.Executor
@@ -238,12 +240,32 @@ func (tf *terraformWrapper) GetDeploymentSettings() *DeploymentSettings {
 	return &tf.deploymentSettings
 }
 
-func (tf *terraformWrapper) GetDeployPlanFileName() string {
-	return tf.projectName + ".deploy.tfplan"
+func (tf *terraformWrapper) ensurePlansDirectory() error {
+	// saving the plan to separate directory, so that if the directory is mounted somewhere (like in Dockerfile / CD process),
+	// it will only have access to the plan files, and not the whole local state cache (.e.g mounting the directory above would
+	// also expose the contents of .terraform directory, and all the terraform files as well).
+	plansDirectory := filepath.Join(tf.terraformDirectory, plansDirectory)
+	return os.MkdirAll(plansDirectory, os.ModePerm)
 }
 
-func (tf *terraformWrapper) GetDestroyPlanFileName() string {
-	return tf.projectName + ".destroy.tfplan"
+func (tf *terraformWrapper) GetDeployPlanFilePath() (string, error) {
+	err := tf.ensurePlansDirectory()
+
+	if err != nil {
+		return "", internal.ReturnErrorOrPanic(err)
+	}
+
+	return filepath.Join(".plans", tf.projectName+".deploy.tfplan"), nil
+}
+
+func (tf *terraformWrapper) GetDestroyPlanFilePath() (string, error) {
+	err := tf.ensurePlansDirectory()
+
+	if err != nil {
+		return "", internal.ReturnErrorOrPanic(err)
+	}
+
+	return filepath.Join(".plans", tf.projectName+".destroy.tfplan"), nil
 }
 
 func (tf *terraformWrapper) GetVariablesFileName() string {
@@ -277,9 +299,21 @@ func (tf *terraformWrapper) plan(isDestroy bool) (string, error) {
 
 	if isDestroy {
 		tfCommand += " -destroy"
-		tfCommand += " -out=\"" + tf.GetDestroyPlanFileName() + "\""
+		path, err := tf.GetDestroyPlanFilePath()
+
+		if err != nil {
+			return "", internal.ReturnErrorOrPanic(err)
+		}
+
+		tfCommand += " -out=\"" + path + "\""
 	} else {
-		tfCommand += " -out=\"" + tf.GetDeployPlanFileName() + "\""
+		path, err := tf.GetDeployPlanFilePath()
+
+		if err != nil {
+			return "", internal.ReturnErrorOrPanic(err)
+		}
+
+		tfCommand += " -out=\"" + path + "\""
 	}
 
 	planOutput, err := tf.executor.Execute(tfCommand)
@@ -366,9 +400,21 @@ func (tf *terraformWrapper) forceApply(isDestroy bool) error {
 
 	if isDestroy {
 		tfCommand += " -destroy"
-		tfCommand += " \"" + tf.GetDestroyPlanFileName() + "\""
+		path, err := tf.GetDestroyPlanFilePath()
+
+		if err != nil {
+			return internal.ReturnErrorOrPanic(err)
+		}
+
+		tfCommand += " \"" + path + "\""
 	} else {
-		tfCommand += " \"" + tf.GetDeployPlanFileName() + "\""
+		path, err := tf.GetDeployPlanFilePath()
+
+		if err != nil {
+			return internal.ReturnErrorOrPanic(err)
+		}
+		
+		tfCommand += " \"" + path + "\""
 	}
 
 	_, err = tf.executor.Execute(tfCommand)
