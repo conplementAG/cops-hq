@@ -63,7 +63,12 @@ RUN example-infra --version # semantic check if it works
 # as a check if all the required tooling is installed, we can use the in-built cops-hq CLI method
 RUN example-infra hq check-dependencies
 
+# change back to root working directory to do some more checks
+WORKDIR /src
+
 RUN go vet ./...
 RUN go test ./...
 
+# set back to command line tool root, because this is from where we could execute the commands in the future
+WORKDIR /src/cmd/example-infra
 CMD [ "/bin/bash" ]

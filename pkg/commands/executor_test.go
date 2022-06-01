@@ -68,7 +68,6 @@ func (s *ExecutorTestSuite) Test_SuccessfulCommandReturnNoErrors() {
 func (s *ExecutorTestSuite) Test_CommandStdErrIsNotCollectedForTheOutput() {
 	out, err := s.exec.Execute("ls this-file-does-not-exist")
 	s.Error(err)
-	s.Contains(err.Error(), "exit status 1")
 	s.NotContains(out, "No such file")
 }
 
