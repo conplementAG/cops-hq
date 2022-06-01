@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -70,7 +71,7 @@ func Test_SetVariablesCanSerializeAnySimpleOrComplexValue(t *testing.T) {
 	assert.Contains(t, string(fileBytes), "my_complex_type={\"aString\":\"What is the answer to life?\",\"anInt\":42,\"aBool\":true}")
 }
 
-func Test_DeployFlow_ApplyWithExistingPlan(t *testing.T) {
+func Test_DeployFlow(t *testing.T) {
 	tests := []struct {
 		testName        string
 		mockSetup       func(executor *executorMock)
@@ -96,6 +97,10 @@ func Test_DeployFlow_ApplyWithExistingPlan(t *testing.T) {
 				executor.On("Execute", mock.MatchedBy(func(command string) bool {
 					return strings.Contains(command, "plan -input=false") && strings.Contains(command, "test.deploy.tfplan")
 				})).Once()
+
+				// we expect the separate plan directory is always there (created)
+				_, err := os.Stat(".plans")
+				assert.NoError(t, err)
 
 				// then the user confirmation is expected
 				executor.On("AskUserToConfirm", mock.Anything).Once()
@@ -178,6 +183,8 @@ func createSimpleTerraformWithDefaultSettings(projectName string) (Terraform, *e
 
 	return New(executor, projectName, "1234", "3214",
 		"westeurope", "testrg", "storeaccount",
+		// important to keep the current directory configured, since some tests rely on this
+		// location to verify that expected directories / files are created
 		filepath.Join("."),
 		DefaultBackendStorageSettings, DefaultDeploymentSettings), executor
 }
