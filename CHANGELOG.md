@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/conplementAG/cops-hq/compare/v0.3.0...v0.4.0) (2022-06-13)
+
+
+### Features
+
+* copsctl recipe ([4864b1e](https://github.com/conplementAG/cops-hq/commit/4864b1ee765a8747b925f09f3c7b5b353a3bacc0))
+
 ## [0.3.0](https://github.com/conplementAG/cops-hq/compare/v0.2.0...v0.3.0) (2022-06-01)
 
 
