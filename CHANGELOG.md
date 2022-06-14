@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/conplementAG/cops-hq/compare/v0.4.0...v0.5.0) (2022-06-14)
+
+
+### Features
+
+* plan analyzer ([230c3bb](https://github.com/conplementAG/cops-hq/commit/230c3bbdc61da55d369cf41052e7b08d938bc5e9))
+
+
+### Bug Fixes
+
+* **copsctl:** query to prompt connect with less noise and no chance to fail ([6a74d5a](https://github.com/conplementAG/cops-hq/commit/6a74d5a92f2f168237b9e7d84901dd735c2f6824))
+
 ## [0.4.0](https://github.com/conplementAG/cops-hq/compare/v0.3.0...v0.4.0) (2022-06-13)
 
 
