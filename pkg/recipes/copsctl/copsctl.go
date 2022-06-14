@@ -44,7 +44,7 @@ func (c *copsctl) Connect(clusterName string, clusterConnectionString string, is
 
 	// workaround to force kubectl login for interactive-login mode
 	if !isTechnicalAccountConnect {
-		err = c.executor.ExecuteTTY("kubectl get pods")
+		err = c.executor.ExecuteTTY("kubectl auth can-i list copsnamespaces.coreops.conplement.cloud") // this query should always work in copsctl context
 
 		if err != nil {
 			return internal.ReturnErrorOrPanic(err)
