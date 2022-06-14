@@ -66,20 +66,10 @@ type Terraform interface {
 	// GetDeploymentSettings returns the current deployment settings, which can be read or modified if desired
 	GetDeploymentSettings() *DeploymentSettings
 
-	// GetDeployPlanFilePath returns the file path for the file in which the terraform deploy plan will be stored. This name is convention based
-	// on the currently set project parameter while creating the terraform wrapper instance
-	GetDeployPlanFilePath() (string, error)
-
-	// GetDestroyPlanFilePath returns the file path for the file in which the terraform destroy plan will be stored. This name is convention based
-	// on the currently set project parameter while creating the terraform wrapper instance
-	GetDestroyPlanFilePath() (string, error)
-
 	// GetVariablesFileName returns the file name in which the terraform variables will be stored. This name is convention based
 	// on the currently set project parameter while creating the terraform wrapper instance
 	GetVariablesFileName() string
 }
-
-var plansDirectory = ".plans"
 
 type terraformWrapper struct {
 	executor commands.Executor
@@ -240,34 +230,6 @@ func (tf *terraformWrapper) GetDeploymentSettings() *DeploymentSettings {
 	return &tf.deploymentSettings
 }
 
-func (tf *terraformWrapper) ensurePlansDirectory() error {
-	// saving the plan to separate directory, so that if the directory is mounted somewhere (like in Dockerfile / CD process),
-	// it will only have access to the plan files, and not the whole local state cache (.e.g mounting the directory above would
-	// also expose the contents of .terraform directory, and all the terraform files as well).
-	plansDirectory := filepath.Join(tf.terraformDirectory, plansDirectory)
-	return os.MkdirAll(plansDirectory, os.ModePerm)
-}
-
-func (tf *terraformWrapper) GetDeployPlanFilePath() (string, error) {
-	err := tf.ensurePlansDirectory()
-
-	if err != nil {
-		return "", internal.ReturnErrorOrPanic(err)
-	}
-
-	return filepath.Join(".plans", tf.projectName+".deploy.tfplan"), nil
-}
-
-func (tf *terraformWrapper) GetDestroyPlanFilePath() (string, error) {
-	err := tf.ensurePlansDirectory()
-
-	if err != nil {
-		return "", internal.ReturnErrorOrPanic(err)
-	}
-
-	return filepath.Join(".plans", tf.projectName+".destroy.tfplan"), nil
-}
-
 func (tf *terraformWrapper) GetVariablesFileName() string {
 	return tf.projectName + ".tfvars"
 }
@@ -297,32 +259,76 @@ func (tf *terraformWrapper) plan(isDestroy bool) (string, error) {
 		" plan -input=false " +
 		" -var-file=\"" + tf.GetVariablesFileName() + "\""
 
+	var localTerraformRelativePlanFilePath string
+
 	if isDestroy {
 		tfCommand += " -destroy"
-		path, err := tf.GetDestroyPlanFilePath()
-
+		localTerraformRelativePlanFilePath, err = GetLocalTerraformRelativePlanFilePath(tf.projectName, tf.terraformDirectory, true)
 		if err != nil {
 			return "", internal.ReturnErrorOrPanic(err)
 		}
 
-		tfCommand += " -out=\"" + path + "\""
+		tfCommand += " -out=\"" + localTerraformRelativePlanFilePath + "\""
 	} else {
-		path, err := tf.GetDeployPlanFilePath()
-
+		localTerraformRelativePlanFilePath, err = GetLocalTerraformRelativePlanFilePath(tf.projectName, tf.terraformDirectory, false)
 		if err != nil {
 			return "", internal.ReturnErrorOrPanic(err)
 		}
 
-		tfCommand += " -out=\"" + path + "\""
+		tfCommand += " -out=\"" + localTerraformRelativePlanFilePath + "\""
 	}
 
-	planOutput, err := tf.executor.Execute(tfCommand)
-
+	plaintextPlanOutput, err := tf.executor.Execute(tfCommand)
 	if err != nil {
 		return "", internal.ReturnErrorOrPanic(err)
 	}
 
-	return planOutput, nil
+	err = tf.persistPlanInAdditionalFormatsOnDisk(plaintextPlanOutput, localTerraformRelativePlanFilePath)
+	if err != nil {
+		return "", internal.ReturnErrorOrPanic(err)
+	}
+
+	return plaintextPlanOutput, nil
+}
+
+// persistPlanInAdditionalFormatsOnDisk - we also persist the plan output to disk in both human-readable and json formats,
+// which can be later be processed, without requiring terraform init & terraform show separately to achieve the same result.
+func (tf *terraformWrapper) persistPlanInAdditionalFormatsOnDisk(planAsPlaintext string, terraformRelativePlanFilePath string) error {
+	// to persist the plan in other file formats, we need to convert the terraformRelativePlanFilePath to a path
+	// resolvable from where we are running at the moment (e.g. cmd/example-cli).
+	planFullFilePath := filepath.Join(tf.terraformDirectory, terraformRelativePlanFilePath)
+
+	// 1. human-readable form we already have from planOutput, so we just persist it
+	textFile, err := os.Create(planFullFilePath + ".txt")
+	defer textFile.Close()
+	if err != nil {
+		return err
+	}
+
+	_, err = textFile.WriteString(planAsPlaintext)
+	if err != nil {
+		return err
+	}
+
+	// 2. json form we need to get with an extra terraform call. Since init is already done, this will work
+	// also, we use the terraformRelativePlanFilePath since this is a terraform command, initialized with -chdir
+	jsonPlanOutput, err := tf.executor.Execute("terraform -chdir=" + tf.terraformDirectory + " show -json " + terraformRelativePlanFilePath)
+	if err != nil {
+		return err
+	}
+
+	jsonFile, err := os.Create(planFullFilePath + ".json")
+	defer jsonFile.Close()
+	if err != nil {
+		return err
+	}
+
+	_, err = jsonFile.WriteString(jsonPlanOutput)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (tf *terraformWrapper) applyFlow(isDestroy bool, planOnly bool, useExistingPlan bool) error {
@@ -400,7 +406,7 @@ func (tf *terraformWrapper) forceApply(isDestroy bool) error {
 
 	if isDestroy {
 		tfCommand += " -destroy"
-		path, err := tf.GetDestroyPlanFilePath()
+		path, err := GetLocalTerraformRelativePlanFilePath(tf.projectName, tf.terraformDirectory, true)
 
 		if err != nil {
 			return internal.ReturnErrorOrPanic(err)
@@ -408,12 +414,12 @@ func (tf *terraformWrapper) forceApply(isDestroy bool) error {
 
 		tfCommand += " \"" + path + "\""
 	} else {
-		path, err := tf.GetDeployPlanFilePath()
+		path, err := GetLocalTerraformRelativePlanFilePath(tf.projectName, tf.terraformDirectory, false)
 
 		if err != nil {
 			return internal.ReturnErrorOrPanic(err)
 		}
-		
+
 		tfCommand += " \"" + path + "\""
 	}
 

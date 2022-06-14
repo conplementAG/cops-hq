@@ -18,7 +18,7 @@ Terraform recipe supports two ways to operations:
   for confirmation, apply changes etc.) `DeployFlow` is an example of a method written with both local development and CI 
   in mind, because it provides a single entry point configurable for all scenarios.
 
-# basic usage
+## basic usage
 
 ```go 
 
@@ -60,3 +60,28 @@ err = tf.DeployFlow(viper.GetBool(cli_flags.PlanOnly), viper.GetBool(cli_flags.U
 ... do something with the error
 
 ```
+
+## Terraform plan and detecting changes in CI/CD
+
+Terraform recipe automatically persists the plans in the .plans directory, in the same place where you specified that your terraform 
+sources are located. Additionally, to the plan file in terraform format, text and json representations of the same plan file are persisted
+as well. These can easily be used in CI/CD for advanced use cases like automatic approval on no terraform changes. For this purpose, 
+take a look at the plan_analyzer object and its IsDeployPlanDirty / IsDestroyPlanDirty methods, which following the example above, could be used as:
+
+```go 
+
+analyzer := plan_analyzer.New(yourProjectName, terraformSourcesDirectory)
+result, err := analyzer.IsDeployPlanDirty()
+
+fmt.Println(result)
+
+```
+
+For CI/CD usage, you can simply wrap required method into your own CLI method (e.g. `infrastructure is-deploy-plan-dirty` or similar), 
+which calls this Go method under the hood. The true / false output can then be parsed with a simple bash command or similar. 
+
+## Additional Terraform plan formats
+
+The plans saved in .plans directory follow the naming convention: `<<project_name>.(destroy|deploy).tfplan`
+Plaintext (command line output of terraform plan) and JSON versions (extra `terraform show -json` call output) of the same plan
+file are saved in the same place, with .txt and .json extensions respectively.
