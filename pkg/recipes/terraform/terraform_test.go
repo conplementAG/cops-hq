@@ -105,6 +105,11 @@ func Test_DeployFlow(t *testing.T) {
 				// then the user confirmation is expected
 				executor.On("AskUserToConfirm", mock.Anything).Once()
 
+				// then the plan json will be created
+				executor.On("Execute", mock.MatchedBy(func(command string) bool {
+					return strings.Contains(command, "show -json") && strings.Contains(command, "test.deploy.tfplan")
+				})).Once()
+
 				// then the fully apply is expected
 				executor.On("Execute", mock.MatchedBy(func(command string) bool {
 					return strings.Contains(command, "apply -auto-approve") && strings.Contains(command, "test.deploy.tfplan")
@@ -120,6 +125,11 @@ func Test_DeployFlow(t *testing.T) {
 				// a plan should be executed, saving the file
 				executor.On("Execute", mock.MatchedBy(func(command string) bool {
 					return strings.Contains(command, "plan -input=false") && strings.Contains(command, "test.deploy.tfplan")
+				})).Once()
+
+				// then the plan json will be created
+				executor.On("Execute", mock.MatchedBy(func(command string) bool {
+					return strings.Contains(command, "show -json") && strings.Contains(command, "test.deploy.tfplan")
 				})).Once()
 			},
 			true,
