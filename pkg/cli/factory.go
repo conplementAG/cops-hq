@@ -18,6 +18,12 @@ type Cli interface {
 	// GetRootCommand returns the root top level command, directly as cobra.Command which is the library used
 	// under the hood.
 	GetRootCommand() *cobra.Command
+
+	// OnInitialize sets the passed function to be run when each command is called. Consider this like a global initializer
+	// hook.
+	OnInitialize(initFunction func())
+
+	SetDefaultCommand(command string)
 }
 
 // New creates a new Cli instance
