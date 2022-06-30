@@ -49,6 +49,10 @@ vars := make(map[string]interface{})
 
 vars["var_x"] = "some value"
 
+// alternatively you can autopopulate your map of strings from your config (e.g. sops) with the help of viper,
+// but keep in mind that terraform only supports flat key structures out of the box.
+vars = viper.GetStringMap("infrastructure")
+
 err = tf.SetVariables(vars)
 ... do something with the error
 
