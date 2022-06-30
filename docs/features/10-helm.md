@@ -42,6 +42,9 @@ vars := map[string]interface{}{
 				"key_1_of_nested": 2,
 				"key_2_of_nested": "nested_value_override"}}}
 				
+// alternatively you can autopopulate your map of strings from your config (e.g. sops) with the help of viper
+vars = viper.GetStringMap("application")
+				
 err = h.SetVariables(vars)
 ... do something with the error
 
