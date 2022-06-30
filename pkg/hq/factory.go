@@ -11,7 +11,10 @@ import (
 // It will create a chatty executor, piping all commands and outputs to both the console and the file (e.g. like
 // in shell scripts)
 func New(programName string, version string, logFileName string) HQ {
-	return create(programName, version, logFileName, false)
+	return create(programName, version, &HqOptions{
+		Quiet:       false,
+		LogFileName: logFileName,
+	})
 }
 
 // NewQuiet creates a new HQ instance, configuring internally used modules for usage. Keep the created HQ instance and
@@ -19,19 +22,29 @@ func New(programName string, version string, logFileName string) HQ {
 // Quiet HQ will create a quiet executor, piping all commands and outputs to the log file, but the console will be
 // kept clean. If needed, like in CI, a viper flag "verbose" can be used to override this behavior.
 func NewQuiet(programName string, version string, logFileName string) HQ {
-	return create(programName, version, logFileName, true)
+	return create(programName, version, &HqOptions{
+		Quiet:       true,
+		LogFileName: logFileName,
+	})
 }
 
-func create(programName string, version string, logFileName string, quiet bool) HQ {
-	logger := logging.Init(logFileName)
+// NewCustom creates a new HQ instance, configuring internally used modules for usage. Keep the created HQ instance and
+// avoid re-instantiation since some setup steps might have global impacts (like logging setup).
+// Custom HQ lets you override most of the behaviours and HQ setup options
+func NewCustom(programName string, version string, options *HqOptions) HQ {
+	return create(programName, version, options)
+}
+
+func create(programName string, version string, options *HqOptions) HQ {
+	logger := logging.Init(options.LogFileName)
 	cli := cli.New(programName, version)
 
 	var exec commands.Executor
 
-	if quiet {
-		exec = commands.NewQuiet(logFileName, logger)
+	if options.Quiet {
+		exec = commands.NewQuiet(options.LogFileName, logger)
 	} else {
-		exec = commands.NewChatty(logFileName, logger)
+		exec = commands.NewChatty(options.LogFileName, logger)
 	}
 
 	container := &hqContainer{
