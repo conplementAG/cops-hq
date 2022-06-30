@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.0](https://github.com/conplementAG/cops-hq/compare/v0.5.0...v0.6.0) (2022-06-30)
+
+
+### Features
+
+* helm recipe ([f837994](https://github.com/conplementAG/cops-hq/commit/f837994ab6cfd6f8e6117439e607a0e2f9e01dba))
+
+
+### Bug Fixes
+
+* adapt terraform/helm recipe docu with variable autopopulate example ([ecca07c](https://github.com/conplementAG/cops-hq/commit/ecca07c43ae3fe538f2482a6565e41e6baf699b4))
+* add helm recipe docu ([d9b241b](https://github.com/conplementAG/cops-hq/commit/d9b241b2839c924e0c2a737333429bd6fe91f4d6))
+* terraform recipe unit test ([0975779](https://github.com/conplementAG/cops-hq/commit/0975779a78053f1c173b3812c8212607c47e3e51))
+
 ## [0.5.0](https://github.com/conplementAG/cops-hq/compare/v0.4.0...v0.5.0) (2022-06-14)
 
 
