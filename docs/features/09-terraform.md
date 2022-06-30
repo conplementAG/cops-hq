@@ -49,7 +49,7 @@ vars := make(map[string]interface{})
 
 vars["var_x"] = "some value"
 
-// alternatively you can autopopulate your map of strings from your config (e.g. sops) with the help of viper,
+// alternatively you can auto-populate your map of strings from your config (e.g. sops) with the help of viper,
 // but keep in mind that terraform only supports flat key structures out of the box.
 vars = viper.GetStringMap("infrastructure")
 
@@ -89,3 +89,8 @@ which calls this Go method under the hood. The true / false output can then be p
 The plans saved in .plans directory follow the naming convention: `<<project_name>.(destroy|deploy).tfplan`
 Plaintext (command line output of terraform plan) and JSON versions (extra `terraform show -json` call output) of the same plan
 file are saved in the same place, with .txt and .json extensions respectively.
+
+## Variable auto-populate from config file
+
+In the example above, a code snippet is included on how to auto-populate the variables from a config section. You could also combine
+both auto-population and your own keys, since this is just simple map manipulation in Go!

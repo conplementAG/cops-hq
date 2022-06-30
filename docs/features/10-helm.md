@@ -55,3 +55,8 @@ err = h.Deploy()
 ... do something with the error
 
 ```
+
+## Variable auto-populate from config file
+
+In the example above, a code snippet is included on how to auto-populate the variables from a config section. You could also combine
+both auto-population and your own keys, since this is just simple map manipulation in Go!
