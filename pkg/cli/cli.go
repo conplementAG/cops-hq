@@ -4,12 +4,14 @@ import (
 	"github.com/conplementag/cops-hq/internal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 )
 
 type cli struct {
-	programName string
-	version     string
-	rootCmd     *cobra.Command
+	programName    string
+	version        string
+	rootCmd        *cobra.Command
+	defaultCommand string
 }
 
 func (cli *cli) AddBaseCommand(use string, shortInfo string, longDescription string, runFunction func()) Command {
@@ -48,10 +50,39 @@ func (cli *cli) AddBaseCommand(use string, shortInfo string, longDescription str
 }
 
 func (cli *cli) Run() error {
+	if cli.defaultCommand != "" {
+		rootCommand := cli.GetRootCommand()
+		registeredCommands := rootCommand.Commands()
+
+		var isCommandSet = false
+		for _, a := range registeredCommands {
+			for _, b := range os.Args[1:] {
+				if a.Name() == b {
+					isCommandSet = true
+					break
+				}
+			}
+		}
+
+		// if no command set on the command line, use the default command by extending the existing command line args
+		if !isCommandSet {
+			args := append([]string{cli.defaultCommand}, os.Args[1:]...)
+			rootCommand.SetArgs(args)
+		}
+	}
+
 	err := cli.rootCmd.Execute()
 	return internal.ReturnErrorOrPanic(err)
 }
 
 func (cli *cli) GetRootCommand() *cobra.Command {
 	return cli.rootCmd
+}
+
+func (cli *cli) OnInitialize(initFunction func()) {
+	cobra.OnInitialize(initFunction)
+}
+
+func (cli *cli) SetDefaultCommand(command string) {
+	cli.defaultCommand = command
 }

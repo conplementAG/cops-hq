@@ -115,7 +115,6 @@ func Test_PersistentParametersAreAvailableThroughViperInSubcommands(t *testing.T
 
 func Test_ParametersFromDifferentCommandsShouldNotOverwriteEachOtherInViper(t *testing.T) {
 	// Arrange
-
 	cli := New("myprog", "0.0.1")
 
 	// Act
@@ -139,4 +138,62 @@ func Test_ParametersFromDifferentCommandsShouldNotOverwriteEachOtherInViper(t *t
 	// binding was not overwritten
 	assert.Equal(t, "johndoe", viper.GetString("my-arg"))
 	assert.Equal(t, true, viper.GetBool("truth"))
+}
+
+func Test_DefaultCommands(t *testing.T) {
+	// Arrange
+	cli := New("myprog", "0.0.1")
+	cli.SetDefaultCommand("first")
+
+	wasCalled := false
+
+	cli.AddBaseCommand("first", "Simple test command 1", "big description", func() {
+		wasCalled = true
+	})
+	cli.AddBaseCommand("second", "Simple test command 2", "big description", func() {})
+
+	// Act
+	testing_utils.PrepareCommandForTesting(cli.GetRootCommand(), "") // intentionally no args, to test the default was called
+	cli.Run()
+
+	// Assert
+	assert.True(t, wasCalled)
+}
+
+func Test_InitializerFunctionCalledWhenCommandExecuted(t *testing.T) {
+	// Arrange
+	cli := New("myprog", "0.0.1")
+	wasCalled := false
+
+	cli.OnInitialize(func() {
+		wasCalled = true
+	})
+
+	// Act
+	cli.AddBaseCommand("first", "Simple test command 1", "big description", nil)
+
+	testing_utils.PrepareCommandForTesting(cli.GetRootCommand(), "first")
+	cli.Run()
+
+	// Assert
+	assert.True(t, wasCalled)
+}
+
+func Test_InitializerFunctionNotCalledWhenNoCommandMatching(t *testing.T) {
+	// Arrange
+	cli := New("myprog", "0.0.1")
+	wasCalled := false
+
+	cli.OnInitialize(func() {
+		wasCalled = true
+	})
+
+	// Act
+	cli.AddBaseCommand("first", "Simple test command 1", "big description", nil)
+
+	testing_utils.PrepareCommandForTesting(cli.GetRootCommand(), "non-existing")
+	cli.Run()
+
+	// Assert
+	assert.False(t, wasCalled)
 }
