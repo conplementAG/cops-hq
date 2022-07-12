@@ -21,8 +21,8 @@ This is an opinionated library, which sets the following goals and hard dependen
 
 For basic usage, check out the `main.go` file in `cmd/cops-hq`.
 
-Explanation of all concepts and features can be found in [Features Overview](docs/features/00-overview.md)
+Explanation of all concepts and features can be found in [Features Overview](docs/overview.md)
 
 ## Contribution
 
-Check [contribution](docs/contribution.md).
+Check [contribution](CONTRIBUTING.md).
