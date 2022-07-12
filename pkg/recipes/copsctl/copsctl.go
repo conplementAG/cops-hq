@@ -16,7 +16,7 @@ type Copsctl interface {
 	Connect(clusterName string, clusterConnectionString string, isTechnicalAccountConnect bool, connectToSecondaryCluster bool) error
 
 	// GetClusterInfo returns the cluster info for the currently connected cluster
-	GetClusterInfo() (*Info, error)
+	GetClusterInfo() (*InfoV2, error)
 }
 
 type copsctl struct {
@@ -55,7 +55,7 @@ func (c *copsctl) Connect(clusterName string, clusterConnectionString string, is
 	return nil
 }
 
-func (c *copsctl) GetClusterInfo() (*Info, error) {
+func (c *copsctl) GetClusterInfo() (*InfoV2, error) {
 	logrus.Info("Receiving cluster info...")
 
 	clusterInfoJson, err := c.executor.ExecuteSilent("copsctl cluster-info --print-to-stdout-silence-everything-else")
@@ -64,7 +64,7 @@ func (c *copsctl) GetClusterInfo() (*Info, error) {
 		return nil, internal.ReturnErrorOrPanic(err)
 	}
 
-	var clusterInfo Info
+	var clusterInfo InfoV2
 	err = json.Unmarshal([]byte(clusterInfoJson), &clusterInfo)
 
 	if err != nil {
