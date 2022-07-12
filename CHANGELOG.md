@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.0](https://github.com/conplementAG/cops-hq/compare/v0.6.0...v0.7.0) (2022-07-12)
+
+
+### Features
+
+* **cli:** default command and global init functionality ([ae9b4d9](https://github.com/conplementAG/cops-hq/commit/ae9b4d972bf5679118ebc6da93ee0ebed3776477))
+* **hq:** new with custom options, possibility to disable logging to file ([dd0d31c](https://github.com/conplementAG/cops-hq/commit/dd0d31cd6990e0084473aa5152372344f761d12b))
+* private endpoint resource type ([90987cd](https://github.com/conplementAG/cops-hq/commit/90987cd5b6ee62075a88cc96217aeba47d02caa2))
+
 ## [0.6.0](https://github.com/conplementAG/cops-hq/compare/v0.5.0...v0.6.0) (2022-06-30)
 
 
