@@ -34,6 +34,7 @@ var namingConventions = []namingConvention{
 	{resources.RouteTable, 3, 80, true, true, true, CaseInsensitive},
 	{resources.ApplicationGateway, 3, 90, true, true, true, CaseInsensitive},
 	{resources.PublicIp, 3, 90, true, true, true, CaseInsensitive},
+	{resources.PrivateEndpoint, 3, 80, true, true, true, CaseInsensitive},
 	{resources.Bastion, 3, 64, true, true, true, CaseInsensitive},
 	{resources.UserAssignedIdentity, 3, 90, true, true, true, CaseInsensitive},
 	{resources.NetworkSecurityGroup, 3, 80, true, true, true, CaseInsensitive},

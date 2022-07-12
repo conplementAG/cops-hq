@@ -18,6 +18,7 @@ const (
 	RouteTable            AzureResourceType = "rt"
 	ApplicationGateway    AzureResourceType = "agw"
 	PublicIp              AzureResourceType = "pip"
+	PrivateEndpoint       AzureResourceType = "pe"
 	Bastion               AzureResourceType = "bn"
 	UserAssignedIdentity  AzureResourceType = "uai"
 	LogAnalyticsWorkspace AzureResourceType = "law"
