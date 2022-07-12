@@ -1,0 +1,96 @@
+{
+  "application_dns_zones": [
+    {
+      "name": "ateam",
+      "resourcegroup_name": "dns",
+      "subscription_id": "00000000-0000-0000-0000-000000000abc",
+      "zone_name": "ateam.local"
+    },
+    {
+      "name": "bteam",
+      "resourcegroup_name": "dns",
+      "subscription_id": "0000000-0000-0000-0000-000000000abc",
+      "zone_name": "bteam.local"
+    }
+  ],
+  "coreops_monitoring_and_logging": "monitoring.local",
+  "egress_static_outbound_ips": [
+    "1.2.3.4",
+    "4.3.2.1"
+  ],
+  "egress_static_outbound_ips_enabled": true,
+  "log_analytics_workspace": "logging.local",
+  "networking_blue": {
+    "application_subnets": [
+      {
+        "cidr": "10.0.0.0/29",
+        "endpoint_resourcegroup_name": "ateam-rg",
+        "id": "subnet_id_blue",
+        "name": "ateam"
+      },
+      {
+        "cidr": "10.0.0.8/29",
+        "endpoint_resourcegroup_name": "bteam-rg",
+        "id": "subnet_id_blue",
+        "name": "bteam"
+      }
+    ],
+    "cluster_subnet_id": "very_long_cluster_subnet_id",
+    "private_dns_zones": [
+      {
+        "name": "file.core.windows.net",
+        "resourcegroup_name": "dnsblue-rg",
+        "zone_name": "privatelink.file.core.windows.net"
+      },
+      {
+        "name": "vaultcore.azure.net",
+        "resourcegroup_name": "dnsblue-rg",
+        "zone_name": "privatelink.vaultcore.azure.net"
+      },
+      {
+        "name": "database.windows.net",
+        "resourcegroup_name": "dnsblue-rg",
+        "zone_name": "privatelink.database.windows.net"
+      }
+    ]
+  },
+  "networking_green": {
+    "application_subnets": [
+      {
+        "cidr": "10.0.0.0/29",
+        "endpoint_resourcegroup_name": "ateam-rg",
+        "id": "subnet_id_green",
+        "name": "ateam"
+      },
+      {
+        "cidr": "10.0.0.8/29",
+        "endpoint_resourcegroup_name": "bteam-rg",
+        "id": "subnet_id_green",
+        "name": "bteam"
+      }
+    ],
+    "cluster_subnet_id": "very_long_cluster_subnet_id",
+    "private_dns_zones": [
+      {
+        "name": "file.core.windows.net",
+        "resourcegroup_name": "dnsgreen-rg",
+        "zone_name": "privatelink.file.core.windows.net"
+      },
+      {
+        "name": "vaultcore.azure.net",
+        "resourcegroup_name": "dnsgreen-rg",
+        "zone_name": "privatelink.vaultcore.azure.net"
+      },
+      {
+        "name": "database.windows.net",
+        "resourcegroup_name": "dnsgreen-rg",
+        "zone_name": "privatelink.database.windows.net"
+      }
+    ]
+  },
+  "subscription_id": "00000000-0000-0000-0000-0000000001bc",
+  "technical_account_name": "my-technical-account",
+  "technical_account_namespace": "my-technical-account-namespace",
+  "tenant_id": "00000000-0000-0000-0000-000000000001",
+  "version": "2"
+}
