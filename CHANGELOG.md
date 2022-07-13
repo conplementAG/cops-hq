@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/conplementAG/cops-hq/compare/v0.7.0...v0.8.0) (2022-07-13)
+
+
+### Features
+
+* cluster info extensions for navigating config sub-objects ([a98e307](https://github.com/conplementAG/cops-hq/commit/a98e30755488f53f70d1a27a2ac0b08f3f347111))
+
 ## [0.7.0](https://github.com/conplementAG/cops-hq/compare/v0.6.0...v0.7.0) (2022-07-12)
 
 
