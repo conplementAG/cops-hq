@@ -12,3 +12,5 @@ pkg/hq/test.logs
 pkg/recipes/terraform/test.tfvars
 
 cmd/example-infra/example-infra.log
+
+pkg/recipes/terraform/.plans/

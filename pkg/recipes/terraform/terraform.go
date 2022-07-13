@@ -92,7 +92,13 @@ type terraformWrapper struct {
 func (tf *terraformWrapper) Init() error {
 	if tf.storageSettings.CreateResourceGroup {
 		logrus.Info("Deploying the project " + tf.projectName + " resource group " + tf.resourceGroupName + "...")
-		_, err := tf.executor.Execute("az group create -l " + tf.region + " -n " + tf.resourceGroupName)
+
+		optionalTags := ""
+		if len(tf.storageSettings.ResourceGroupTags) > 0 {
+			optionalTags = " --tags " + serializeTagsIntoAzureCliString(tf.storageSettings.ResourceGroupTags)
+		}
+
+		_, err := tf.executor.Execute("az group create -l " + tf.region + " -n " + tf.resourceGroupName + optionalTags)
 
 		if err != nil {
 			return internal.ReturnErrorOrPanic(err)

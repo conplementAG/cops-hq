@@ -191,10 +191,14 @@ type variablesStruct struct {
 func createSimpleTerraformWithDefaultSettings(projectName string) (Terraform, *executorMock) {
 	executor := &executorMock{}
 
+	backendStorageSettings := DefaultBackendStorageSettings
+	backendStorageSettings.ResourceGroupTags["test"] = "value"
+
 	return New(executor, projectName, "1234", "3214",
 		"westeurope", "testrg", "storeaccount",
 		// important to keep the current directory configured, since some tests rely on this
 		// location to verify that expected directories / files are created
 		filepath.Join("."),
-		DefaultBackendStorageSettings, DefaultDeploymentSettings), executor
+		backendStorageSettings,
+		DefaultDeploymentSettings), executor
 }
