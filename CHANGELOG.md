@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/conplementAG/cops-hq/compare/v0.8.0...v0.9.0) (2022-07-18)
+
+
+### Features
+
+* **terraform-recipe:** resource group tagging ([16e1a0d](https://github.com/conplementAG/cops-hq/commit/16e1a0dc85cec683cfc02a1129eb0fdf68796db6))
+
 ## [0.8.0](https://github.com/conplementAG/cops-hq/compare/v0.7.0...v0.8.0) (2022-07-13)
 
 
