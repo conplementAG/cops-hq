@@ -44,7 +44,8 @@ err = tf.Init()
 ... do something with the error
 
 // then, we need to set all the terraform variables. This is always a simple map of strings, but supporting any
-// simple or complex object (check the tf.SetVariables code docs)
+// simple or complex object (check the tf.SetVariables code docs). Don't serialize your variables to JSON / string, 
+// this is not required and it will not work!
 vars := make(map[string]interface{})
 
 vars["var_x"] = "some value"
