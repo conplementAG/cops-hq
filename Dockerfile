@@ -35,7 +35,7 @@ RUN chmod 700 get_helm.sh
 RUN ./get_helm.sh
 
 # copsctl
-ENV COPSCTL_VERSION 0.8.0
+ENV COPSCTL_VERSION 0.8.2
 RUN curl -LO https://github.com/conplementAG/copsctl/releases/download/v${COPSCTL_VERSION}/copsctl_${COPSCTL_VERSION}_Linux_x86_64.tar.gz
 RUN tar xvzf copsctl_${COPSCTL_VERSION}_Linux_x86_64.tar.gz
 RUN mv copsctl $GOPATH/bin
