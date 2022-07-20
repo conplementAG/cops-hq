@@ -28,6 +28,8 @@ type Cli interface {
 
 // New creates a new Cli instance
 func New(programName string, version string) Cli {
+	// This method will mark the resolution in viper to use env variables as priority when searching for values.
+	// Note: This does not load all the env variables at this point in code, so it is ok to hev this call in the beginning!
 	viper.AutomaticEnv()
 
 	myFigure := figure.NewFigure(programName, "", true)

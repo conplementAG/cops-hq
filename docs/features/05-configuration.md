@@ -7,7 +7,7 @@ value := viper.GetString("variable_name")
 ```
 
 Viper is per default loaded with these sources:
-- all environment variables
+- all environment variables (overrides other same named keys, priority source)
 - parameters defined for the CLI
 
 ## Application configuration
