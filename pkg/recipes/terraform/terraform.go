@@ -90,15 +90,15 @@ type terraformWrapper struct {
 }
 
 func (tf *terraformWrapper) Init() error {
-	optionalTags := ""
+	tags := ""
 	if len(tf.storageSettings.Tags) > 0 {
-		optionalTags = " --tags " + serializeTagsIntoAzureCliString(tf.storageSettings.Tags)
+		tags = " --tags " + serializeTagsIntoAzureCliString(tf.storageSettings.Tags)
 	}
 
 	if tf.storageSettings.CreateResourceGroup {
 		logrus.Info("Deploying the project " + tf.projectName + " resource group " + tf.resourceGroupName + "...")
 
-		_, err := tf.executor.Execute("az group create -l " + tf.region + " -n " + tf.resourceGroupName + optionalTags)
+		_, err := tf.executor.Execute("az group create -l " + tf.region + " -n " + tf.resourceGroupName + tags)
 
 		if err != nil {
 			return internal.ReturnErrorOrPanic(err)
@@ -117,7 +117,7 @@ func (tf *terraformWrapper) Init() error {
 		" --kind StorageV2" +
 		" --min-tls-version TLS1_2" +
 		" --https-only true" +
-		optionalTags)
+		tags)
 
 	if err != nil {
 		return internal.ReturnErrorOrPanic(err)
