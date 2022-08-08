@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/conplementAG/cops-hq/compare/v0.9.0...v0.9.1) (2022-08-08)
+
+
+### Bug Fixes
+
+* **terraform-recipe:** renaming optional tags ([7e11d6d](https://github.com/conplementAG/cops-hq/commit/7e11d6d20d05403a35fc4ff6ef291dd6ddd73820))
+
 ## [0.9.0](https://github.com/conplementAG/cops-hq/compare/v0.8.0...v0.9.0) (2022-07-18)
 
 
