@@ -90,13 +90,13 @@ type terraformWrapper struct {
 }
 
 func (tf *terraformWrapper) Init() error {
+	optionalTags := ""
+	if len(tf.storageSettings.Tags) > 0 {
+		optionalTags = " --tags " + serializeTagsIntoAzureCliString(tf.storageSettings.Tags)
+	}
+
 	if tf.storageSettings.CreateResourceGroup {
 		logrus.Info("Deploying the project " + tf.projectName + " resource group " + tf.resourceGroupName + "...")
-
-		optionalTags := ""
-		if len(tf.storageSettings.ResourceGroupTags) > 0 {
-			optionalTags = " --tags " + serializeTagsIntoAzureCliString(tf.storageSettings.ResourceGroupTags)
-		}
 
 		_, err := tf.executor.Execute("az group create -l " + tf.region + " -n " + tf.resourceGroupName + optionalTags)
 
@@ -106,6 +106,7 @@ func (tf *terraformWrapper) Init() error {
 	}
 
 	logrus.Info("Deploying the " + tf.projectName + " terraform state storage account " + tf.stateStorageAccountName + "...")
+
 	_, err := tf.executor.Execute("az storage account create" +
 		" --name " + tf.stateStorageAccountName +
 		" --resource-group " + tf.resourceGroupName +
@@ -115,7 +116,8 @@ func (tf *terraformWrapper) Init() error {
 		" --require-infrastructure-encryption" + // infra encryption will add another layer of encryption at rest
 		" --kind StorageV2" +
 		" --min-tls-version TLS1_2" +
-		" --https-only true")
+		" --https-only true" +
+		optionalTags)
 
 	if err != nil {
 		return internal.ReturnErrorOrPanic(err)

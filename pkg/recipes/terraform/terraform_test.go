@@ -16,8 +16,8 @@ import (
 func Test_SettingsAreNotSharedByReferenceBetweenMultipleInstances(t *testing.T) {
 	// we want to make sure that the design of non-shared settings is always kept, even after refactorings
 	// Arrange
-	tf1, _ := createSimpleTerraformWithDefaultSettings("app1")
-	tf2, _ := createSimpleTerraformWithDefaultSettings("app2")
+	tf1, _ := createSimpleTerraformWithDefaultSettings("app1", false)
+	tf2, _ := createSimpleTerraformWithDefaultSettings("app2", false)
 
 	// Act
 	tf1.GetDeploymentSettings().AlwaysCleanLocalCache = false
@@ -35,7 +35,7 @@ func Test_SettingsAreNotSharedByReferenceBetweenMultipleInstances(t *testing.T) 
 
 func Test_SetVariablesCanSerializeAnySimpleOrComplexValue(t *testing.T) {
 	// Arrange
-	tf, _ := createSimpleTerraformWithDefaultSettings("test")
+	tf, _ := createSimpleTerraformWithDefaultSettings("test", false)
 
 	var variables = make(map[string]interface{})
 
@@ -149,7 +149,7 @@ func Test_DeployFlow(t *testing.T) {
 		// Arrange
 		fmt.Println("Executing test " + tt.testName)
 
-		tf, executorMock := createSimpleTerraformWithDefaultSettings("test")
+		tf, executorMock := createSimpleTerraformWithDefaultSettings("test", false)
 		tt.mockSetup(executorMock)
 		tf.SetVariables(nil)
 
@@ -167,12 +167,70 @@ func Test_DeployFlow(t *testing.T) {
 	}
 }
 
+func Test_Init(t *testing.T) {
+	tests := []struct {
+		testName  string
+		mockSetup func(executor *executorMock)
+		withTags  bool
+	}{
+		{"init without tags",
+			func(executor *executorMock) {
+				executor.On("Execute", mock.MatchedBy(func(command string) bool {
+					return !strings.Contains(command, "--tags")
+				})).Times(4)
+				executor.On("ExecuteSilent", mock.MatchedBy(func(command string) bool {
+					return true
+				})).Once()
+			},
+			false,
+		},
+		{"init with tags",
+			func(executor *executorMock) {
+				// we only expect the existing plan to be applied
+				executor.On("Execute", mock.MatchedBy(func(command string) bool {
+					if strings.Contains(command, "az storage account create") {
+						return strings.Contains(command, "--tags \"test\"=\"value\"")
+					} else {
+						return true
+					}
+				})).Times(4)
+				executor.On("ExecuteSilent", mock.MatchedBy(func(command string) bool {
+					return true
+				})).Once()
+			},
+			true,
+		},
+	}
+
+	for _, tt := range tests {
+		// Arrange
+		fmt.Println("Executing test " + tt.testName)
+
+		tf, executorMock := createSimpleTerraformWithDefaultSettings("test", tt.withTags)
+		tt.mockSetup(executorMock)
+		tf.SetVariables(nil)
+
+		// Act
+		err := tf.Init()
+
+		// Assert
+		assert.NoError(t, err)
+
+		executorMock.AssertExpectations(t)
+	}
+}
+
 type executorMock struct {
 	mock.Mock
 	commands.Executor
 }
 
 func (e *executorMock) Execute(command string) (string, error) {
+	e.Called(command)
+	return "success", nil
+}
+
+func (e *executorMock) ExecuteSilent(command string) (string, error) {
 	e.Called(command)
 	return "success", nil
 }
@@ -188,11 +246,13 @@ type variablesStruct struct {
 	ABool   bool   `mapstructure:"aBool" json:"aBool" yaml:"aBool"`
 }
 
-func createSimpleTerraformWithDefaultSettings(projectName string) (Terraform, *executorMock) {
+func createSimpleTerraformWithDefaultSettings(projectName string, withTags bool) (Terraform, *executorMock) {
 	executor := &executorMock{}
 
 	backendStorageSettings := DefaultBackendStorageSettings
-	backendStorageSettings.ResourceGroupTags["test"] = "value"
+	if withTags {
+		backendStorageSettings.Tags["test"] = "value"
+	}
 
 	return New(executor, projectName, "1234", "3214",
 		"westeurope", "testrg", "storeaccount",
