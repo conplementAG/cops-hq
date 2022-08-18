@@ -107,6 +107,11 @@ func (tf *terraformWrapper) Init() error {
 
 	logrus.Info("Deploying the " + tf.projectName + " terraform state storage account " + tf.stateStorageAccountName + "...")
 
+	defaultAction := "Allow"
+	if len(tf.storageSettings.AllowedIpAddresses) > 0 {
+		defaultAction = "Deny"
+	}
+
 	_, err := tf.executor.Execute("az storage account create" +
 		" --name " + tf.stateStorageAccountName +
 		" --resource-group " + tf.resourceGroupName +
@@ -117,10 +122,59 @@ func (tf *terraformWrapper) Init() error {
 		" --kind StorageV2" +
 		" --min-tls-version TLS1_2" +
 		" --https-only true" +
+		" --default-action " +
+		defaultAction +
 		tags)
 
 	if err != nil {
 		return internal.ReturnErrorOrPanic(err)
+	}
+
+	// determine current set ip network rules
+	currentAllowedIpAddresses, err := tf.executor.Execute("az storage account network-rule list" +
+		" --resource-group " + tf.resourceGroupName +
+		" --account-name " + tf.stateStorageAccountName +
+		" --query ipRules[].ipAddressOrRange -o json")
+
+	if err != nil {
+		return internal.ReturnErrorOrPanic(err)
+	}
+
+	var currentAllowedIpAddressesMapped []string
+	err = json.Unmarshal([]byte(currentAllowedIpAddresses), &currentAllowedIpAddressesMapped)
+
+	if err != nil {
+		return internal.ReturnErrorOrPanic(err)
+	}
+
+	// cleanup ip network rules
+	if len(currentAllowedIpAddressesMapped) > 0 {
+		logrus.Info("Cleanup network rules for terraform state storage account " + tf.stateStorageAccountName + "...")
+		for _, currentAllowedIpAddress := range currentAllowedIpAddressesMapped {
+			_, err := tf.executor.Execute("az storage account network-rule remove" +
+				" --account-name " + tf.stateStorageAccountName +
+				" --ip-address " + currentAllowedIpAddress +
+				" --resource-group " + tf.resourceGroupName)
+
+			if err != nil {
+				return internal.ReturnErrorOrPanic(err)
+			}
+		}
+	}
+
+	// add ip network rules
+	if len(tf.storageSettings.AllowedIpAddresses) > 0 {
+		logrus.Info("Setting network rules for terraform state storage account " + tf.stateStorageAccountName + "...")
+		for _, allowedIpAddress := range tf.storageSettings.AllowedIpAddresses {
+			_, err := tf.executor.Execute("az storage account network-rule add" +
+				" --account-name " + tf.stateStorageAccountName +
+				" --ip-address " + allowedIpAddress +
+				" --resource-group " + tf.resourceGroupName)
+
+			if err != nil {
+				return internal.ReturnErrorOrPanic(err)
+			}
+		}
 	}
 
 	logrus.Info("Reading the storage account key, which will be give to terraform to initialize the remote state...")

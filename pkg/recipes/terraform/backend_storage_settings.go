@@ -5,6 +5,7 @@ type BackendStorageSettings struct {
 	Tags                map[string]string
 	BlobContainerName   string
 	BlobContainerKey    string
+	AllowedIpAddresses  []string
 }
 
 var DefaultBackendStorageSettings = BackendStorageSettings{
@@ -12,4 +13,5 @@ var DefaultBackendStorageSettings = BackendStorageSettings{
 	Tags:                map[string]string{},
 	BlobContainerName:   "tfstate",
 	BlobContainerKey:    "terraform.tfstate",
+	AllowedIpAddresses:  []string{},
 }
