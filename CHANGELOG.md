@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/conplementAG/cops-hq/compare/v0.9.1...v0.10.0) (2022-08-19)
+
+
+### Features
+
+* **terraform-recipe:** add support to define IP firewall rules for backend storage ([0102fb8](https://github.com/conplementAG/cops-hq/commit/0102fb87914c4da8195fab7265b5492044d30963))
+
 ## [0.9.1](https://github.com/conplementAG/cops-hq/compare/v0.9.0...v0.9.1) (2022-08-08)
 
 
