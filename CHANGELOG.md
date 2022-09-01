@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.11.0](https://github.com/conplementAG/cops-hq/compare/v0.10.0...v0.11.0) (2022-09-01)
+
+
+### Features
+
+* Dockerfile update with copsctl 0.8.2 ([b1a5596](https://github.com/conplementAG/cops-hq/commit/b1a55967c712ed22ad2a49e48f72c245a9d6b4b5))
+* tooling upgrade ([fae3351](https://github.com/conplementAG/cops-hq/commit/fae3351a10d61db26d1563038df582280997ab18))
+
+
+### Bug Fixes
+
+* **terraform-recipe:** adapt IP firewall rule handling backend storage ([efeaef5](https://github.com/conplementAG/cops-hq/commit/efeaef5f7e3d4a7d5668612dd4091800db897256))
+
 ## [0.10.0](https://github.com/conplementAG/cops-hq/compare/v0.9.1...v0.10.0) (2022-08-19)
 
 
