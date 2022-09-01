@@ -3,7 +3,9 @@ module github.com/conplementag/cops-hq
 go 1.18
 
 require (
+	github.com/Masterminds/semver v1.5.0
 	github.com/ahmetb/go-linq v3.0.0+incompatible
+	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/briandowns/spinner v1.18.1
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/google/uuid v1.3.0
@@ -14,11 +16,11 @@ require (
 	github.com/spf13/viper v1.11.0
 	github.com/stretchr/testify v1.7.1
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
 require (
 	github.com/BurntSushi/toml v1.1.0 // indirect
-	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
@@ -46,5 +48,4 @@ require (
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )

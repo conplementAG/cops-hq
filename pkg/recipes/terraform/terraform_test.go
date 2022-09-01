@@ -3,6 +3,7 @@ package terraform
 import (
 	"errors"
 	"fmt"
+	"github.com/avast/retry-go"
 	"github.com/conplementag/cops-hq/pkg/commands"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -173,6 +174,7 @@ func Test_Init(t *testing.T) {
 		mockSetup      func(executor *executorMock)
 		withTags       bool
 		withAllowedIps bool
+		hasErrors      bool
 	}{
 		{"init without tags",
 			func(executor *executorMock) {
@@ -183,6 +185,7 @@ func Test_Init(t *testing.T) {
 					return true
 				})).Once()
 			},
+			false,
 			false,
 			false,
 		},
@@ -202,6 +205,7 @@ func Test_Init(t *testing.T) {
 			},
 			true,
 			false,
+			false,
 		},
 		{"init without tags and with allowed Ips",
 			func(executor *executorMock) {
@@ -211,12 +215,10 @@ func Test_Init(t *testing.T) {
 					} else {
 						return true
 					}
-				})).Times(6)
-				executor.On("ExecuteSilent", mock.MatchedBy(func(command string) bool {
-					return true
-				})).Once()
+				})).Times(int(retry.DefaultAttempts) + 4)
 			},
 			false,
+			true,
 			true,
 		},
 	}
@@ -233,7 +235,11 @@ func Test_Init(t *testing.T) {
 		err := tf.Init()
 
 		// Assert
-		assert.NoError(t, err)
+		if tt.hasErrors {
+			assert.Error(t, err)
+		} else {
+			assert.NoError(t, err)
+		}
 
 		executorMock.AssertExpectations(t)
 	}
