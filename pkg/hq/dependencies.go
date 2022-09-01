@@ -11,11 +11,11 @@ import (
 )
 
 const (
-	ExpectedMinAzureCliVersion  = "2.37.0"
-	ExpectedMinTerraformVersion = "1.2.1"
+	ExpectedMinAzureCliVersion  = "2.39.0"
+	ExpectedMinTerraformVersion = "1.2.8"
 	ExpectedMinHelmVersion      = "3.8.2"
-	ExpectedMinKubectlVersion   = "1.23.5"
-	ExpectedMinCopsctlVersion   = "0.8.0"
+	ExpectedMinKubectlVersion   = "1.25.0"
+	ExpectedMinCopsctlVersion   = "0.8.4"
 	ExpectedMinSopsVersion      = "3.7.3"
 )
 
