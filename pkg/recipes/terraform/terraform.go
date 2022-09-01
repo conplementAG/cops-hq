@@ -4,12 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/avast/retry-go"
 	"github.com/conplementag/cops-hq/internal"
 	"github.com/conplementag/cops-hq/pkg/commands"
 	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
+	"reflect"
+	"sort"
 	"strings"
+	"time"
 )
 
 // Terraform is a wrapper around common terraform functionality used in IaC projects with Azure. In includes remote state
@@ -130,25 +134,14 @@ func (tf *terraformWrapper) Init() error {
 		return internal.ReturnErrorOrPanic(err)
 	}
 
-	// determine current set ip network rules
-	currentAllowedIpAddresses, err := tf.executor.Execute("az storage account network-rule list" +
-		" --resource-group " + tf.resourceGroupName +
-		" --account-name " + tf.stateStorageAccountName +
-		" --query ipRules[].ipAddressOrRange -o json")
-
-	if err != nil {
-		return internal.ReturnErrorOrPanic(err)
-	}
-
-	var currentAllowedIpAddressesMapped []string
-	err = json.Unmarshal([]byte(currentAllowedIpAddresses), &currentAllowedIpAddressesMapped)
+	currentAllowedIpAddressesMapped, err := tf.determineCurrentAllowedIpAddresses()
 
 	if err != nil {
 		return internal.ReturnErrorOrPanic(err)
 	}
 
 	// cleanup ip network rules
-	if len(currentAllowedIpAddressesMapped) > 0 {
+	if len(currentAllowedIpAddressesMapped) > 0 && !reflect.DeepEqual(currentAllowedIpAddressesMapped, tf.storageSettings.AllowedIpAddresses) {
 		logrus.Info("Cleanup network rules for terraform state storage account " + tf.stateStorageAccountName + "...")
 		for _, currentAllowedIpAddress := range currentAllowedIpAddressesMapped {
 			_, err := tf.executor.Execute("az storage account network-rule remove" +
@@ -174,6 +167,37 @@ func (tf *terraformWrapper) Init() error {
 			if err != nil {
 				return internal.ReturnErrorOrPanic(err)
 			}
+		}
+	}
+
+	// check ip network rules
+	if len(tf.storageSettings.AllowedIpAddresses) > 0 {
+		logrus.Info("Checking network rules for terraform state storage account " + tf.stateStorageAccountName + "...")
+		retryErrorText := "network rules not equal"
+		err := retry.Do(func() error {
+			currentAllowedIpAddressesMapped, err := tf.determineCurrentAllowedIpAddresses()
+			if err != nil {
+				return err
+			}
+
+			if reflect.DeepEqual(currentAllowedIpAddressesMapped, tf.storageSettings.AllowedIpAddresses) {
+				return nil
+			} else {
+				return errors.New(retryErrorText)
+			}
+		},
+			retry.Delay(time.Second),
+			retry.DelayType(retry.FixedDelay),
+			retry.RetryIf(func(err error) bool {
+				return err.Error() == retryErrorText
+			}),
+			retry.OnRetry(func(n uint, err error) {
+				logrus.Debugf("Retry %d - checking network rules of storage account... %s", n+1, err)
+			}),
+		)
+
+		if err != nil {
+			return internal.ReturnErrorOrPanic(err)
 		}
 	}
 
@@ -294,6 +318,29 @@ func (tf *terraformWrapper) GetDeploymentSettings() *DeploymentSettings {
 
 func (tf *terraformWrapper) GetVariablesFileName() string {
 	return tf.projectName + ".tfvars"
+}
+
+func (tf *terraformWrapper) determineCurrentAllowedIpAddresses() ([]string, error) {
+	networkRuleListCmd := "az storage account network-rule list" +
+		" --resource-group " + tf.resourceGroupName +
+		" --account-name " + tf.stateStorageAccountName +
+		" --query ipRules[].ipAddressOrRange -o json"
+
+	currentAllowedIpAddresses, err := tf.executor.Execute(networkRuleListCmd)
+
+	if err != nil {
+		return []string{}, err
+	}
+
+	var currentAllowedIpAddressesMapped []string
+	err = json.Unmarshal([]byte(currentAllowedIpAddresses), &currentAllowedIpAddressesMapped)
+
+	if err != nil {
+		return []string{}, err
+	}
+
+	sort.Strings(currentAllowedIpAddressesMapped)
+	return currentAllowedIpAddressesMapped, nil
 }
 
 func (tf *terraformWrapper) guardAgainstUnsetVariables() error {
