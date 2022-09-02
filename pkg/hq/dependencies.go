@@ -14,7 +14,7 @@ const (
 	ExpectedMinAzureCliVersion  = "2.39.0"
 	ExpectedMinTerraformVersion = "1.2.8"
 	ExpectedMinHelmVersion      = "3.8.2"
-	ExpectedMinKubectlVersion   = "1.25.0"
+	ExpectedMinKubectlVersion   = "1.23.9"
 	ExpectedMinCopsctlVersion   = "0.8.4"
 	ExpectedMinSopsVersion      = "3.7.3"
 )

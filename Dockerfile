@@ -24,7 +24,7 @@ RUN mv terraform /usr/local/bin
 # k8s CLI
 # You must use a kubectl version that is within one minor version difference of your cluster.
 # For example, a v1.24 client can communicate with v1.23, v1.24, and v1.25 control planes.
-ARG KUBECTL_VERSION=v1.25.0
+ARG KUBECTL_VERSION=v1.23.9
 RUN curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl
 RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 RUN kubectl version --client=true
