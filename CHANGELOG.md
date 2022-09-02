@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.1](https://github.com/conplementAG/cops-hq/compare/v0.11.0...v0.11.1) (2022-09-02)
+
+
+### Bug Fixes
+
+* **check-dependencies:** downgrade min. kubectl version to v1.23.9 ([4844daf](https://github.com/conplementAG/cops-hq/commit/4844daf556bee022535e6699e8150d453db883a5))
+* undo delete .idea\misc.xml file ([15cdabb](https://github.com/conplementAG/cops-hq/commit/15cdabb9069db9896d2785b54e8e2ad3bfe44347))
+
 ## [0.11.0](https://github.com/conplementAG/cops-hq/compare/v0.10.0...v0.11.0) (2022-09-01)
 
 
