@@ -26,10 +26,19 @@ func (hq *hqContainer) LoadConfigFile(filePath string) error {
 		return internal.ReturnErrorOrPanic(fmt.Errorf("error recieved while reading the config file: %w", err))
 	}
 
+	hq.RawConfiguration = configFile
 	return nil
 }
 
 func (hq *hqContainer) LoadEnvironmentConfigFile() error {
 	configFilePath := filepath.Join(ProjectBasePath, "config", viper.GetString("environment-tag")+".yaml")
 	return hq.LoadConfigFile(configFilePath)
+}
+
+func (hq *hqContainer) GetRawConfigurationFile() (string, error) {
+	if hq.RawConfiguration == "" {
+		return "", internal.ReturnErrorOrPanic(fmt.Errorf("configuration was not loaded yet. load configfile first."))
+	}
+
+	return hq.RawConfiguration, nil
 }

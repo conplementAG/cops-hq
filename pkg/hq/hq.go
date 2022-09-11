@@ -33,6 +33,10 @@ type HQ interface {
 	// available in PATH, and in correct version (use the CheckToolingDependencies method or call hq 'check-dependencies')
 	LoadConfigFile(filePath string) error
 
+	// GetRawConfigurationFile returns the currently loaded configuration decrypted as string. Loading configuration is
+	// a procondition due to get raw configuration string
+	GetRawConfigurationFile() (string, error)
+
 	// CheckToolingDependencies can be called to check if installed tooling (Azure CLI, Terraform, Helm etc.) is of minimal
 	// expected version for all of HQ functionality to work. It is highly recommended to call this method in your code, and fail
 	// in case of errors.
