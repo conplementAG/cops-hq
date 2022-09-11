@@ -13,9 +13,10 @@ import (
 var ProjectBasePath = filepath.Join(".", "../", "../")
 
 type hqContainer struct {
-	Executor commands.Executor
-	Cli      cli.Cli
-	Logger   *logrus.Logger
+	Executor         commands.Executor
+	Cli              cli.Cli
+	Logger           *logrus.Logger
+	RawConfiguration string
 }
 
 func (hq *hqContainer) Run() error {
