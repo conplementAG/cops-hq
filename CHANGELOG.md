@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/conplementAG/cops-hq/compare/v0.11.1...v0.12.0) (2022-09-12)
+
+
+### Features
+
+* **configuration:** make decrypted config available ([173af36](https://github.com/conplementAG/cops-hq/commit/173af363f80dcb2a3a8761807e189be91a87cd11))
+
 ## [0.11.1](https://github.com/conplementAG/cops-hq/compare/v0.11.0...v0.11.1) (2022-09-02)
 
 
