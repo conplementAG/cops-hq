@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/conplementAG/cops-hq/compare/v0.12.0...v1.0.0) (2022-09-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* **cli:** drop shorthand flag "s" from global cli flags
+
+### Features
+
+* **cli:** drop shorthand flag "s" from global cli flags ([6fbf977](https://github.com/conplementAG/cops-hq/commit/6fbf977281ff2c071638fb290b279974288ba4cd))
+
 ## [0.12.0](https://github.com/conplementAG/cops-hq/compare/v0.11.1...v0.12.0) (2022-09-12)
 
 
