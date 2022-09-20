@@ -47,7 +47,7 @@ func New(programName string, version string) Cli {
 
 	viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
 
-	rootCmd.PersistentFlags().BoolP("silence-long-running-progress-indicators", "s", false, "Set to "+
+	rootCmd.PersistentFlags().BoolP("silence-long-running-progress-indicators", "", false, "Set to "+
 		"silence long running operation indicator. Useful for CI.")
 
 	viper.BindPFlag("silence-long-running-progress-indicators", rootCmd.PersistentFlags().Lookup("silence-long-running-progress-indicators"))
