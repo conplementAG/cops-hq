@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.0](https://github.com/conplementAG/cops-hq/compare/v1.0.0...v2.0.0) (2022-10-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* terraform - auto approve parameter in deploy and destroy flows
+
+### Features
+
+* configurable RequireInfrastructureEncryption setting for terraform state storage ([35e7759](https://github.com/conplementAG/cops-hq/commit/35e7759ef9102c2154d37128abe62eda1f044c03))
+* terraform - auto approve parameter in deploy and destroy flows ([d745cbe](https://github.com/conplementAG/cops-hq/commit/d745cbe0ad3d189be640d50dd90a1fabdc4a2e29))
+
 ## [1.0.0](https://github.com/conplementAG/cops-hq/compare/v0.12.0...v1.0.0) (2022-09-20)
 
 
