@@ -116,13 +116,19 @@ func (tf *terraformWrapper) Init() error {
 		defaultAction = "Deny"
 	}
 
+	requireInfrastructureEncryptionSetting := ""
+
+	if tf.storageSettings.RequireInfrastructureEncryption {
+		requireInfrastructureEncryptionSetting = " --require-infrastructure-encryption" // infra encryption will add another layer of encryption at rest
+	}
+
 	_, err := tf.executor.Execute("az storage account create" +
 		" --name " + tf.stateStorageAccountName +
 		" --resource-group " + tf.resourceGroupName +
 		" --location " + tf.region +
 		" --sku Standard_LRS" +
 		" --access-tier Hot" +
-		" --require-infrastructure-encryption" + // infra encryption will add another layer of encryption at rest
+		requireInfrastructureEncryptionSetting +
 		" --kind StorageV2" +
 		" --min-tls-version TLS1_2" +
 		" --https-only true" +
