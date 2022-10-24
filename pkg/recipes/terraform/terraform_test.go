@@ -78,6 +78,7 @@ func Test_DeployFlow(t *testing.T) {
 		mockSetup       func(executor *executorMock)
 		planOnly        bool
 		useExistingPlan bool
+		autoApprove     bool
 		expectedError   error
 	}{
 		{"apply with existing plan",
@@ -89,6 +90,7 @@ func Test_DeployFlow(t *testing.T) {
 			},
 			false,
 			true,
+			false,
 			nil,
 		},
 
@@ -118,6 +120,30 @@ func Test_DeployFlow(t *testing.T) {
 			},
 			false,
 			false,
+			false,
+			nil,
+		},
+
+		{"auto approve does not prompt the user",
+			func(executor *executorMock) {
+				// first, a plan should be executed, saving the file
+				executor.On("Execute", mock.MatchedBy(func(command string) bool {
+					return strings.Contains(command, "plan -input=false") && strings.Contains(command, "test.deploy.tfplan")
+				})).Once()
+
+				// then the plan json will be created
+				executor.On("Execute", mock.MatchedBy(func(command string) bool {
+					return strings.Contains(command, "show -json") && strings.Contains(command, "test.deploy.tfplan")
+				})).Once()
+
+				// then the fully apply is expected
+				executor.On("Execute", mock.MatchedBy(func(command string) bool {
+					return strings.Contains(command, "apply -auto-approve") && strings.Contains(command, "test.deploy.tfplan")
+				})).Once()
+			},
+			false,
+			false,
+			true,
 			nil,
 		},
 
@@ -135,6 +161,7 @@ func Test_DeployFlow(t *testing.T) {
 			},
 			true,
 			false,
+			false,
 			nil,
 		},
 
@@ -142,6 +169,7 @@ func Test_DeployFlow(t *testing.T) {
 			func(executor *executorMock) {},
 			true,
 			true,
+			false,
 			errors.New("planOnly with useExistingPlan makes no sense as a combination"),
 		},
 	}
@@ -155,7 +183,7 @@ func Test_DeployFlow(t *testing.T) {
 		tf.SetVariables(nil)
 
 		// Act
-		err := tf.DeployFlow(tt.planOnly, tt.useExistingPlan)
+		err := tf.DeployFlow(tt.planOnly, tt.useExistingPlan, tt.autoApprove)
 
 		// Assert
 		if tt.expectedError == nil {

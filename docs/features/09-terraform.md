@@ -57,11 +57,11 @@ vars = viper.GetStringMap("infrastructure")
 err = tf.SetVariables(vars)
 ... do something with the error
 
-// then, we can start the real deployment flow. Via CLI flags plan-only and use-existing-plan (you need to define them yourself), 
+// then, we can start the real deployment flow. Via CLI flags plan-only, use-existing-plan and auto-approve (you need to define them yourself), 
 // we can control the set up from the outside, for example, a local developer would have these flags set to false, so plan would 
 // be created before deploying. In CI system, we would have separate jobs for creating and apply the plan, as a job
 // to wait for user confirmation would have to be set in between. 
-err = tf.DeployFlow(viper.GetBool(cli_flags.PlanOnly), viper.GetBool(cli_flags.UseExistingPlan))
+err = tf.DeployFlow(viper.GetBool(cli_flags.PlanOnly), viper.GetBool(cli_flags.UseExistingPlan), viper.GetBool(cli_flags.AutoApprove))
 ... do something with the error
 
 ```
