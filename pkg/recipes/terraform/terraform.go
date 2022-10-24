@@ -36,18 +36,21 @@ type Terraform interface {
 	// Parameters support are
 	//     planOnly (will only create the plan)
 	//     useExistingPlan (will reuse existing plan from the disk)
+	//     autoApprove (will skip asking user questions, if required, like approving a plan before apply. Defaults to false.
+	//                  Can be safely set to true on operations which don't prompt any user inputs, it will just have zero effect on the behaviour).
 	// Here is a short explanation:
-	//     DeployFlow(false, false) will show the plan, prompt the user, and apply if confirmed
-	//     DeployFlow(true, false) will only show the plan, but also persist it on disk (use GetDeployPlanFileName() for details)
-	//     DeployFlow(false, true) will reuse the plan already saved on disk, and apply it without any user confirmations
-	//     DeployFlow(true, true) will just show the plan persisted on the disk, without generating a new plan.
+	//     DeployFlow(false, false, false) will show the plan, prompt the user, and apply if confirmed (setting autoApprove to true will skip confirmation)
+	//     DeployFlow(true, false, false) will only show the plan, but also persist it on disk (use GetDeployPlanFileName() for details)
+	//     DeployFlow(false, true, false) will reuse the plan already saved on disk, and apply it without any user confirmations (autoApprove makes no impact here)
+	//     DeployFlow(true, true, false) will just show the plan persisted on the disk, without generating a new plan.
 	// It is best practice to set the both planOnly and useExistingPlan from the CLI, so that CI scripts can simply override
 	// the variables depending on the current CI step (usually a plan is presented, user is awaited for approval, then the existing
-	// plan is applied).
-	DeployFlow(planOnly bool, useExistingPlan bool) error
+	// plan is applied). The autoApprove parameter is useful in local deployment scenarios, where you plan / deploy everything as one step,
+	// and perhaps do not want to be prompted.
+	DeployFlow(planOnly bool, useExistingPlan bool, autoApprove bool) error
 
 	// DestroyFlow is same as DeployFlow, but only for destroy.
-	DestroyFlow(planOnly bool, useExistingPlan bool) error
+	DestroyFlow(planOnly bool, useExistingPlan bool, autoApprove bool) error
 
 	// PlanDeploy executes the terraform plan for deployment, returning the changes as a string. Plan output is always
 	// saved to a file as well. Common pattern is to show the changes to the user, ask for confirmation, and then to Deploy the plan.
@@ -290,12 +293,12 @@ func (tf *terraformWrapper) SetVariables(terraformVariables map[string]interface
 	return nil
 }
 
-func (tf *terraformWrapper) DeployFlow(planOnly bool, useExistingPlan bool) error {
-	return tf.applyFlow(false, planOnly, useExistingPlan)
+func (tf *terraformWrapper) DeployFlow(planOnly bool, useExistingPlan bool, autoApprove bool) error {
+	return tf.applyFlow(false, planOnly, useExistingPlan, autoApprove)
 }
 
-func (tf *terraformWrapper) DestroyFlow(planOnly bool, useExistingPlan bool) error {
-	return tf.applyFlow(true, planOnly, useExistingPlan)
+func (tf *terraformWrapper) DestroyFlow(planOnly bool, useExistingPlan bool, autoApprove bool) error {
+	return tf.applyFlow(true, planOnly, useExistingPlan, autoApprove)
 }
 
 func (tf *terraformWrapper) PlanDeploy() (string, error) {
@@ -446,7 +449,7 @@ func (tf *terraformWrapper) persistPlanInAdditionalFormatsOnDisk(planAsPlaintext
 	return nil
 }
 
-func (tf *terraformWrapper) applyFlow(isDestroy bool, planOnly bool, useExistingPlan bool) error {
+func (tf *terraformWrapper) applyFlow(isDestroy bool, planOnly bool, useExistingPlan bool, autoApprove bool) error {
 	var err error
 	var plan string
 
@@ -480,19 +483,29 @@ func (tf *terraformWrapper) applyFlow(isDestroy bool, planOnly bool, useExisting
 		fmt.Println(plan)
 
 		if !planOnly {
-			if tf.executor.AskUserToConfirm("Do you want to apply the plan?") {
-				if isDestroy {
-					err = tf.ForceDestroy()
-				} else {
-					err = tf.ForceDeploy()
-				}
+			approved := false
 
-				if err != nil {
-					return internal.ReturnErrorOrPanic(err)
-				}
-			} else {
+			if autoApprove {
+				approved = true
+			}
+
+			if !approved {
+				approved = tf.executor.AskUserToConfirm("Do you want to apply the plan?")
+			}
+
+			if !approved {
 				err := errors.New("plan was not approved")
 				logrus.Error(err)
+				return internal.ReturnErrorOrPanic(err)
+			}
+
+			if isDestroy {
+				err = tf.ForceDestroy()
+			} else {
+				err = tf.ForceDeploy()
+			}
+
+			if err != nil {
 				return internal.ReturnErrorOrPanic(err)
 			}
 		}
