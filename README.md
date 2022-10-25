@@ -23,6 +23,10 @@ For basic usage, check out the `main.go` file in `cmd/cops-hq`.
 
 Explanation of all concepts and features can be found in [Features Overview](docs/overview.md)
 
+## Upgrading
+
+For upgrading to a new library version, please read the [UPGRADING](UPGRADING.md) guide.
+
 ## Contribution
 
 Check [contribution](CONTRIBUTING.md).
