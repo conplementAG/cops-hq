@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/conplementAG/cops-hq/compare/v2.0.0...v2.0.1) (2022-10-25)
+
+
+### Bug Fixes
+
+* correct v2 package versioning ([e355a7c](https://github.com/conplementAG/cops-hq/commit/e355a7c4be56c85704182928c6218c839425f9d2))
+
 ## [2.0.0](https://github.com/conplementAG/cops-hq/compare/v1.0.0...v2.0.0) (2022-10-24)
 
 
