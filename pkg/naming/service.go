@@ -2,10 +2,10 @@ package naming
 
 import (
 	"github.com/ahmetb/go-linq"
-	"github.com/conplementag/cops-hq/internal"
-	"github.com/conplementag/cops-hq/pkg/naming/patterns"
-	"github.com/conplementag/cops-hq/pkg/naming/regions"
-	"github.com/conplementag/cops-hq/pkg/naming/resources"
+	"github.com/conplementag/cops-hq/v2/internal"
+	"github.com/conplementag/cops-hq/v2/pkg/naming/patterns"
+	"github.com/conplementag/cops-hq/v2/pkg/naming/regions"
+	"github.com/conplementag/cops-hq/v2/pkg/naming/resources"
 	"strings"
 )
 

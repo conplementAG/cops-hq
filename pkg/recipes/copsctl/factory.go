@@ -1,7 +1,7 @@
 package copsctl
 
 import (
-	"github.com/conplementag/cops-hq/pkg/commands"
+	"github.com/conplementag/cops-hq/v2/pkg/commands"
 )
 
 // New creates a new Copsctl recipe instance. Required parameters are:

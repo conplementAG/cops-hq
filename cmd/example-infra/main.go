@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/conplementag/cops-hq/pkg/hq"
+	"github.com/conplementag/cops-hq/v2/pkg/hq"
 	"github.com/sirupsen/logrus"
 )
 

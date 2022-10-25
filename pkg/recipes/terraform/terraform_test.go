@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/avast/retry-go"
-	"github.com/conplementag/cops-hq/pkg/commands"
+	"github.com/conplementag/cops-hq/v2/pkg/commands"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"io/ioutil"

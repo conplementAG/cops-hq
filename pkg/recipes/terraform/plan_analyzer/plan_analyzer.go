@@ -2,8 +2,8 @@ package plan_analyzer
 
 import (
 	"errors"
-	"github.com/conplementag/cops-hq/internal"
-	"github.com/conplementag/cops-hq/pkg/recipes/terraform"
+	"github.com/conplementag/cops-hq/v2/internal"
+	"github.com/conplementag/cops-hq/v2/pkg/recipes/terraform"
 	"os"
 	"path/filepath"
 	"strings"
