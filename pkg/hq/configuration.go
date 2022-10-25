@@ -2,7 +2,7 @@ package hq
 
 import (
 	"fmt"
-	"github.com/conplementag/cops-hq/internal"
+	"github.com/conplementag/cops-hq/v2/internal"
 	"github.com/spf13/viper"
 	"path/filepath"
 	"strings"

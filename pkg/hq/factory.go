@@ -1,9 +1,9 @@
 package hq
 
 import (
-	"github.com/conplementag/cops-hq/pkg/cli"
-	"github.com/conplementag/cops-hq/pkg/commands"
-	"github.com/conplementag/cops-hq/pkg/logging"
+	"github.com/conplementag/cops-hq/v2/pkg/cli"
+	"github.com/conplementag/cops-hq/v2/pkg/commands"
+	"github.com/conplementag/cops-hq/v2/pkg/logging"
 )
 
 // New creates a new HQ instance, configuring internally used modules for usage. Keep the created HQ instance and

@@ -1,6 +1,6 @@
 package helm
 
-import "github.com/conplementag/cops-hq/pkg/commands"
+import "github.com/conplementag/cops-hq/v2/pkg/commands"
 
 // New creates a new instance of Helm, which is a wrapper around common Helm functionality.
 // Parameters:

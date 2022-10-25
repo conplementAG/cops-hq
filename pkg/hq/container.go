@@ -1,9 +1,9 @@
 package hq
 
 import (
-	"github.com/conplementag/cops-hq/internal"
-	"github.com/conplementag/cops-hq/pkg/cli"
-	"github.com/conplementag/cops-hq/pkg/commands"
+	"github.com/conplementag/cops-hq/v2/internal"
+	"github.com/conplementag/cops-hq/v2/pkg/cli"
+	"github.com/conplementag/cops-hq/v2/pkg/commands"
 	"github.com/sirupsen/logrus"
 	"path/filepath"
 )

@@ -3,7 +3,7 @@ package azure_login
 import (
 	"encoding/json"
 	"errors"
-	"github.com/conplementag/cops-hq/pkg/commands"
+	"github.com/conplementag/cops-hq/v2/pkg/commands"
 	"github.com/stretchr/testify/mock"
 	"strings"
 	"testing"

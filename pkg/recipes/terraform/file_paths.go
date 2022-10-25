@@ -1,7 +1,7 @@
 package terraform
 
 import (
-	"github.com/conplementag/cops-hq/internal"
+	"github.com/conplementag/cops-hq/v2/internal"
 	"os"
 	"path/filepath"
 )

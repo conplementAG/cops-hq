@@ -2,8 +2,8 @@ package copsctl
 
 import (
 	"encoding/json"
-	"github.com/conplementag/cops-hq/internal"
-	"github.com/conplementag/cops-hq/pkg/commands"
+	"github.com/conplementag/cops-hq/v2/internal"
+	"github.com/conplementag/cops-hq/v2/pkg/commands"
 	"github.com/sirupsen/logrus"
 )
 

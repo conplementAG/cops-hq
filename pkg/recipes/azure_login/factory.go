@@ -1,7 +1,7 @@
 package azure_login
 
 import (
-	"github.com/conplementag/cops-hq/pkg/commands"
+	"github.com/conplementag/cops-hq/v2/pkg/commands"
 	"github.com/spf13/viper"
 )
 

@@ -3,7 +3,7 @@ package hq
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/conplementag/cops-hq/pkg/commands"
+	"github.com/conplementag/cops-hq/v2/pkg/commands"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"strings"

@@ -2,8 +2,8 @@ package naming
 
 import (
 	"errors"
-	"github.com/conplementag/cops-hq/internal"
-	"github.com/conplementag/cops-hq/pkg/naming/patterns"
+	"github.com/conplementag/cops-hq/v2/internal"
+	"github.com/conplementag/cops-hq/v2/pkg/naming/patterns"
 )
 
 // New creates a new naming convention service.

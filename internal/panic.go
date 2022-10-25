@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"github.com/conplementag/cops-hq/pkg/error_handling"
+	"github.com/conplementag/cops-hq/v2/pkg/error_handling"
 	"github.com/sirupsen/logrus"
 )
 
