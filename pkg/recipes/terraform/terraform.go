@@ -247,12 +247,12 @@ func (tf *terraformWrapper) Init() error {
 	_, err = tf.executor.Execute("terraform" +
 		" -chdir=" + tf.terraformDirectory +
 		" init -upgrade " +
-		" --backend-config=\"subscription_id=" + tf.subscriptionId + "\"" +
-		" --backend-config=\"tenant_id=" + tf.tenantId + "\"" +
-		" --backend-config=\"storage_account_name=" + tf.stateStorageAccountName + "\"" +
-		" --backend-config=\"access_key=" + storageAccountKey + "\"" +
-		" --backend-config=\"container_name=" + tf.storageSettings.BlobContainerName + "\"" +
-		" --backend-config=\"key=" + tf.storageSettings.BlobContainerKey + "\"")
+		" --backend-config=subscription_id=" + tf.subscriptionId +
+		" --backend-config=tenant_id=" + tf.tenantId +
+		" --backend-config=storage_account_name=" + tf.stateStorageAccountName +
+		" --backend-config=access_key=" + storageAccountKey +
+		" --backend-config=container_name=" + tf.storageSettings.BlobContainerName +
+		" --backend-config=key=" + tf.storageSettings.BlobContainerKey)
 
 	if err != nil {
 		return internal.ReturnErrorOrPanic(err)
@@ -375,7 +375,7 @@ func (tf *terraformWrapper) plan(isDestroy bool) (string, error) {
 	tfCommand := "terraform" +
 		" -chdir=" + tf.terraformDirectory +
 		" plan -input=false " +
-		" -var-file=\"" + tf.GetVariablesFileName() + "\""
+		" -var-file=" + tf.GetVariablesFileName()
 
 	var localTerraformRelativePlanFilePath string
 
@@ -386,14 +386,14 @@ func (tf *terraformWrapper) plan(isDestroy bool) (string, error) {
 			return "", internal.ReturnErrorOrPanic(err)
 		}
 
-		tfCommand += " -out=\"" + localTerraformRelativePlanFilePath + "\""
+		tfCommand += " -out=" + localTerraformRelativePlanFilePath
 	} else {
 		localTerraformRelativePlanFilePath, err = GetLocalTerraformRelativePlanFilePath(tf.projectName, tf.terraformDirectory, false)
 		if err != nil {
 			return "", internal.ReturnErrorOrPanic(err)
 		}
 
-		tfCommand += " -out=\"" + localTerraformRelativePlanFilePath + "\""
+		tfCommand += " -out=" + localTerraformRelativePlanFilePath
 	}
 
 	plaintextPlanOutput, err := tf.executor.Execute(tfCommand)
