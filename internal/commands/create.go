@@ -10,7 +10,7 @@ const DoubleQuote = "{DOUBLE_QUOTE}"
 
 // Create creates a command from a single string
 // This allows you to pass parameters which include spaces as commands.
-// You just need to add "double-quotes" around the parameter and it will be treated as one parameter and not be splitted by whitespace.
+// You just need to add "double-quotes" around the parameter, and it will be treated as one parameter and not be split by whitespace.
 func Create(plainCommand string) *exec.Cmd {
 	/*
 		Example
@@ -37,30 +37,39 @@ func markQuotedSpaces(plainCommand string) string {
 	var escapedCommand strings.Builder
 	enteredEscapeModeInThisIteration := false
 
-	for _, char := range plainCommand {
+	// using previous with a variable instead of index, since in case of index 0 we would run out of bounds, and code is cleaner in this was
+	previousCharacter := ""
 
-		// Enter Escape Mode when " occurs
-		if !escapeMode && string(char) == "\"" {
+	for _, char := range plainCommand {
+		currentCharacter := string(char)
+
+		// Enter Escape Mode when " occurs, but only if preceded with space, which signals to us that it is an argument which
+		// requires this special handling. Example:
+		// correct quotes to escape: command -a "some arg"
+		// incorrect quotes to escape: command -a object["property"] <- in this case the whole object["property"] should be left unchanged!
+		if !escapeMode && currentCharacter == "\"" && previousCharacter == " " {
 			escapeMode = true
 			enteredEscapeModeInThisIteration = true
 		}
 
 		// Handle spaces when in Escape Mode
-		if escapeMode && string(char) == " " {
+		if escapeMode && currentCharacter == " " {
 			escapedCommand.WriteString(SpaceWithinQuote)
-		} else if escapeMode && string(char) == "\"" {
+		} else if escapeMode && currentCharacter == "\"" {
 			escapedCommand.WriteString(DoubleQuote)
 		} else {
 			escapedCommand.WriteRune(char)
 		}
 
 		// Exit Escape Mode when " occurs
-		if !enteredEscapeModeInThisIteration && escapeMode && string(char) == "\"" {
+		if !enteredEscapeModeInThisIteration && escapeMode && currentCharacter == "\"" {
 			escapeMode = false
 		}
 
 		enteredEscapeModeInThisIteration = false
+		previousCharacter = currentCharacter
 	}
+
 	return escapedCommand.String()
 }
 
