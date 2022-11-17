@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.2](https://github.com/conplementAG/cops-hq/compare/v2.0.1...v2.0.2) (2022-11-17)
+
+
+### Bug Fixes
+
+* **executor:** prevent escaping for quotations which are parts of the arguments ([80be3ed](https://github.com/conplementAG/cops-hq/commit/80be3eda20f6c622559f628d6d74beea6410545c))
+* **terraform-recipe:** remove quotations which were anyways always removed before ([dc49955](https://github.com/conplementAG/cops-hq/commit/dc49955337a5ecd994dd69afa8d60006cfdb028b))
+
 ## [2.0.1](https://github.com/conplementAG/cops-hq/compare/v2.0.0...v2.0.1) (2022-10-25)
 
 
