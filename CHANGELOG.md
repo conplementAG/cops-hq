@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/conplementAG/cops-hq/compare/v2.0.2...v2.1.0) (2022-11-22)
+
+
+### Features
+
+* **executor:** direct os/exec command support for complex cases ([95013a1](https://github.com/conplementAG/cops-hq/commit/95013a1923bcf5f27599710169dc78da074f697f))
+
 ## [2.0.2](https://github.com/conplementAG/cops-hq/compare/v2.0.1...v2.0.2) (2022-11-17)
 
 
