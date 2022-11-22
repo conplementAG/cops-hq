@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"io"
 	"os"
+	"os/exec"
 	"strings"
 	"testing"
 )
@@ -41,6 +42,12 @@ func (s *ExecutorTestSuite) Test_ExecuteNormalCommand() {
 
 func (s *ExecutorTestSuite) Test_ReturnsCommandStdoutOutput() {
 	out, _ := s.exec.Execute("echo test")
+	s.Equal("test", out)
+}
+
+func (s *ExecutorTestSuite) Test_OsExecCommandsAreCorrectlyExecuted() {
+	cmd := exec.Command("echo", "test")
+	out, _ := s.exec.ExecuteCmd(cmd)
 	s.Equal("test", out)
 }
 
