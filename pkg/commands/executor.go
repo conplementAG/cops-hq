@@ -12,6 +12,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"strings"
 	"sync"
 	"time"
@@ -24,10 +25,18 @@ type Executor interface {
 	// Any errors are returned as err return value.
 	Execute(command string) (output string, err error)
 
+	// ExecuteCmd is same as Execute, except you can provide the os/exec command directly. Useful to avoid Executor escaping logic,
+	// in rare cases where the command does not follow the usual --argument value semantics.
+	ExecuteCmd(cmd *exec.Cmd) (output string, err error)
+
 	// ExecuteWithProgressInfo is same as Execute, except an infinite progress bar is shown, signaling an async operation to
 	// the user. The progress bar can be overridden with Viper parameter "silence-long-running-progress-indicators" - useful
 	// for CI for example.
 	ExecuteWithProgressInfo(command string) (output string, err error)
+
+	// ExecuteCmdWithProgressInfo is same as ExecuteWithProgressInfo, except you can provide the os/exec command directly. Useful to avoid Executor escaping logic,
+	// in rare cases where the command does not follow the usual --argument value semantics.
+	ExecuteCmdWithProgressInfo(cmd *exec.Cmd) (output string, err error)
 
 	// ExecuteSilent will run the given command, returning the stdout output and errors (if any).
 	// No command output is shown on the console or logged to the file (irrelevant of the chatty / quiet setting). Can be
@@ -36,10 +45,18 @@ type Executor interface {
 	// Any errors are returned as err return value.
 	ExecuteSilent(command string) (output string, err error)
 
+	// ExecuteCmdSilent is same as ExecuteSilent, except you can provide the os/exec command directly. Useful to avoid Executor escaping logic,
+	// in rare cases where the command does not follow the usual --argument value semantics.
+	ExecuteCmdSilent(cmd *exec.Cmd) (output string, err error)
+
 	// ExecuteTTY is a special executor for cases where the called command needs to detect it runs in a TTY session.
 	// One example of such command is Docker. Commands executed via ExecuteTTY have their output shown on the console,
 	// but the output is NOT saved to a log file. Chatty / Quiet settings have no effect on this method.
 	ExecuteTTY(command string) error
+
+	// ExecuteCmdTTY is same as ExecuteTTY, except you can provide the os/exec command directly. Useful to avoid Executor escaping logic,
+	// in rare cases where the command does not follow the usual --argument value semantics.
+	ExecuteCmdTTY(cmd *exec.Cmd) error
 
 	// AskUserToConfirm pauses the execution, and awaits for user to confirm (by either typing yes, Y or y).
 	// Parameter displayMessage can be used to show a message on the screen.
@@ -59,23 +76,37 @@ type executor struct {
 }
 
 func (e *executor) Execute(command string) (output string, err error) {
-	return e.execute(command, false)
+	return e.executeString(command, false)
+}
+
+func (e *executor) ExecuteCmd(cmd *exec.Cmd) (output string, err error) {
+	return e.executeCmd(cmd, false)
 }
 
 func (e *executor) ExecuteWithProgressInfo(command string) (output string, err error) {
 	if !viper.GetBool("silence-long-running-progress-indicators") {
-		spinner := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
-		spinner.Prefix = "Please wait "
-		spinner.Color("green", "bold")
-		spinner.Start()
+		spinner := createAndStartSpinner()
 		defer spinner.Stop()
 	}
 
-	return e.execute(command, false)
+	return e.executeString(command, false)
+}
+
+func (e *executor) ExecuteCmdWithProgressInfo(cmd *exec.Cmd) (output string, err error) {
+	if !viper.GetBool("silence-long-running-progress-indicators") {
+		spinner := createAndStartSpinner()
+		defer spinner.Stop()
+	}
+
+	return e.executeCmd(cmd, false)
 }
 
 func (e *executor) ExecuteSilent(command string) (output string, err error) {
-	return e.execute(command, true)
+	return e.executeString(command, true)
+}
+
+func (e *executor) ExecuteCmdSilent(cmd *exec.Cmd) (output string, err error) {
+	return e.executeCmd(cmd, true)
 }
 
 func (e *executor) ExecuteTTY(command string) error {
@@ -92,7 +123,20 @@ func (e *executor) ExecuteTTY(command string) error {
 	return internal.ReturnErrorOrPanic(err)
 }
 
-func (e *executor) execute(command string, silent bool) (output string, err error) {
+func (e *executor) ExecuteCmdTTY(cmd *exec.Cmd) error {
+	e.logger.Info("[Command] " + cmd.String())
+
+	// only the direct pipe to os.Std* will work for TTY, using io.MultiWriter like in
+	// the standard Execute() did not work that executing process recognizes it is in TTY session...
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+
+	return internal.ReturnErrorOrPanic(err)
+}
+
+func (e *executor) executeString(command string, silent bool) (output string, err error) {
 	if !silent {
 		commandStartMessage := "[Command] " + command
 
@@ -104,7 +148,24 @@ func (e *executor) execute(command string, silent bool) (output string, err erro
 	}
 
 	cmd := commands.Create(command)
+	return e.execute(cmd, silent)
+}
 
+func (e *executor) executeCmd(cmd *exec.Cmd, silent bool) (output string, err error) {
+	if !silent {
+		commandStartMessage := "[Command (via os/exec)] " + cmd.String()
+
+		if e.chatty {
+			e.logger.Info(commandStartMessage)
+		} else {
+			logging.NewLogFileAppender(e.logFileName).Write([]byte(commandStartMessage))
+		}
+	}
+
+	return e.execute(cmd, silent)
+}
+
+func (e *executor) execute(cmd *exec.Cmd, silent bool) (output string, err error) {
 	// Logic of conditional pipe-ing of command outputs here:
 	// 1. We "capture" the sources of command output from the command itself, by assigning the pipes to local variables.
 	//    These variables are of type io.Reader.
@@ -175,6 +236,14 @@ func (e *executor) execute(command string, silent bool) (output string, err erro
 	}
 
 	return cleanedStringOutput, internal.ReturnErrorOrPanic(compositeError)
+}
+
+func createAndStartSpinner() *spinner.Spinner {
+	spinner := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+	spinner.Prefix = "Please wait "
+	spinner.Color("green", "bold")
+	spinner.Start()
+	return spinner
 }
 
 func (e *executor) AskUserToConfirm(displayMessage string) bool {
