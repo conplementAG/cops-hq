@@ -3,11 +3,9 @@ package terraform
 import (
 	"errors"
 	"fmt"
-	"github.com/avast/retry-go"
 	"github.com/conplementag/cops-hq/v2/pkg/commands"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,8 +15,8 @@ import (
 func Test_SettingsAreNotSharedByReferenceBetweenMultipleInstances(t *testing.T) {
 	// we want to make sure that the design of non-shared settings is always kept, even after refactorings
 	// Arrange
-	tf1, _ := createSimpleTerraformWithDefaultSettings("app1", false, false)
-	tf2, _ := createSimpleTerraformWithDefaultSettings("app2", false, false)
+	tf1, _ := createSimpleTerraformWithDefaultSettings("app1")
+	tf2, _ := createSimpleTerraformWithDefaultSettings("app2")
 
 	// Act
 	tf1.GetDeploymentSettings().AlwaysCleanLocalCache = false
@@ -36,7 +34,7 @@ func Test_SettingsAreNotSharedByReferenceBetweenMultipleInstances(t *testing.T) 
 
 func Test_SetVariablesCanSerializeAnySimpleOrComplexValue(t *testing.T) {
 	// Arrange
-	tf, _ := createSimpleTerraformWithDefaultSettings("test", false, false)
+	tf, _ := createSimpleTerraformWithDefaultSettings("test")
 
 	var variables = make(map[string]interface{})
 
@@ -57,7 +55,7 @@ func Test_SetVariablesCanSerializeAnySimpleOrComplexValue(t *testing.T) {
 	// Assert
 	assert.NoError(t, err)
 
-	fileBytes, err := ioutil.ReadFile(filepath.Join(".", tf.GetVariablesFileName()))
+	fileBytes, err := os.ReadFile(filepath.Join(".", tf.GetVariablesFileName()))
 
 	if err != nil {
 		assert.NoError(t, err)
@@ -178,7 +176,7 @@ func Test_DeployFlow(t *testing.T) {
 		// Arrange
 		fmt.Println("Executing test " + tt.testName)
 
-		tf, executorMock := createSimpleTerraformWithDefaultSettings("test", false, false)
+		tf, executorMock := createSimpleTerraformWithDefaultSettings("test")
 		tt.mockSetup(executorMock)
 		tf.SetVariables(nil)
 
@@ -196,83 +194,6 @@ func Test_DeployFlow(t *testing.T) {
 	}
 }
 
-func Test_Init(t *testing.T) {
-	tests := []struct {
-		testName       string
-		mockSetup      func(executor *executorMock)
-		withTags       bool
-		withAllowedIps bool
-		hasErrors      bool
-	}{
-		{"init without tags",
-			func(executor *executorMock) {
-				executor.On("Execute", mock.MatchedBy(func(command string) bool {
-					return !strings.Contains(command, "--tags")
-				})).Times(5)
-				executor.On("ExecuteSilent", mock.MatchedBy(func(command string) bool {
-					return true
-				})).Once()
-			},
-			false,
-			false,
-			false,
-		},
-		{"init with tags",
-			func(executor *executorMock) {
-				// we only expect the existing plan to be applied
-				executor.On("Execute", mock.MatchedBy(func(command string) bool {
-					if strings.Contains(command, "az storage account create") {
-						return strings.Contains(command, "--tags \"test\"=\"value\"")
-					} else {
-						return true
-					}
-				})).Times(5)
-				executor.On("ExecuteSilent", mock.MatchedBy(func(command string) bool {
-					return true
-				})).Once()
-			},
-			true,
-			false,
-			false,
-		},
-		{"init without tags and with allowed Ips",
-			func(executor *executorMock) {
-				executor.On("Execute", mock.MatchedBy(func(command string) bool {
-					if strings.Contains(command, "network-rule add") {
-						return strings.Contains(command, "--ip-address 10.0.0.1")
-					} else {
-						return true
-					}
-				})).Times(int(retry.DefaultAttempts) + 4)
-			},
-			false,
-			true,
-			true,
-		},
-	}
-
-	for _, tt := range tests {
-		// Arrange
-		fmt.Println("Executing test " + tt.testName)
-
-		tf, executorMock := createSimpleTerraformWithDefaultSettings("test", tt.withTags, tt.withAllowedIps)
-		tt.mockSetup(executorMock)
-		tf.SetVariables(nil)
-
-		// Act
-		err := tf.Init()
-
-		// Assert
-		if tt.hasErrors {
-			assert.Error(t, err)
-		} else {
-			assert.NoError(t, err)
-		}
-
-		executorMock.AssertExpectations(t)
-	}
-}
-
 type executorMock struct {
 	mock.Mock
 	commands.Executor
@@ -280,12 +201,7 @@ type executorMock struct {
 
 func (e *executorMock) Execute(command string) (string, error) {
 	e.Called(command)
-	if strings.Contains(command, "network-rule") {
-		return "[]", nil
-	} else {
-
-		return "success", nil
-	}
+	return "success", nil
 }
 
 func (e *executorMock) ExecuteSilent(command string) (string, error) {
@@ -304,24 +220,14 @@ type variablesStruct struct {
 	ABool   bool   `mapstructure:"aBool" json:"aBool" yaml:"aBool"`
 }
 
-func createSimpleTerraformWithDefaultSettings(projectName string, withTags bool, withAllowedIps bool) (Terraform, *executorMock) {
+func createSimpleTerraformWithDefaultSettings(projectName string) (Terraform, *executorMock) {
 	executor := &executorMock{}
-
-	backendStorageSettings := DefaultBackendStorageSettings
-	if withTags {
-		backendStorageSettings.Tags["test"] = "value"
-	}
-
-	if withAllowedIps {
-		allowedIpAddresses := []string{"10.0.0.1"}
-		backendStorageSettings.AllowedIpAddresses = allowedIpAddresses
-	}
 
 	return New(executor, projectName, "1234", "3214",
 		"westeurope", "testrg", "storeaccount",
 		// important to keep the current directory configured, since some tests rely on this
 		// location to verify that expected directories / files are created
 		filepath.Join("."),
-		backendStorageSettings,
+		DefaultBackendStorageSettings,
 		DefaultDeploymentSettings), executor
 }

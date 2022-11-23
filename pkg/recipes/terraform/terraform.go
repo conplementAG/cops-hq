@@ -9,6 +9,7 @@ import (
 	"github.com/conplementag/cops-hq/v2/pkg/commands"
 	"github.com/sirupsen/logrus"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -97,15 +98,27 @@ type terraformWrapper struct {
 }
 
 func (tf *terraformWrapper) Init() error {
-	tags := ""
-	if len(tf.storageSettings.Tags) > 0 {
-		tags = " --tags " + serializeTagsIntoAzureCliString(tf.storageSettings.Tags)
-	}
+
+	tags := serializeTagsIntoCmdArgsList(tf.storageSettings.Tags)
 
 	if tf.storageSettings.CreateResourceGroup {
 		logrus.Info("Deploying the project " + tf.projectName + " resource group " + tf.resourceGroupName + "...")
 
-		_, err := tf.executor.Execute("az group create -l " + tf.region + " -n " + tf.resourceGroupName + tags)
+		groupCreateCmd := exec.Command("az", "group", "create",
+			"-l", tf.region,
+			"-n", tf.resourceGroupName,
+			"--tags")
+
+		if len(tags) > 0 {
+			groupCreateCmd.Args = append(groupCreateCmd.Args, tags...)
+		} else {
+			// reset tags, if there were already any assigned
+			groupCreateCmd.Args = append(groupCreateCmd.Args, "")
+		}
+
+		// using ExecuteCmd to skip the escaping logic of "Execute"
+		// the --tags argument does not follow the usual --argument value semantics (value(s) contain equal (=) sign and could also contain spaces)
+		_, err := tf.executor.ExecuteCmd(groupCreateCmd)
 
 		if err != nil {
 			return internal.ReturnErrorOrPanic(err)
@@ -119,25 +132,32 @@ func (tf *terraformWrapper) Init() error {
 		defaultAction = "Deny"
 	}
 
-	requireInfrastructureEncryptionSetting := ""
+	storageAccountCreateCmd := exec.Command("az", "storage", "account", "create",
+		"--name", tf.stateStorageAccountName,
+		"--resource-group", tf.resourceGroupName,
+		"--location", tf.region,
+		"--default-action", defaultAction,
+		"--sku", "Standard_LRS",
+		"--access-tier", "Hot",
+		"--kind", "StorageV2",
+		"--min-tls-version", "TLS1_2",
+		"--https-only", "true",
+		"--tags")
 
-	if tf.storageSettings.RequireInfrastructureEncryption {
-		requireInfrastructureEncryptionSetting = " --require-infrastructure-encryption" // infra encryption will add another layer of encryption at rest
+	if len(tags) > 0 {
+		storageAccountCreateCmd.Args = append(storageAccountCreateCmd.Args, tags...)
+	} else {
+		// reset tags, if there were already any assigned
+		storageAccountCreateCmd.Args = append(storageAccountCreateCmd.Args, "")
 	}
 
-	_, err := tf.executor.Execute("az storage account create" +
-		" --name " + tf.stateStorageAccountName +
-		" --resource-group " + tf.resourceGroupName +
-		" --location " + tf.region +
-		" --sku Standard_LRS" +
-		" --access-tier Hot" +
-		requireInfrastructureEncryptionSetting +
-		" --kind StorageV2" +
-		" --min-tls-version TLS1_2" +
-		" --https-only true" +
-		" --default-action " +
-		defaultAction +
-		tags)
+	if tf.storageSettings.RequireInfrastructureEncryption {
+		storageAccountCreateCmd.Args = append(storageAccountCreateCmd.Args, "--require-infrastructure-encryption") // infra encryption will add another layer of encryption at rest
+	}
+
+	// using ExecuteCmd to skip the escaping logic of "Execute"
+	// the --tags argument does not follow the usual --argument value semantics (value(s) contain equal (=) sign and could also contain spaces)
+	_, err := tf.executor.ExecuteCmd(storageAccountCreateCmd)
 
 	if err != nil {
 		return internal.ReturnErrorOrPanic(err)
