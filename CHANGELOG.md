@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/conplementAG/cops-hq/compare/v2.1.0...v2.1.1) (2022-11-28)
+
+
+### Bug Fixes
+
+* **terraform-recipe:** use ExecuteCmd for az cmds with tags argument ([8af9c56](https://github.com/conplementAG/cops-hq/commit/8af9c5637d392fc2aa4b6fe809906615d8376b8e))
+
 ## [2.1.0](https://github.com/conplementAG/cops-hq/compare/v2.0.2...v2.1.0) (2022-11-22)
 
 
