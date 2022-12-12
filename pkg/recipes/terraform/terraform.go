@@ -8,11 +8,11 @@ import (
 	"github.com/conplementag/cops-hq/v2/internal"
 	"github.com/conplementag/cops-hq/v2/pkg/commands"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/exp/slices"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"reflect"
-	"sort"
 	"strings"
 	"time"
 )
@@ -163,71 +163,9 @@ func (tf *terraformWrapper) Init() error {
 		return internal.ReturnErrorOrPanic(err)
 	}
 
-	currentAllowedIpAddressesMapped, err := tf.determineCurrentAllowedIpAddresses()
-
+	err = tf.addStorageAccountNetworkRules()
 	if err != nil {
 		return internal.ReturnErrorOrPanic(err)
-	}
-
-	// cleanup ip network rules
-	if len(currentAllowedIpAddressesMapped) > 0 && !reflect.DeepEqual(currentAllowedIpAddressesMapped, tf.storageSettings.AllowedIpAddresses) {
-		logrus.Info("Cleanup network rules for terraform state storage account " + tf.stateStorageAccountName + "...")
-		for _, currentAllowedIpAddress := range currentAllowedIpAddressesMapped {
-			_, err := tf.executor.Execute("az storage account network-rule remove" +
-				" --account-name " + tf.stateStorageAccountName +
-				" --ip-address " + currentAllowedIpAddress +
-				" --resource-group " + tf.resourceGroupName)
-
-			if err != nil {
-				return internal.ReturnErrorOrPanic(err)
-			}
-		}
-	}
-
-	// add ip network rules
-	if len(tf.storageSettings.AllowedIpAddresses) > 0 {
-		logrus.Info("Setting network rules for terraform state storage account " + tf.stateStorageAccountName + "...")
-		for _, allowedIpAddress := range tf.storageSettings.AllowedIpAddresses {
-			_, err := tf.executor.Execute("az storage account network-rule add" +
-				" --account-name " + tf.stateStorageAccountName +
-				" --ip-address " + allowedIpAddress +
-				" --resource-group " + tf.resourceGroupName)
-
-			if err != nil {
-				return internal.ReturnErrorOrPanic(err)
-			}
-		}
-	}
-
-	// check ip network rules
-	if len(tf.storageSettings.AllowedIpAddresses) > 0 {
-		logrus.Info("Checking network rules for terraform state storage account " + tf.stateStorageAccountName + "...")
-		retryErrorText := "network rules not equal"
-		err := retry.Do(func() error {
-			currentAllowedIpAddressesMapped, err := tf.determineCurrentAllowedIpAddresses()
-			if err != nil {
-				return err
-			}
-
-			if reflect.DeepEqual(currentAllowedIpAddressesMapped, tf.storageSettings.AllowedIpAddresses) {
-				return nil
-			} else {
-				return errors.New(retryErrorText)
-			}
-		},
-			retry.Delay(time.Second),
-			retry.DelayType(retry.FixedDelay),
-			retry.RetryIf(func(err error) bool {
-				return err.Error() == retryErrorText
-			}),
-			retry.OnRetry(func(n uint, err error) {
-				logrus.Debugf("Retry %d - checking network rules of storage account... %s", n+1, err)
-			}),
-		)
-
-		if err != nil {
-			return internal.ReturnErrorOrPanic(err)
-		}
 	}
 
 	logrus.Info("Reading the storage account key, which will be give to terraform to initialize the remote state...")
@@ -349,6 +287,57 @@ func (tf *terraformWrapper) GetVariablesFileName() string {
 	return tf.projectName + ".tfvars"
 }
 
+func (tf *terraformWrapper) addStorageAccountNetworkRules() error {
+	existingIpAddresses, err := tf.determineCurrentAllowedIpAddresses()
+	if err != nil {
+		return internal.ReturnErrorOrPanic(err)
+	}
+
+	addIpAddresses, removeIpAddresses := findItemsToAddAndRemove(existingIpAddresses, tf.storageSettings.AllowedIpAddresses)
+
+	// add new rules
+	for _, ipAddress := range addIpAddresses {
+		tf.addOrRemoveStorageAccountNetworkRule("add", ipAddress)
+	}
+
+	// remove rules
+	for _, ipAddress := range removeIpAddresses {
+		tf.addOrRemoveStorageAccountNetworkRule("remove", ipAddress)
+	}
+
+	// ensure rules are applied to allow further processing
+	retryErrorText := "network rules not equal"
+	retry.Do(func() error {
+		currentAllowedIpAddresses, _ := tf.determineCurrentAllowedIpAddresses()
+		if reflect.DeepEqual(currentAllowedIpAddresses, tf.storageSettings.AllowedIpAddresses) {
+			return nil
+		} else {
+			return errors.New(retryErrorText)
+		}
+	},
+		retry.Delay(time.Second),
+		retry.DelayType(retry.FixedDelay),
+		retry.RetryIf(func(err error) bool {
+			return err.Error() == retryErrorText
+		}),
+		retry.OnRetry(func(n uint, err error) {
+			logrus.Debugf("Retry %d - checking network rules of storage account... %s", n+1, err)
+		}),
+	)
+
+	return nil
+}
+
+func (tf *terraformWrapper) addOrRemoveStorageAccountNetworkRule(method, value string) {
+	cmd := "az storage account network-rule " + method +
+		" --resource-group " + tf.resourceGroupName +
+		" --account-name " + tf.stateStorageAccountName + " " +
+		" --ip-address " + value
+
+	_, err := tf.executor.Execute(cmd)
+	internal.ReturnErrorOrPanic(err)
+}
+
 func (tf *terraformWrapper) determineCurrentAllowedIpAddresses() ([]string, error) {
 	networkRuleListCmd := "az storage account network-rule list" +
 		" --resource-group " + tf.resourceGroupName +
@@ -368,8 +357,23 @@ func (tf *terraformWrapper) determineCurrentAllowedIpAddresses() ([]string, erro
 		return []string{}, err
 	}
 
-	sort.Strings(currentAllowedIpAddressesMapped)
 	return currentAllowedIpAddressesMapped, nil
+}
+
+func findItemsToAddAndRemove(current, expected []string) (add, remove []string) {
+	for _, item := range current {
+		if !slices.Contains(expected, item) {
+			remove = append(remove, item)
+		}
+	}
+
+	for _, item := range expected {
+		if !slices.Contains(current, item) {
+			add = append(add, item)
+		}
+	}
+
+	return add, remove
 }
 
 func (tf *terraformWrapper) guardAgainstUnsetVariables() error {
