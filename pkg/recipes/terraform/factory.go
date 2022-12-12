@@ -2,7 +2,6 @@ package terraform
 
 import (
 	"github.com/conplementag/cops-hq/v2/pkg/commands"
-	"sort"
 )
 
 // New creates a new instance of Terraform, which is a wrapper around common Terraform functionality. In includes remote state
@@ -28,8 +27,6 @@ func New(executor commands.Executor, projectName string,
 	subscriptionId string, tenantId string, region string,
 	resourceGroupName string, stateStorageAccountName string, terraformDirectory string,
 	backendStorageSettings BackendStorageSettings, deploymentSettings DeploymentSettings) Terraform {
-
-	sort.Strings(backendStorageSettings.AllowedIpAddresses)
 
 	return &terraformWrapper{
 		executor:                executor,
