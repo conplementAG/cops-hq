@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/conplementAG/cops-hq/compare/v2.1.1...v2.2.0) (2022-12-12)
+
+
+### Features
+
+* **terraform recipe:** allow ip as cidr and  optimization ([f8a98ff](https://github.com/conplementAG/cops-hq/commit/f8a98fff605c32eacbb3b568ad4649e0ec91b152))
+
 ## [2.1.1](https://github.com/conplementAG/cops-hq/compare/v2.1.0...v2.1.1) (2022-11-28)
 
 
