@@ -24,7 +24,7 @@ After you install sops on your machine, create a config directory in the root of
 ```yaml 
 # azure_keyvault is configured with an ID of the key which should be used to decrypt specified config files.
 # Decryption will work, if the currently logged-in user has access to the specified key. All team developers should
-# per default have access to the non-prod key, while prod key access should only be granted to the cicd service principal.
+# per default have access to the non-prod key, while prod key access should only be granted to the CI/CD service principal.
 creation_rules:
   - path_regex: \.prod.yaml$
     azure_keyvault: prod_keyvault_key_id_from_azure_portal
@@ -40,12 +40,22 @@ to decrypt / encrypt production env configs, and  "dev_keyvault_key_id_from_azur
 Current logged-in user should of course have access to these key(s), which can be granted in Azure portal.   
 
 Reading / writing of configuration files is always done via sops CLI, which uses the currently configured system text editor. 
-If you want to override this, you could for example do `export EDITOR="code --wait"` before executing any sops command.
+If you want to override this, you could run
+#### Linux and Mac
+```shell
+export EDITOR="code -w"
+```
+or
+#### Windows (as Admin)
+```shell
+setx EDITOR "code -w" /m
+```
+to set VS Code as text editor before executing any sops command.
 
 First, create a template file which developers can re-use in the future for own personal dev environments. You can store all 
 the default configuration values here, and check this file in your source control. 
 
-``` shell
+```shell
 sops local-template.yaml
 ```
 
@@ -59,7 +69,7 @@ method expect a viper variable called "environment-tag" to be defined and set.
 To showcase the complete "solution", usual pattern is something like this:
 
 ```go
-// since we use sops with azure key vault, we need to log into the Azure first, so that sops can cnrypt / decrypt the config files
+// since we use sops with azure key vault, we need to log into the Azure first, so that sops can crypt / decrypt the config files
 login := azure_login.New(hq.GetExecutor())
 login.Login()
 
