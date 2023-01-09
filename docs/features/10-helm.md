@@ -18,7 +18,7 @@ provide a map of strings to set variables.
 // First create a new helm instance and set the global parameters.
 h := helm.New(s.executor, "my-namespace", "my-chartname", filepath.Join(copshq.ProjectBasePath, "helm"))
 
-// Next step is is normally to set variables for your helm deployment.
+// Next step is normally to set variables for your helm deployment.
 // This is always a simple map of strings, but supporting any simple or complex object. Nested structures are
 // also supported. 
 // You can also simply load a whole structure of your viper configuration and convert this directly to a map.
@@ -42,7 +42,7 @@ vars := map[string]interface{}{
 				"key_1_of_nested": 2,
 				"key_2_of_nested": "nested_value_override"}}}
 				
-// alternatively you can autopopulate your map of strings from your config (e.g. sops) with the help of viper
+// alternatively you can auto-populate your map of strings from your config (e.g. sops) with the help of viper
 vars = viper.GetStringMap("application")
 				
 err = h.SetVariables(vars)
