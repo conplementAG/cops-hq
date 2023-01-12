@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/conplementAG/cops-hq/compare/v2.2.0...v2.3.0) (2023-01-12)
+
+
+### Features
+
+* **command:** make command factory public ([c022ecf](https://github.com/conplementAG/cops-hq/commit/c022ecfde4670e9bb97f3e79f2c17c81b361e655))
+
 ## [2.2.0](https://github.com/conplementAG/cops-hq/compare/v2.1.1...v2.2.0) (2022-12-12)
 
 
