@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/briandowns/spinner"
 	"github.com/conplementag/cops-hq/v2/internal"
-	"github.com/conplementag/cops-hq/v2/internal/commands"
 	"github.com/conplementag/cops-hq/v2/internal/logging"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -111,7 +110,7 @@ func (e *executor) ExecuteCmdSilent(cmd *exec.Cmd) (output string, err error) {
 
 func (e *executor) ExecuteTTY(command string) error {
 	e.logger.Info("[Command] " + command)
-	cmd := commands.Create(command)
+	cmd := Create(command)
 
 	// only the direct pipe to os.Std* will work for TTY, using io.MultiWriter like in
 	// the standard Execute() did not work that executing process recognizes it is in TTY session...
@@ -147,7 +146,7 @@ func (e *executor) executeString(command string, silent bool) (output string, er
 		}
 	}
 
-	cmd := commands.Create(command)
+	cmd := Create(command)
 	return e.execute(cmd, silent)
 }
 
