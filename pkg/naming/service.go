@@ -13,18 +13,22 @@ type Service struct {
 	pattern     patterns.Pattern
 	context     string
 	module      string
+	color       string
 	region      string
 	environment string
 }
 
 // SetPattern changes the naming convention pattern to a user defined value. To set a custom pattern, combine the
 // placeholders in any order you wish, but without spaces, hyphens or any other characters.
-//     Placeholders supported are {context} {module} {name} {region} {environment} and {resource_suffix}.
+//
+//	Placeholders supported are {context} {module} {color} {name} {region} {environment} and {resource_suffix}.
+//
 // For example, you can declare a new pattern like this:
-//     var myPattern patterns.Pattern = "{resource_suffix}{environment}{context}{module}{region}{name}"
+//
+//	var myPattern patterns.Pattern = "{resource_suffix}{environment}{context}{module}{region}{name}{color}"
 func (service *Service) SetPattern(pattern patterns.Pattern) error {
-	numberOfPlaceholders := 6
-	mandatoryPlaceholders := []string{"{resource_suffix}", "{environment}", "{context}", "{module}", "{region}", "{name}"}
+	numberOfPlaceholders := 7
+	mandatoryPlaceholders := []string{"{resource_suffix}", "{environment}", "{color}", "{context}", "{module}", "{region}", "{name}"}
 
 	for _, placeholder := range mandatoryPlaceholders {
 		if !strings.Contains(string(pattern), placeholder) {
@@ -69,6 +73,7 @@ func (service *Service) GenerateResourceName(resourceType resources.AzureResourc
 	placeholderMappings := []placeholderMapping{
 		{"{context}", 0, service.context},
 		{"{module}", 0, service.module},
+		{"{color}", 0, service.color},
 		{"{name}", 0, name},
 		{"{region}", 0, abbreviatedRegion},
 		{"{environment}", 0, service.environment},
@@ -86,6 +91,13 @@ func (service *Service) GenerateResourceName(resourceType resources.AzureResourc
 	if name == "" {
 		linq.From(placeholderMappings).WhereT(func(mapping placeholderMapping) bool {
 			return mapping.placeholder != "{name}"
+		}).ToSlice(&placeholderMappings)
+	}
+
+	// if color not provided, we need to omit the {color} field from the naming completely
+	if service.color == "" {
+		linq.From(placeholderMappings).WhereT(func(mapping placeholderMapping) bool {
+			return mapping.placeholder != "{color}"
 		}).ToSlice(&placeholderMappings)
 	}
 
