@@ -24,7 +24,7 @@ var namingConventions = []namingConvention{
 	{resources.SqlDatabase, 3, 63, true, true, false, LowerCase},
 	{resources.SqlManagedInstance, 3, 63, true, true, false, LowerCase},
 	{resources.SqlElasticPool, 3, 63, true, true, false, LowerCase},
-	{resources.KeyVault, 3, 24, true, true, false, CaseInsensitive},
+	{resources.KeyVault, 3, 24, true, false, false, CaseInsensitive},
 	{resources.IotHub, 3, 50, true, true, false, CaseInsensitive},
 	{resources.RecoveryServicesVault, 5, 50, true, true, false, CaseInsensitive},
 	{resources.AKSCluster, 5, 50, true, true, true, CaseInsensitive},
