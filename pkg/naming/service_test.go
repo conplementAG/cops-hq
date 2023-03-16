@@ -57,6 +57,18 @@ func Test_GenerateResourceName(t *testing.T) {
 		{"module can be omitted - short length azure resource", "acmextestweudevsa", nil,
 			args{"", "test", "x", patterns.Normal, resources.StorageAccount},
 		},
+		{"long resource name test storage account", "acmefrontbtestweudevsa", nil,
+			args{"front", "test", "b", patterns.Normal, resources.StorageAccount},
+		},
+		{"long resource name test private endpoint", "acme-front-b-test-weu-dev-pe", nil,
+			args{"front", "test", "b", patterns.Normal, resources.PrivateEndpoint},
+		},
+		{"long resource name test key vault", "acmefrontbtestweudevkv", nil,
+			args{"front", "test", "b", patterns.Normal, resources.KeyVault},
+		},
+		{"long resource name test key vault", "acme-front-b-test-weu-dev-sqlmi", nil,
+			args{"front", "test", "b", patterns.Normal, resources.SqlManagedInstance},
+		},
 	}
 
 	for _, tt := range tests {
