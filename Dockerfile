@@ -29,6 +29,14 @@ RUN curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubect
 RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 RUN kubectl version --client=true
 
+# kubelogin CLI
+ARG KUBELOGIN_VERSION=v0.0.28
+RUN curl -L https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip --output kubelogin.zip
+RUN unzip kubelogin.zip -d kubelogin
+RUN chmod +x kubelogin
+RUN mv kubelogin/bin/linux_amd64/kubelogin /usr/local/bin
+RUN kubelogin --version
+
 # Helm > 3.0, latest version
 RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
 RUN chmod 700 get_helm.sh

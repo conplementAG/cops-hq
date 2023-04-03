@@ -50,6 +50,7 @@ type versionCheckExecutorMock struct {
 	azureCliVersion  string
 	terraformVersion string
 	kubectlVersion   string
+	kubeloginVersion string
 	helmVersion      string
 	copsctlVersion   string
 }
@@ -58,6 +59,7 @@ func (e *versionCheckExecutorMock) SetVersionsToExpected() {
 	e.azureCliVersion = ExpectedMinAzureCliVersion
 	e.terraformVersion = ExpectedMinTerraformVersion
 	e.kubectlVersion = ExpectedMinKubectlVersion
+	e.kubeloginVersion = ExpectedMinKubeloginVersion
 	e.helmVersion = ExpectedMinHelmVersion
 	e.copsctlVersion = ExpectedMinCopsctlVersion
 }
@@ -84,6 +86,10 @@ func (e *versionCheckExecutorMock) Execute(command string) (string, error) {
 		response.ClientVersion.GitVersion = e.kubectlVersion
 
 		return serializeToJson(response), nil
+	}
+
+	if strings.Contains(command, "kubelogin") {
+		return fmt.Sprintf("kubelogin version\r\ngit hash: v%s/45765476576575675\r\nother stuff", e.kubeloginVersion), nil
 	}
 
 	if strings.Contains(command, "helm") {
