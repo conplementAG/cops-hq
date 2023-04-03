@@ -7,6 +7,7 @@ import (
 	"github.com/conplementag/cops-hq/v2/internal"
 	"github.com/conplementag/cops-hq/v2/pkg/error_handling"
 	"github.com/sirupsen/logrus"
+	"regexp"
 	"strings"
 )
 
@@ -15,6 +16,7 @@ const (
 	ExpectedMinTerraformVersion = "1.2.8"
 	ExpectedMinHelmVersion      = "3.8.2"
 	ExpectedMinKubectlVersion   = "1.23.9"
+	ExpectedMinKubeloginVersion = "0.0.28"
 	ExpectedMinCopsctlVersion   = "0.8.4"
 	ExpectedMinSopsVersion      = "3.7.3"
 )
@@ -27,10 +29,11 @@ func (hq *hqContainer) CheckToolingDependencies() error {
 	err2 := hq.checkHelm()
 	err3 := hq.checkTerraform()
 	err4 := hq.checkKubectl()
-	err5 := hq.checkCopsctl()
+	err5 := hq.checkKubelogin()
+	err6 := hq.checkCopsctl()
 
-	if err1 != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil {
-		compositeErr := fmt.Errorf("mandatory tooling dependencies check failed: %v %v %v %v %v", err1, err2, err3, err4, err5)
+	if err1 != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil || err6 != nil {
+		compositeErr := fmt.Errorf("mandatory tooling dependencies check failed: %v %v %v %v %v %v", err1, err2, err3, err4, err5, err6)
 		return internal.ReturnErrorOrPanic(compositeErr)
 	}
 
@@ -137,6 +140,29 @@ func (hq *hqContainer) checkKubectl() error {
 
 	if !versionConstraint.Check(installedVersion) {
 		return fmt.Errorf("kubectl version mismatch. expected >= %v, got %v", ExpectedMinKubectlVersion, installedVersion)
+	}
+
+	logrus.Info("...ok.")
+	return nil
+}
+
+func (hq *hqContainer) checkKubelogin() error {
+	logrus.Info("Checking kubelogin...")
+	kubeloginVersion, err := hq.Executor.Execute("kubelogin --version")
+
+	if err != nil {
+		return err
+	}
+
+	kubeloginRegex, err := regexp.Compile(".*(v\\d+\\.\\d+\\.\\d+).*")
+	if kubeloginRegex.MatchString(kubeloginVersion) {
+		matches := kubeloginRegex.FindStringSubmatch(kubeloginVersion)
+		versionConstraint, _ := semver.NewConstraint(">=" + ExpectedMinKubeloginVersion)
+		installedVersion, _ := semver.NewVersion(matches[1])
+
+		if !versionConstraint.Check(installedVersion) {
+			return fmt.Errorf("kubelogin version mismatch. expected >= %v, got %v", ExpectedMinKubeloginVersion, installedVersion)
+		}
 	}
 
 	logrus.Info("...ok.")
