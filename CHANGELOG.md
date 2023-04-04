@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/conplementAG/cops-hq/compare/v2.3.0...v2.4.0) (2023-04-04)
+
+
+### Features
+
+* **dependencies-check:** add kubelogin ([ff71e9a](https://github.com/conplementAG/cops-hq/commit/ff71e9ada3580b657c3a40ea85a5487be9858af0))
+
 ## [2.3.0](https://github.com/conplementAG/cops-hq/compare/v2.2.0...v2.3.0) (2023-01-12)
 
 
