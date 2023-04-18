@@ -22,6 +22,7 @@ var namingConventions = []namingConvention{
 	{resources.ResourceGroup, 3, 90, true, true, true, CaseInsensitive},
 	{resources.SqlServer, 3, 63, true, true, false, LowerCase},
 	{resources.SqlDatabase, 3, 63, true, true, false, LowerCase},
+	{resources.MongoAtlasCluster, 3, 63, true, true, false, LowerCase},
 	{resources.SqlManagedInstance, 3, 63, true, true, false, LowerCase},
 	{resources.SqlElasticPool, 3, 63, true, true, false, LowerCase},
 	{resources.KeyVault, 3, 24, true, false, false, CaseInsensitive},
