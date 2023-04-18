@@ -7,6 +7,7 @@ const (
 	StorageAccount        AzureResourceType = "sa"
 	SqlServer             AzureResourceType = "sqls"
 	SqlDatabase           AzureResourceType = "sqldb"
+	MongoAtlasCluster     AzureResourceType = "mac"
 	SqlManagedInstance    AzureResourceType = "sqlmi"
 	SqlElasticPool        AzureResourceType = "sqlep"
 	KeyVault              AzureResourceType = "kv"
