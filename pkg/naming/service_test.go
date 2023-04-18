@@ -54,6 +54,9 @@ func Test_GenerateResourceName(t *testing.T) {
 		{"module can be omitted - normal azure resource", "acme-g-test-weu-dev-rg", nil,
 			args{"", "test", "g", patterns.Normal, resources.ResourceGroup},
 		},
+		{"color can be omitted - normal azure resource", "acme-test-weu-dev-rg", nil,
+			args{"", "test", "", patterns.Normal, resources.ResourceGroup},
+		},
 		{"module can be omitted - short length azure resource", "acmextestweudevsa", nil,
 			args{"", "test", "x", patterns.Normal, resources.StorageAccount},
 		},
@@ -72,7 +75,7 @@ func Test_GenerateResourceName(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		namingService, err := New("acme", tt.args.module, tt.args.color, "westeurope", "dev")
+		namingService, err := New("acme", "westeurope", "dev", tt.args.module, tt.args.color)
 		assert.NoError(t, err)
 
 		namingService.SetPattern(tt.args.pattern)
@@ -93,7 +96,7 @@ func Test_GenerateResourceName(t *testing.T) {
 }
 
 func Test_SetPattern(t *testing.T) {
-	namingService, err := New("acme", "front", "blue", "westeurope", "dev")
+	namingService, err := New("acme", "westeurope", "dev", "front", "blue")
 	assert.NoError(t, err)
 
 	var customPattern patterns.Pattern = "{resource_suffix}{module}{color}{name}{environment}{region}{context}"
