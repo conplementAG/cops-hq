@@ -1,4 +1,4 @@
-FROM golang:1.18.5-bullseye
+FROM golang:1.20.2-bullseye
 
 RUN apt-get update && \
     apt-get install lsb-release -y
@@ -8,14 +8,14 @@ RUN go version
 RUN apt-get update
 
 ################## Tooling prerequisites  ######################
-ARG AZURE_CLI_VERSION=2.39.0
+ARG AZURE_CLI_VERSION=2.46.0
 RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" > /etc/apt/sources.list.d/azure-cli.list
 RUN curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 RUN apt-get install apt-transport-https
 RUN apt-get update && apt-get install -y azure-cli=${AZURE_CLI_VERSION}-1~bullseye
 
 # Install terraform
-ARG TERRAFORM_VERSION=1.2.8
+ARG TERRAFORM_VERSION=1.4.0
 RUN curl -L https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip --output terraform.zip
 RUN apt-get install unzip
 RUN unzip terraform.zip
@@ -24,7 +24,7 @@ RUN mv terraform /usr/local/bin
 # k8s CLI
 # You must use a kubectl version that is within one minor version difference of your cluster.
 # For example, a v1.24 client can communicate with v1.23, v1.24, and v1.25 control planes.
-ARG KUBECTL_VERSION=v1.23.9
+ARG KUBECTL_VERSION=v1.25.7
 RUN curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl
 RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 RUN kubectl version --client=true
@@ -37,13 +37,15 @@ RUN chmod +x kubelogin
 RUN mv kubelogin/bin/linux_amd64/kubelogin /usr/local/bin
 RUN kubelogin --version
 
-# Helm > 3.0, latest version
-RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
-RUN chmod 700 get_helm.sh
-RUN ./get_helm.sh
+# Helm
+ENV HELM_VERSION v3.11.3
+RUN curl -LO https://get.helm.sh/helm-${HELM_VERSION}-linux-386.tar.gz
+RUN tar xvzf helm-${HELM_VERSION}-linux-386.tar.gz
+RUN mv linux-386/helm $GOPATH/bin
+RUN helm version
 
 # copsctl
-ENV COPSCTL_VERSION 0.8.4
+ENV COPSCTL_VERSION 0.9.0
 RUN curl -LO https://github.com/conplementAG/copsctl/releases/download/v${COPSCTL_VERSION}/copsctl_${COPSCTL_VERSION}_Linux_x86_64.tar.gz
 RUN tar xvzf copsctl_${COPSCTL_VERSION}_Linux_x86_64.tar.gz
 RUN mv copsctl $GOPATH/bin
