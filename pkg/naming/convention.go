@@ -25,7 +25,10 @@ var namingConventions = []namingConvention{
 	{resources.MongoAtlasCluster, 3, 63, true, true, false, LowerCase},
 	{resources.SqlManagedInstance, 3, 63, true, true, false, LowerCase},
 	{resources.SqlElasticPool, 3, 63, true, true, false, LowerCase},
-	{resources.KeyVault, 3, 24, true, false, false, CaseInsensitive},
+	{resources.KeyVault, 3, 24, true, true, false, CaseInsensitive},
+	// KeyVaultWithoutHyphens can be used if the normal KeyVault resource is too long (for example, when using the color part name).
+	// This had to be implemented like this to avoid breaking changes to all the existing clients.
+	{resources.KeyVaultWithoutHyphens, 3, 24, true, false, false, CaseInsensitive},
 	{resources.IotHub, 3, 50, true, true, false, CaseInsensitive},
 	{resources.RecoveryServicesVault, 5, 50, true, true, false, CaseInsensitive},
 	{resources.AKSCluster, 5, 50, true, true, true, CaseInsensitive},
