@@ -63,7 +63,8 @@ func (s *ExecutorTestSuite) Test_ExecuteCommandInTTYMode() {
 }
 
 func (s *ExecutorTestSuite) Test_ExecuteCommandWithArgumentsWithSpacesAndQuotations() {
-	out, _ := s.exec.Execute("echo \"this is a long string\"")
+	out, err := s.exec.Execute("echo \"this is a long string\"")
+	s.Nil(err)
 	s.Equal("this is a long string", out)
 }
 
