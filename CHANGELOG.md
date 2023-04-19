@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.5.0](https://github.com/conplementAG/cops-hq/compare/v2.4.0...v2.5.0) (2023-04-19)
+
+
+### Features
+
+* **docker:** updated dependencies ([54f4d5b](https://github.com/conplementAG/cops-hq/commit/54f4d5b6cc59016412a314ef6d179cd2e3ac7b3a))
+* **naming-service:** add a KeyVaultWithoutHyphens resource to allow all parts to be used with key vaults ([3761a37](https://github.com/conplementAG/cops-hq/commit/3761a37c5ebc5f721c43cf74a5b1abc173f89b18))
+* **naming-service:** added color part ([9af33ee](https://github.com/conplementAG/cops-hq/commit/9af33ee1d54f39adf5aa6aac9ac34dd6a0c0f271))
+* **naming-service:** keyvault naming without hyphens due to max char limitations ([e490bf4](https://github.com/conplementAG/cops-hq/commit/e490bf43e5506f6dd5ae02d9ecc6dfae5acc88ff))
+* **naming-service:** mongo atlas resource ([808cc10](https://github.com/conplementAG/cops-hq/commit/808cc10365814fed04786265b8265a38fd3354ab))
+
+
+### Bug Fixes
+
+* **naming-service:** color should be optional ([ee3bacc](https://github.com/conplementAG/cops-hq/commit/ee3bacc9d73a3ee98417ccc600703393c1ffae78))
+
 ## [2.4.0](https://github.com/conplementAG/cops-hq/compare/v2.3.0...v2.4.0) (2023-04-04)
 
 
