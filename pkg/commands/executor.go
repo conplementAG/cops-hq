@@ -2,6 +2,7 @@ package commands
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"github.com/briandowns/spinner"
 	"github.com/conplementag/cops-hq/v2/internal"
@@ -44,6 +45,11 @@ type Executor interface {
 	// Any errors are returned as err return value.
 	ExecuteSilent(command string) (output string, err error)
 
+	// ExecuteLoud will run the given command, returning the stdout output and errors (if any).
+	// Command output is always shown on the console and logged to the file (irrelevant of the chatty / quiet setting). Can be
+	// used for commands that are always of output relevant for the user (like an interactive login command or similar)
+	ExecuteLoud(command string) (output string, err error)
+
 	// ExecuteCmdSilent is same as ExecuteSilent, except you can provide the os/exec command directly. Useful to avoid Executor escaping logic,
 	// in rare cases where the command does not follow the usual --argument value semantics.
 	ExecuteCmdSilent(cmd *exec.Cmd) (output string, err error)
@@ -75,7 +81,7 @@ type executor struct {
 }
 
 func (e *executor) Execute(command string) (output string, err error) {
-	return e.executeString(command, false)
+	return e.executeString(command, false, false)
 }
 
 func (e *executor) ExecuteCmd(cmd *exec.Cmd) (output string, err error) {
@@ -88,7 +94,7 @@ func (e *executor) ExecuteWithProgressInfo(command string) (output string, err e
 		defer spinner.Stop()
 	}
 
-	return e.executeString(command, false)
+	return e.executeString(command, false, false)
 }
 
 func (e *executor) ExecuteCmdWithProgressInfo(cmd *exec.Cmd) (output string, err error) {
@@ -101,7 +107,11 @@ func (e *executor) ExecuteCmdWithProgressInfo(cmd *exec.Cmd) (output string, err
 }
 
 func (e *executor) ExecuteSilent(command string) (output string, err error) {
-	return e.executeString(command, true)
+	return e.executeString(command, true, false)
+}
+
+func (e *executor) ExecuteLoud(command string) (output string, err error) {
+	return e.executeString(command, false, true)
 }
 
 func (e *executor) ExecuteCmdSilent(cmd *exec.Cmd) (output string, err error) {
@@ -135,11 +145,15 @@ func (e *executor) ExecuteCmdTTY(cmd *exec.Cmd) error {
 	return internal.ReturnErrorOrPanic(err)
 }
 
-func (e *executor) executeString(command string, silent bool) (output string, err error) {
+func (e *executor) executeString(command string, silent bool, loud bool) (output string, err error) {
+	if silent && loud {
+		return "", errors.New("it makes no sense to have a command execute as both silent and loud")
+	}
+
 	if !silent {
 		commandStartMessage := "[Command] " + command
 
-		if e.chatty {
+		if e.chatty || loud {
 			e.logger.Info(commandStartMessage)
 		} else {
 			logging.NewLogFileAppender(e.logFileName).Write([]byte(commandStartMessage))
@@ -147,7 +161,7 @@ func (e *executor) executeString(command string, silent bool) (output string, er
 	}
 
 	cmd := Create(command)
-	return e.execute(cmd, silent)
+	return e.execute(cmd, silent, loud)
 }
 
 func (e *executor) executeCmd(cmd *exec.Cmd, silent bool) (output string, err error) {
@@ -161,10 +175,18 @@ func (e *executor) executeCmd(cmd *exec.Cmd, silent bool) (output string, err er
 		}
 	}
 
-	return e.execute(cmd, silent)
+	return e.execute(cmd, silent, false)
 }
 
-func (e *executor) execute(cmd *exec.Cmd, silent bool) (output string, err error) {
+// execute argument logic is as follows:
+// if silent is given, the command output will be suppressed from automatic console / file logging
+// if loud is given, the command output will be explicitly outputted, even in non-chatty mode (useful for login or similar)
+// both silent and loud make so sense at the same time
+func (e *executor) execute(cmd *exec.Cmd, silent bool, loud bool) (output string, err error) {
+	if silent && loud {
+		return "", errors.New("it makes no sense to have a command execute as both silent and loud")
+	}
+
 	// Logic of conditional pipe-ing of command outputs here:
 	// 1. We "capture" the sources of command output from the command itself, by assigning the pipes to local variables.
 	//    These variables are of type io.Reader.
@@ -196,7 +218,7 @@ func (e *executor) execute(cmd *exec.Cmd, silent bool) (output string, err error
 	if !silent {
 		logFileWriter = logging.NewLogFileAppender(e.logFileName)
 
-		if e.chatty || viper.GetBool("verbose") {
+		if e.chatty || viper.GetBool("verbose") || loud {
 			stdoutWriter = os.Stdout
 			stderrWriter = os.Stderr
 		}
