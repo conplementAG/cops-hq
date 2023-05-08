@@ -56,7 +56,7 @@ func Test_TriggersUserLogin_WhenNoCredentialsProvidedAndNotLoggedIn(t *testing.T
 		return strings.Contains(command, "az account show")
 	})).Once()
 
-	executor.On("Execute", mock.MatchedBy(func(command string) bool {
+	executor.On("ExecuteLoud", mock.MatchedBy(func(command string) bool {
 		return strings.Contains(command, "az login")
 	})).Once()
 
@@ -113,4 +113,10 @@ func (e *loginExecutorMock) ExecuteSilent(command string) (string, error) {
 	}
 
 	return "unknown command for the ExecuteSilent mock called, but let's return successfully anyways", nil
+}
+
+func (e *loginExecutorMock) ExecuteLoud(command string) (string, error) {
+	e.Called(command)
+
+	return "mock return - success", nil
 }

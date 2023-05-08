@@ -73,7 +73,7 @@ func (l *Login) useServicePrincipalLogin() bool {
 }
 
 func (l *Login) interactiveLogin() error {
-	_, err := l.executor.Execute("az login")
+	_, err := l.executor.ExecuteLoud("az login")
 	return err
 }
 
