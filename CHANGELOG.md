@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/conplementAG/cops-hq/compare/v2.5.0...v2.6.0) (2023-05-09)
+
+
+### Features
+
+* loud executor for azure interactive login ([383832c](https://github.com/conplementAG/cops-hq/commit/383832c03e720b91b2cf6050ed53c834ada9e58c))
+
 ## [2.5.0](https://github.com/conplementAG/cops-hq/compare/v2.4.0...v2.5.0) (2023-04-19)
 
 
