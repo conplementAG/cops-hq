@@ -19,6 +19,7 @@ type InfoV2 struct {
 	NetworkingBlue                 Networking           `json:"networking_blue"`
 	NetworkingGreen                Networking           `json:"networking_green"`
 	ApplicationDnsZones            []ApplicationDnsZone `json:"application_dns_zones"`
+	OidcIssuerProfileUrl           string               `json:"oidc_issuer_profile_url"`
 }
 
 type Networking struct {
