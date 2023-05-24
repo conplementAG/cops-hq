@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.0](https://github.com/conplementAG/cops-hq/compare/v2.6.0...v2.7.0) (2023-05-24)
+
+
+### Features
+
+* **clusterinfo:** extend clusterinfo for oidc issure profile url ([2dbee1b](https://github.com/conplementAG/cops-hq/commit/2dbee1bb432b223da603e16b0ac7d2e72cffbab7))
+
 ## [2.6.0](https://github.com/conplementAG/cops-hq/compare/v2.5.0...v2.6.0) (2023-05-09)
 
 
