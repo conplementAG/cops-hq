@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/avast/retry-go"
 	"github.com/conplementag/cops-hq/v2/internal"
+	"github.com/conplementag/cops-hq/v2/internal/cmdutil"
 	"github.com/conplementag/cops-hq/v2/pkg/commands"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
@@ -14,7 +14,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
-	"time"
 )
 
 // Terraform is a wrapper around common terraform functionality used in IaC projects with Azure. In includes remote state
@@ -181,10 +180,13 @@ func (tf *terraformWrapper) Init() error {
 	storageAccountKey = trimLinebreakSuffixes(storageAccountKey)
 
 	logrus.Info("Creating the remote state blob container named " + tf.storageSettings.BlobContainerName + "...")
-	_, err = tf.executor.Execute("az storage container create" +
-		" --account-name " + tf.stateStorageAccountName +
-		" --account-key " + storageAccountKey +
-		" --name " + tf.storageSettings.BlobContainerName)
+	err = cmdutil.ExecuteWithRetry(
+		tf.executor.Execute,
+		"az storage container create"+
+			" --account-name "+tf.stateStorageAccountName+
+			" --account-key "+storageAccountKey+
+			" --name "+tf.storageSettings.BlobContainerName,
+		5)
 
 	if err != nil {
 		return internal.ReturnErrorOrPanic(err)
@@ -307,23 +309,15 @@ func (tf *terraformWrapper) addStorageAccountNetworkRules() error {
 
 	// ensure rules are applied to allow further processing
 	retryErrorText := "network rules not equal"
-	retry.Do(func() error {
-		currentAllowedIpAddresses, _ := tf.determineCurrentAllowedIpAddresses()
-		if reflect.DeepEqual(currentAllowedIpAddresses, tf.storageSettings.AllowedIpAddresses) {
-			return nil
-		} else {
-			return errors.New(retryErrorText)
-		}
-	},
-		retry.Delay(time.Second),
-		retry.DelayType(retry.FixedDelay),
-		retry.RetryIf(func(err error) bool {
-			return err.Error() == retryErrorText
-		}),
-		retry.OnRetry(func(n uint, err error) {
-			logrus.Debugf("Retry %d - checking network rules of storage account... %s", n+1, err)
-		}),
-	)
+	cmdutil.ExecuteFunctionWithRetry(
+		func() error {
+			currentAllowedIpAddresses, _ := tf.determineCurrentAllowedIpAddresses()
+			if reflect.DeepEqual(currentAllowedIpAddresses, tf.storageSettings.AllowedIpAddresses) {
+				return nil
+			} else {
+				return errors.New(retryErrorText)
+			}
+		}, 3)
 
 	return nil
 }
