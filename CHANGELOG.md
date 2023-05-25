@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.8.0](https://github.com/conplementAG/cops-hq/compare/v2.7.0...v2.8.0) (2023-05-25)
+
+
+### Features
+
+* **terraform:** apply retry for storage container creation ([636e0d1](https://github.com/conplementAG/cops-hq/commit/636e0d15d80d18c3c9edd2d18ee29df8d2053f66))
+
 ## [2.7.0](https://github.com/conplementAG/cops-hq/compare/v2.6.0...v2.7.0) (2023-05-24)
 
 
