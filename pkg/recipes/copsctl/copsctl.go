@@ -16,7 +16,10 @@ type Copsctl interface {
 	Connect(clusterName string, clusterConnectionString string, isTechnicalAccountConnect bool, connectToSecondaryCluster bool) error
 
 	// GetClusterInfo returns the cluster info for the currently connected cluster
-	GetClusterInfo() (*InfoV2, error)
+	GetClusterInfo() (*ClusterInfoV1, error)
+
+	// GetEnvironmentInfo returns the environment info for the currently connected cluster
+	GetEnvironmentInfo() (*EnvironmentInfoV2, error)
 }
 
 type copsctl struct {
@@ -55,16 +58,37 @@ func (c *copsctl) Connect(clusterName string, clusterConnectionString string, is
 	return nil
 }
 
-func (c *copsctl) GetClusterInfo() (*InfoV2, error) {
-	logrus.Info("Receiving cluster info...")
+func (c *copsctl) GetEnvironmentInfo() (*EnvironmentInfoV2, error) {
+	logrus.Info("Receiving environment info...")
 
-	clusterInfoJson, err := c.executor.ExecuteSilent("copsctl cluster-info --print-to-stdout-silence-everything-else")
+	environmentInfoJson, err := c.executor.ExecuteSilent("copsctl info environment --print-to-stdout-silence-everything-else")
 
 	if err != nil {
 		return nil, internal.ReturnErrorOrPanic(err)
 	}
 
-	var clusterInfo InfoV2
+	var environmentInfo EnvironmentInfoV2
+	err = json.Unmarshal([]byte(environmentInfoJson), &environmentInfo)
+
+	if err != nil {
+		return nil, internal.ReturnErrorOrPanic(err)
+	}
+
+	logrus.Info("Done.")
+
+	return &environmentInfo, nil
+}
+
+func (c *copsctl) GetClusterInfo() (*ClusterInfoV1, error) {
+	logrus.Info("Receiving cluster info...")
+
+	clusterInfoJson, err := c.executor.ExecuteSilent("copsctl info cluster --print-to-stdout-silence-everything-else")
+
+	if err != nil {
+		return nil, internal.ReturnErrorOrPanic(err)
+	}
+
+	var clusterInfo ClusterInfoV1
 	err = json.Unmarshal([]byte(clusterInfoJson), &clusterInfo)
 
 	if err != nil {
