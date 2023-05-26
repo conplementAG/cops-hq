@@ -47,7 +47,7 @@ RUN mv linux-386/helm $GOPATH/bin
 RUN helm version
 
 # copsctl
-ENV COPSCTL_VERSION 0.9.0
+ENV COPSCTL_VERSION 0.10.0
 RUN curl -LO https://github.com/conplementAG/copsctl/releases/download/v${COPSCTL_VERSION}/copsctl_${COPSCTL_VERSION}_Linux_x86_64.tar.gz
 RUN tar xvzf copsctl_${COPSCTL_VERSION}_Linux_x86_64.tar.gz
 RUN mv copsctl $GOPATH/bin

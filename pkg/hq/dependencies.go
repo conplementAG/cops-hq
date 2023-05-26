@@ -17,7 +17,7 @@ const (
 	ExpectedMinHelmVersion      = "3.11.3"
 	ExpectedMinKubectlVersion   = "1.25.7"
 	ExpectedMinKubeloginVersion = "0.0.28"
-	ExpectedMinCopsctlVersion   = "0.9.0"
+	ExpectedMinCopsctlVersion   = "0.10.0"
 	ExpectedMinSopsVersion      = "3.7.3"
 )
 

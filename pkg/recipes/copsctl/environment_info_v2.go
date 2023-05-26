@@ -5,9 +5,10 @@ import (
 	"github.com/ahmetb/go-linq/v3"
 )
 
-// InfoV2 object is a wrapper over the cluster-info response in version 2.
-type InfoV2 struct {
+// EnvironmentInfoV2 object is a wrapper over the info environment response in version 2.
+type EnvironmentInfoV2 struct {
 	Version                        string               `json:"version"`
+	Description                    string               `json:"description"`
 	SubscriptionId                 string               `json:"subscription_id"`
 	TenantId                       string               `json:"tenant_id"`
 	EgressStaticOutboundIpsEnabled bool                 `json:"egress_static_outbound_ips_enabled"`
@@ -48,7 +49,7 @@ type ApplicationDnsZone struct {
 }
 
 // GetDevOpsTeamSubnets finds both the blue & green subnets for a given DevOps team name
-func (info *InfoV2) GetDevOpsTeamSubnets(devOpsTeamName string) (subnetBlue *Subnet, subnetGreen *Subnet, err error) {
+func (info *EnvironmentInfoV2) GetDevOpsTeamSubnets(devOpsTeamName string) (subnetBlue *Subnet, subnetGreen *Subnet, err error) {
 	subnetBlueResult, ok := linq.From(info.NetworkingBlue.ApplicationSubnets).SingleWithT(func(subnet Subnet) bool {
 		return subnet.Name == devOpsTeamName
 	}).(Subnet)
@@ -74,7 +75,7 @@ func (info *InfoV2) GetDevOpsTeamSubnets(devOpsTeamName string) (subnetBlue *Sub
 
 // GetPrivateDnsZones finds both the blue & green zones for a given name
 // (e.g. file.core.windows.net, returns privatelink.file.core.windows.net zones for both blue & green environments)
-func (info *InfoV2) GetPrivateDnsZones(name string) (zoneBlue *PrivateDnsZone, zoneGreen *PrivateDnsZone, err error) {
+func (info *EnvironmentInfoV2) GetPrivateDnsZones(name string) (zoneBlue *PrivateDnsZone, zoneGreen *PrivateDnsZone, err error) {
 	zoneBlueResult, ok := linq.From(info.NetworkingBlue.PrivateDnsZones).SingleWithT(func(zone PrivateDnsZone) bool {
 		return zone.Name == name
 	}).(PrivateDnsZone)
@@ -99,7 +100,7 @@ func (info *InfoV2) GetPrivateDnsZones(name string) (zoneBlue *PrivateDnsZone, z
 }
 
 // GetApplicationDnsZone finds the public DNS zone assigned to the DevOps team
-func (info *InfoV2) GetApplicationDnsZone(devOpsTeamName string) (*ApplicationDnsZone, error) {
+func (info *EnvironmentInfoV2) GetApplicationDnsZone(devOpsTeamName string) (*ApplicationDnsZone, error) {
 	zone, ok := linq.From(info.ApplicationDnsZones).SingleWithT(func(zone ApplicationDnsZone) bool {
 		return zone.Name == devOpsTeamName
 	}).(ApplicationDnsZone)

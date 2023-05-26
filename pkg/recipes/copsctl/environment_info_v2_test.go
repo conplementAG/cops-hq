@@ -84,11 +84,11 @@ func Test_ApplicationDnsZone_SearchingForNonExistingDevOpsTeam(t *testing.T) {
 	assert.Nil(t, zone)
 }
 
-func loadClusterInfoTestFile(t *testing.T) *InfoV2 {
-	fileBytes, err := ioutil.ReadFile(filepath.Join(".", "cluster_info_v2_test.json"))
+func loadClusterInfoTestFile(t *testing.T) *EnvironmentInfoV2 {
+	fileBytes, err := ioutil.ReadFile(filepath.Join(".", "environment_info_v2_test.json"))
 	assert.NoError(t, err)
 
-	var clusterInfo InfoV2
+	var clusterInfo EnvironmentInfoV2
 	err = json.Unmarshal(fileBytes, &clusterInfo)
 	assert.NoError(t, err)
 
