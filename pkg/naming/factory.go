@@ -1,7 +1,6 @@
 package naming
 
 import (
-	"errors"
 	"github.com/conplementag/cops-hq/v2/internal"
 	"github.com/conplementag/cops-hq/v2/pkg/naming/patterns"
 )
@@ -23,15 +22,15 @@ import (
 // SetPattern() method
 func New(context string, region string, environment string, module string, color string) (*Service, error) {
 	if context == "" {
-		return nil, internal.ReturnErrorOrPanic(errors.New("context must be provided"))
+		return nil, internal.ReturnErrorOrPanic(NewNamingError("context must be provided"))
 	}
 
 	if region == "" {
-		return nil, internal.ReturnErrorOrPanic(errors.New("region must be provided"))
+		return nil, internal.ReturnErrorOrPanic(NewNamingError("region must be provided"))
 	}
 
 	if environment == "" {
-		return nil, internal.ReturnErrorOrPanic(errors.New("environment must be provided"))
+		return nil, internal.ReturnErrorOrPanic(NewNamingError("environment must be provided"))
 	}
 
 	return &Service{

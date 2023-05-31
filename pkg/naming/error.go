@@ -1,12 +1,14 @@
 package naming
 
+import "fmt"
+
 type NamingError struct {
 	message string
 }
 
 func NewNamingError(message string) *NamingError {
 	return &NamingError{
-		message: message,
+		message: fmt.Sprintf("[Naming] %s", message),
 	}
 }
 

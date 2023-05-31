@@ -1,6 +1,7 @@
 package naming
 
 import (
+	"fmt"
 	"github.com/ahmetb/go-linq/v3"
 	"github.com/conplementag/cops-hq/v2/pkg/naming/resources"
 	"regexp"
@@ -54,23 +55,23 @@ func findNamingConvention(resourceType resources.AzureResourceType) namingConven
 // isValid verifies the naming convention against a given value parameter
 func (r namingConvention) isValid(value string) (bool, error) {
 	if len(value) < r.MinLength {
-		return false, NewNamingError("Min length not reached")
+		return false, NewNamingError(fmt.Sprintf("Min length of %d char(s) for name '%s' not reached", r.MinLength, value))
 	}
 
 	if len(value) > r.MaxLength {
-		return false, NewNamingError("Max length exceeded")
+		return false, NewNamingError(fmt.Sprintf("Max length of %d chars for name '%s' exceeded", r.MaxLength, value))
 	}
 
 	if regexp.MustCompile(r.getRegexPattern(len(value))).MatchString(value) == false {
-		return false, NewNamingError("Invalid char used")
+		return false, NewNamingError(fmt.Sprintf("Invalid char in name '%s' used", value))
 	}
 
 	if r.Case == UpperCase && strings.ToUpper(value) != value {
-		return false, NewNamingError("Must not contain lowercase characters")
+		return false, NewNamingError(fmt.Sprintf("'%s' must not contain lowercase characters", value))
 	}
 
 	if r.Case == LowerCase && strings.ToLower(value) != value {
-		return false, NewNamingError("Must not contain uppercase characters")
+		return false, NewNamingError(fmt.Sprintf("'%s' must not contain uppercase characters", value))
 	}
 
 	return true, nil
