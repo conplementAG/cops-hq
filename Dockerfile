@@ -1,4 +1,4 @@
-FROM golang:1.20.2-bullseye
+FROM golang:1.20.4-bullseye
 
 RUN apt-get update && \
     apt-get install lsb-release -y
@@ -8,7 +8,7 @@ RUN go version
 RUN apt-get update
 
 ################## Tooling prerequisites  ######################
-ARG AZURE_CLI_VERSION=2.46.0
+ARG AZURE_CLI_VERSION=2.49.0
 RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" > /etc/apt/sources.list.d/azure-cli.list
 RUN curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 RUN apt-get install apt-transport-https
@@ -30,15 +30,17 @@ RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 RUN kubectl version --client=true
 
 # kubelogin CLI
-ARG KUBELOGIN_VERSION=v0.0.28
-RUN curl -L https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip --output kubelogin.zip
-RUN unzip kubelogin.zip -d kubelogin
+ARG KUBELOGIN_VERSION=v0.0.29
+ARG KUBELOGIN_SHA256=550bc8e82efe665a97deabd041be357f8db9f6764139fb0ad6a014910e9a8b26
+RUN curl -LO https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip
+RUN echo "${KUBELOGIN_SHA256} kubelogin-linux-amd64.zip" | sha256sum -c
+RUN unzip kubelogin-linux-amd64.zip -d kubelogin
 RUN chmod +x kubelogin
 RUN mv kubelogin/bin/linux_amd64/kubelogin /usr/local/bin
 RUN kubelogin --version
 
 # Helm
-ENV HELM_VERSION v3.11.3
+ENV HELM_VERSION v3.12.0
 RUN curl -LO https://get.helm.sh/helm-${HELM_VERSION}-linux-386.tar.gz
 RUN tar xvzf helm-${HELM_VERSION}-linux-386.tar.gz
 RUN mv linux-386/helm $GOPATH/bin

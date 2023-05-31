@@ -1,7 +1,7 @@
 package cmdutil
 
 import (
-	"github.com/avast/retry-go"
+	"github.com/avast/retry-go/v4"
 	"github.com/sirupsen/logrus"
 	"os/exec"
 	"time"
