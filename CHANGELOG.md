@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.0](https://github.com/conplementAG/cops-hq/compare/v2.8.0...v2.9.0) (2023-05-31)
+
+
+### Features
+
+* **naming:** better error messages ([4b64f78](https://github.com/conplementAG/cops-hq/commit/4b64f78e15e860e469d77ac9f132f73d1857e44c))
+
 ## [2.8.0](https://github.com/conplementAG/cops-hq/compare/v2.7.0...v2.8.0) (2023-05-25)
 
 
