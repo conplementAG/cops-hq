@@ -10,7 +10,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -209,9 +208,9 @@ func (e *executor) execute(cmd *exec.Cmd, silent bool, loud bool) (output string
 
 	// 2. We create a composite io.Writer consisting of multiple sinks. Depending on the configuration, these writers
 	//    either write to "nothing" (discard), or they write to a file / console / buffer to collect the output, etc.
-	stdoutWriter := ioutil.Discard
-	stderrWriter := ioutil.Discard
-	logFileWriter := ioutil.Discard
+	stdoutWriter := io.Discard
+	stderrWriter := io.Discard
+	logFileWriter := io.Discard
 	var stdoutCollector strings.Builder
 	var stderrCollector strings.Builder
 

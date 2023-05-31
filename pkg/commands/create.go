@@ -14,9 +14,9 @@ const DoubleQuote = "{DOUBLE_QUOTE}"
 func Create(plainCommand string) *exec.Cmd {
 	/*
 		Example
-		     plainCommand   : az role assignment create --role "Network Contributer" --assignee ABC --scope abc
-		     escapedCommand : az role assignment create --role "Network{SPACE_WITHIN_QUOTE}Contributer" --assignee ABC --scope abc
-		     commandParts   : ["az", "role", "assignment", "create", "--role", "Network Contributer", "--assignee", "ABC", "--scope", "abc"]
+		     plainCommand   : az role assignment create --role "Network Contributor" --assignee ABC --scope abc
+		     escapedCommand : az role assignment create --role "Network{SPACE_WITHIN_QUOTE}Contributor" --assignee ABC --scope abc
+		     commandParts   : ["az", "role", "assignment", "create", "--role", "Network Contributor", "--assignee", "ABC", "--scope", "abc"]
 	*/
 	escapedCommand := markQuotedSpaces(plainCommand)
 	commandParts := handleSpacesInQuotes(strings.Fields(escapedCommand))
