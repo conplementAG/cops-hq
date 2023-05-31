@@ -3,7 +3,7 @@ package hq
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Masterminds/semver"
+	"github.com/Masterminds/semver/v3"
 	"github.com/conplementag/cops-hq/v2/internal"
 	"github.com/conplementag/cops-hq/v2/pkg/error_handling"
 	"github.com/sirupsen/logrus"

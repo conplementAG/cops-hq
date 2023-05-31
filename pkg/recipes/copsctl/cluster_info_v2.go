@@ -2,7 +2,7 @@ package copsctl
 
 import (
 	"errors"
-	"github.com/ahmetb/go-linq"
+	"github.com/ahmetb/go-linq/v3"
 )
 
 // InfoV2 object is a wrapper over the cluster-info response in version 2.
