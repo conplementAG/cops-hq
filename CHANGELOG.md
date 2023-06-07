@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.10.0](https://github.com/conplementAG/cops-hq/compare/v2.9.0...v2.10.0) (2023-06-07)
+
+
+### Features
+
+* **clusterinfo:** remove oidc issuer from cluster-info  ([06b53ee](https://github.com/conplementAG/cops-hq/commit/06b53eeb8ac5b710b891ef6ba2c55f3103c638ff))
+* **info:** Cluster and Environment config ([268203e](https://github.com/conplementAG/cops-hq/commit/268203eb6ae34ef365926f74ceddb216a05e628e))
+
 ## [2.9.0](https://github.com/conplementAG/cops-hq/compare/v2.8.0...v2.9.0) (2023-05-31)
 
 
