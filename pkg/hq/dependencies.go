@@ -163,6 +163,8 @@ func (hq *hqContainer) checkKubelogin() error {
 		if !versionConstraint.Check(installedVersion) {
 			return fmt.Errorf("kubelogin version mismatch. expected >= %v, got %v", ExpectedMinKubeloginVersion, installedVersion)
 		}
+	} else {
+		return fmt.Errorf("kubelogin not found")
 	}
 
 	logrus.Info("...ok.")
@@ -204,14 +206,17 @@ func (hq *hqContainer) checkSops() error {
 		return err
 	}
 
-	sopsVersion = strings.TrimPrefix(sopsVersion, "sops ")
-	sopsVersion = strings.TrimSuffix(sopsVersion, " (latest)")
+	sopsRegex, err := regexp.Compile(".*(\\d+\\.\\d+\\.\\d+).*")
+	if sopsRegex.MatchString(sopsVersion) {
+		matches := sopsRegex.FindStringSubmatch(sopsVersion)
+		versionConstraint, _ := semver.NewConstraint(">=" + ExpectedMinSopsVersion)
+		installedVersion, _ := semver.NewVersion(matches[1])
 
-	versionConstraint, _ := semver.NewConstraint(">=" + ExpectedMinSopsVersion)
-	installedVersion, _ := semver.NewVersion(sopsVersion)
-
-	if installedVersion == nil || !versionConstraint.Check(installedVersion) {
-		return fmt.Errorf("sops version mismatch. expected >= %v, got %v", ExpectedMinSopsVersion, installedVersion)
+		if installedVersion == nil || !versionConstraint.Check(installedVersion) {
+			return fmt.Errorf("sops version mismatch. expected >= %v, got %v", ExpectedMinSopsVersion, installedVersion)
+		}
+	} else {
+		return fmt.Errorf("sops not found")
 	}
 
 	logrus.Info("...ok.")
