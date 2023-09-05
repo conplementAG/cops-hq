@@ -154,7 +154,8 @@ func (hq *hqContainer) checkKubelogin() error {
 		return err
 	}
 
-	kubeloginRegex, err := regexp.Compile(".*(v\\d+\\.\\d+\\.\\d+).*")
+	kubeloginRegex, _ := regexp.Compile(".*(v\\d+\\.\\d+\\.\\d+).*")
+
 	if kubeloginRegex.MatchString(kubeloginVersion) {
 		matches := kubeloginRegex.FindStringSubmatch(kubeloginVersion)
 		versionConstraint, _ := semver.NewConstraint(">=" + ExpectedMinKubeloginVersion)
@@ -164,7 +165,7 @@ func (hq *hqContainer) checkKubelogin() error {
 			return fmt.Errorf("kubelogin version mismatch. expected >= %v, got %v", ExpectedMinKubeloginVersion, installedVersion)
 		}
 	} else {
-		return fmt.Errorf("kubelogin not found")
+		return fmt.Errorf("kubelogin version could not be parsed from this output: " + kubeloginVersion)
 	}
 
 	logrus.Info("...ok.")
@@ -194,6 +195,7 @@ func (hq *hqContainer) checkCopsctl() error {
 
 func (hq *hqContainer) checkSops() error {
 	logrus.Info("Checking sops...")
+
 	// sops is an optional dependency, so in case we are in panic mode, we should survive it
 	previousPanicSetting := error_handling.PanicOnAnyError
 	error_handling.PanicOnAnyError = false
@@ -206,7 +208,8 @@ func (hq *hqContainer) checkSops() error {
 		return err
 	}
 
-	sopsRegex, err := regexp.Compile(".*(\\d+\\.\\d+\\.\\d+).*")
+	sopsRegex, _ := regexp.Compile(".*(\\d+\\.\\d+\\.\\d+).*")
+
 	if sopsRegex.MatchString(sopsVersion) {
 		matches := sopsRegex.FindStringSubmatch(sopsVersion)
 		versionConstraint, _ := semver.NewConstraint(">=" + ExpectedMinSopsVersion)
@@ -216,7 +219,7 @@ func (hq *hqContainer) checkSops() error {
 			return fmt.Errorf("sops version mismatch. expected >= %v, got %v", ExpectedMinSopsVersion, installedVersion)
 		}
 	} else {
-		return fmt.Errorf("sops not found")
+		return fmt.Errorf("sops version could not be parsed from this output: %s", sopsVersion)
 	}
 
 	logrus.Info("...ok.")
