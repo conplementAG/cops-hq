@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.10.1](https://github.com/conplementAG/cops-hq/compare/v2.10.0...v2.10.1) (2023-09-05)
+
+
+### Bug Fixes
+
+* **dependencies-check:** adapt logic for sops version ([25b41dc](https://github.com/conplementAG/cops-hq/commit/25b41dc4369fc2663ac3c52d1490fb35e8b53a87))
+
 ## [2.10.0](https://github.com/conplementAG/cops-hq/compare/v2.9.0...v2.10.0) (2023-06-07)
 
 
