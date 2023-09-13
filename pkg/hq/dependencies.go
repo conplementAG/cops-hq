@@ -41,7 +41,16 @@ func (hq *hqContainer) CheckToolingDependencies() error {
 	warn1 := hq.checkSops()
 
 	if warn1 != nil {
-		logrus.Warnf("optional dependency (recommended to be used) not met: %v", warn1)
+		logrus.Warnf("Sops - optional dependency (recommended to be installed) not met: %v", warn1)
+		logrus.Warn("Sops is a useful tool for source version configuration management.")
+	}
+
+	warn2 := hq.checkVim()
+
+	if warn2 != nil {
+		logrus.Warnf("vim - optional dependency (recommended to be installed) not met: %v", warn2)
+		logrus.Warn("Vim is used as the default editor for some cops-hq functionality, like fixing MAC versions " +
+			"of Sops managed config files.")
 	}
 
 	return nil
@@ -224,6 +233,24 @@ func (hq *hqContainer) checkSops() error {
 
 	logrus.Info("...ok.")
 	return nil
+}
+
+func (hq *hqContainer) checkVim() error {
+	logrus.Info("Checking vim...")
+
+	// sops is an optional dependency, so in case we are in panic mode, we should survive it
+	previousPanicSetting := error_handling.PanicOnAnyError
+	error_handling.PanicOnAnyError = false
+
+	_, err := hq.Executor.Execute("vim --version") // we simply check if installed, should return no errors
+
+	error_handling.PanicOnAnyError = previousPanicSetting
+
+	if err != nil {
+		logrus.Info("...ok.")
+	}
+
+	return err
 }
 
 type azureCliVersionResponse struct {
