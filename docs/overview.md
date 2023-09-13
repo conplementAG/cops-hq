@@ -20,4 +20,5 @@ way to understand the features.
 - [Recipe - Azure Login](features/08-azure-login.md)
 - [Recipe - Terraform](features/09-terraform.md)
 - [Recipe - Helm](features/10-helm.md)
+- [Recipe - Sops](features/11-sops.md)
 - [Dockerfile for CI/CD](features/99-dockerfile.md)
