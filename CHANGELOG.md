@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.11.0](https://github.com/conplementAG/cops-hq/compare/v2.10.1...v2.11.0) (2023-09-14)
+
+
+### Features
+
+* **dependency-check:** add vim as optional dependency ([0252c24](https://github.com/conplementAG/cops-hq/commit/0252c249027ac74c365d8ad04a37d55b3e25b309))
+* **sops-recipe:** regenerate MAC functionality ([1876113](https://github.com/conplementAG/cops-hq/commit/1876113e0fecb9b77f0c6ab21101339ef70526a8))
+
 ## [2.10.1](https://github.com/conplementAG/cops-hq/compare/v2.10.0...v2.10.1) (2023-09-05)
 
 
