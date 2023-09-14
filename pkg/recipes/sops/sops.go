@@ -58,7 +58,7 @@ func (s *sopsWrapper) RegenerateMacValues(filePath string) error {
 							return err
 						}
 					} else if exitCode == 128 {
-						logrus.Error("CouldNotRetrieveKey")
+						logrus.Error("CouldNotRetrieveKey - are you logged in to encrypt sops file?")
 					}
 				}
 			} else {

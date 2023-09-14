@@ -48,7 +48,7 @@ func (hq *hqContainer) CheckToolingDependencies() error {
 	warn2 := hq.checkVim()
 
 	if warn2 != nil {
-		logrus.Warnf("vim - optional dependency (recommended to be installed) not met: %v", warn2)
+		logrus.Warnf("Vim - optional dependency (recommended to be installed) not met: %v", warn2)
 		logrus.Warn("Vim is used as the default editor for some cops-hq functionality, like fixing MAC versions " +
 			"of Sops managed config files.")
 	}
@@ -238,11 +238,13 @@ func (hq *hqContainer) checkSops() error {
 func (hq *hqContainer) checkVim() error {
 	logrus.Info("Checking vim...")
 
-	// sops is an optional dependency, so in case we are in panic mode, we should survive it
+	// Vim is an optional dependency, so in case we are in panic mode, we should survive it
 	previousPanicSetting := error_handling.PanicOnAnyError
 	error_handling.PanicOnAnyError = false
 
-	_, err := hq.Executor.Execute("vim --version") // we simply check if installed, should return no errors
+	// Result is ignored, because we simply need to check if installed, which should return no errors.
+	// Checking for correct version like for other dependencies is not required here.
+	_, err := hq.Executor.Execute("vim --version")
 
 	error_handling.PanicOnAnyError = previousPanicSetting
 
