@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.0](https://github.com/conplementAG/cops-hq/compare/v2.11.0...v2.12.0) (2023-09-25)
+
+
+### Features
+
+* **terraform-recipe:** add configurable container create retry count ([701c2ba](https://github.com/conplementAG/cops-hq/commit/701c2baf352f208f8881590dfb71eb9e5f914de8))
+
 ## [2.11.0](https://github.com/conplementAG/cops-hq/compare/v2.10.1...v2.11.0) (2023-09-14)
 
 
