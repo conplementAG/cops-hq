@@ -186,7 +186,7 @@ func (tf *terraformWrapper) Init() error {
 			" --account-name "+tf.stateStorageAccountName+
 			" --account-key "+storageAccountKey+
 			" --name "+tf.storageSettings.BlobContainerName,
-		5)
+		tf.storageSettings.ContainerCreateRetryCount)
 
 	if err != nil {
 		return internal.ReturnErrorOrPanic(err)
