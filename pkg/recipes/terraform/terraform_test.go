@@ -12,11 +12,13 @@ import (
 	"testing"
 )
 
+const projectName = "test"
+
 func Test_SettingsAreNotSharedByReferenceBetweenMultipleInstances(t *testing.T) {
 	// we want to make sure that the design of non-shared settings is always kept, even after refactorings
 	// Arrange
-	tf1, _ := createSimpleTerraformWithDefaultSettings("app1")
-	tf2, _ := createSimpleTerraformWithDefaultSettings("app2")
+	tf1 := createSimpleTerraformWithDefaultSettings(&executorMock{}, "app1")
+	tf2 := createSimpleTerraformWithDefaultSettings(&executorMock{}, "app2")
 
 	// Act
 	tf1.GetDeploymentSettings().AlwaysCleanLocalCache = false
@@ -34,7 +36,7 @@ func Test_SettingsAreNotSharedByReferenceBetweenMultipleInstances(t *testing.T) 
 
 func Test_SetVariablesCanSerializeAnySimpleOrComplexValue(t *testing.T) {
 	// Arrange
-	tf, _ := createSimpleTerraformWithDefaultSettings("test")
+	tf := createSimpleTerraformWithDefaultSettings(&executorMock{}, projectName)
 
 	var variables = make(map[string]interface{})
 
@@ -72,12 +74,18 @@ func Test_SetVariablesCanSerializeAnySimpleOrComplexValue(t *testing.T) {
 
 func Test_DeployFlow(t *testing.T) {
 	tests := []struct {
-		testName        string
-		mockSetup       func(executor *executorMock)
-		planOnly        bool
-		useExistingPlan bool
-		autoApprove     bool
-		expectedError   error
+		testName string
+		// make sure the mock setup only contains the actual setup (like the On() calls) and not the additional validation
+		// and verifications which have nothing to do with the mocks. Use postRunAdditionalVerifications for this. Main reason
+		// for this is that mockSetup occurs before the actual test Act is performed, therefore it is too early to actually
+		// verify anything.
+		mockSetup                      func(executor *executorMock)
+		planOnly                       bool
+		useExistingPlan                bool
+		planHasChanges                 bool
+		autoApprove                    bool
+		expectedError                  error
+		postRunAdditionalVerifications func()
 	}{
 		{"apply with existing plan",
 			func(executor *executorMock) {
@@ -89,37 +97,41 @@ func Test_DeployFlow(t *testing.T) {
 			false,
 			true,
 			false,
+			false,
 			nil,
+			func() {
+				assertPlanFilesPresence(t, false, false, false) // no plan should be created!
+			},
 		},
 
 		{"full apply flow",
 			func(executor *executorMock) {
-				// first, a plan should be executed, saving the file
+				// a plan should be executed, saving the file
 				executor.On("Execute", mock.MatchedBy(func(command string) bool {
 					return strings.Contains(command, "plan -input=false") && strings.Contains(command, "test.deploy.tfplan")
 				})).Once()
 
-				// we expect the separate plan directory is always there (created)
-				_, err := os.Stat(".plans")
-				assert.NoError(t, err)
-
-				// then the user confirmation is expected
+				// the user confirmation is expected
 				executor.On("AskUserToConfirm", mock.Anything).Once()
 
-				// then the plan json will be created
+				// the plan json will also be created
 				executor.On("Execute", mock.MatchedBy(func(command string) bool {
 					return strings.Contains(command, "show -json") && strings.Contains(command, "test.deploy.tfplan")
 				})).Once()
 
-				// then the fully apply is expected
+				// the fully apply is expected
 				executor.On("Execute", mock.MatchedBy(func(command string) bool {
 					return strings.Contains(command, "apply -auto-approve") && strings.Contains(command, "test.deploy.tfplan")
 				})).Once()
 			},
 			false,
 			false,
+			true,
 			false,
 			nil,
+			func() {
+				assertPlanFilesPresence(t, true, true, false) // plan expected to be dirty!
+			},
 		},
 
 		{"auto approve does not prompt the user",
@@ -141,11 +153,23 @@ func Test_DeployFlow(t *testing.T) {
 			},
 			false,
 			false,
+			false,
 			true,
+			nil,
 			nil,
 		},
 
-		{"only execute the plan",
+		{"only plan with existing plan throws error since it makes no sense",
+			func(executor *executorMock) {},
+			true,
+			true,
+			false,
+			false,
+			errors.New("planOnly with useExistingPlan makes no sense as a combination"),
+			nil,
+		},
+
+		{"only perform the plan",
 			func(executor *executorMock) {
 				// a plan should be executed, saving the file
 				executor.On("Execute", mock.MatchedBy(func(command string) bool {
@@ -160,15 +184,11 @@ func Test_DeployFlow(t *testing.T) {
 			true,
 			false,
 			false,
-			nil,
-		},
-
-		{"only plan with existing plan throws error since it makes no sense",
-			func(executor *executorMock) {},
-			true,
-			true,
 			false,
-			errors.New("planOnly with useExistingPlan makes no sense as a combination"),
+			nil,
+			func() {
+				assertPlanFilesPresence(t, true, true, true)
+			},
 		},
 	}
 
@@ -176,12 +196,19 @@ func Test_DeployFlow(t *testing.T) {
 		// Arrange
 		fmt.Println("Executing test " + tt.testName)
 
-		tf, executorMock := createSimpleTerraformWithDefaultSettings("test")
-		tt.mockSetup(executorMock)
+		// always clean the .plans to make sure the tests are not dependent on each other
+		err := deleteDirectoryIfExists(".plans")
+		assert.NoError(t, err)
+
+		executor := &executorMock{}
+		executor.planHasChanges = tt.planHasChanges
+
+		tf := createSimpleTerraformWithDefaultSettings(executor, projectName)
+		tt.mockSetup(executor)
 		tf.SetVariables(nil)
 
 		// Act
-		err := tf.DeployFlow(tt.planOnly, tt.useExistingPlan, tt.autoApprove)
+		err = tf.DeployFlow(tt.planOnly, tt.useExistingPlan, tt.autoApprove)
 
 		// Assert
 		if tt.expectedError == nil {
@@ -190,86 +217,76 @@ func Test_DeployFlow(t *testing.T) {
 			assert.Equal(t, tt.expectedError, err)
 		}
 
-		executorMock.AssertExpectations(t)
+		executor.AssertExpectations(t)
+
+		if tt.postRunAdditionalVerifications != nil {
+			tt.postRunAdditionalVerifications()
+		}
 	}
 }
 
-func Test_FindItemsToAddAndRemove(t *testing.T) {
-	data := []struct {
-		testName       string
-		actualCurrent  []string
-		actualExpected []string
-		expectedAdd    []string
-		expectedRemove []string
-	}{
-		// for ease of use letters are used and not ip addresses
-		{
-			testName:       "green field - nothing to do",
-			actualCurrent:  nil,
-			actualExpected: nil,
-			expectedAdd:    nil,
-			expectedRemove: nil,
-		},
-		{
-			testName:       "green field",
-			actualCurrent:  nil,
-			actualExpected: []string{"A", "B"},
-			expectedAdd:    []string{"A", "B"},
-			expectedRemove: nil,
-		},
-		{
-			testName:       "brown field - nothing to do",
-			actualCurrent:  []string{"A", "B"},
-			actualExpected: []string{"A", "B"},
-			expectedAdd:    nil,
-			expectedRemove: nil,
-		},
-		{
-			testName:       "brown field - nothing to do - order",
-			actualCurrent:  []string{"A", "B"},
-			actualExpected: []string{"B", "A"},
-			expectedAdd:    nil,
-			expectedRemove: nil,
-		},
-		{
-			testName:       "brown field - add and remove",
-			actualCurrent:  []string{"A", "B", "C"},
-			actualExpected: []string{"A", "B", "D"},
-			expectedAdd:    []string{"D"},
-			expectedRemove: []string{"C"},
-		},
-	}
+func Test_MultiplePlansCleanupCorrectly(t *testing.T) {
+	// we should start from a clean slate
+	err := deleteDirectoryIfExists(".plans")
+	assert.NoError(t, err)
 
-	for _, test := range data {
-		t.Run(test.testName, func(t *testing.T) {
+	// first run, plan has no changes, all files are expected
+	executor1 := &executorMock{isLooseMock: true, planHasChanges: false}
+	tf1 := createSimpleTerraformWithDefaultSettings(executor1, projectName)
+	tf1.SetVariables(nil)
+	err = tf1.DeployFlow(true, false, false)
+	assert.NoError(t, err)
 
-			// Act
-			actualAdd, actualRemove := findItemsToAddAndRemove(test.actualCurrent, test.actualExpected)
+	// assert the first run that the files are there
+	assertPlanFilesPresence(t, true, true, true)
 
-			// Assert
-			assert.Equal(t, test.expectedAdd, actualAdd)
-			assert.Equal(t, test.expectedRemove, actualRemove)
-		})
-	}
+	// second run, plan has changes, VERY IMPORTANT that we don't find the has-no-changes file here!
+	executor2 := &executorMock{isLooseMock: true, planHasChanges: true}
+	tf2 := createSimpleTerraformWithDefaultSettings(executor2, projectName)
+	tf2.SetVariables(nil)
+	err = tf2.DeployFlow(true, false, false)
+	assert.NoError(t, err)
+
+	// assert the second run
+	assertPlanFilesPresence(t, true, true, false)
 }
 
 type executorMock struct {
 	mock.Mock
 	commands.Executor
+	planHasChanges bool
+	isLooseMock    bool
 }
 
 func (e *executorMock) Execute(command string) (string, error) {
-	e.Called(command)
-	return "success", nil
+	if !e.isLooseMock {
+		e.Called(command)
+	}
+
+	if strings.Contains(command, "plan") {
+		if e.planHasChanges {
+			return "Terraform will perform the following actions ... To perform exactly these actions, run the following command to apply", nil
+		} else {
+			return "Your infrastructure matches the configuration. ... found no differences, so no changes are needed", nil
+		}
+	}
+
+	return "success - this output does not matter", nil
 }
 
 func (e *executorMock) ExecuteSilent(command string) (string, error) {
-	e.Called(command)
-	return "success", nil
+	if !e.isLooseMock {
+		e.Called(command)
+	}
+
+	return "success - this output does not matter", nil
 }
 
 func (e *executorMock) AskUserToConfirm(displayMessage string) bool {
-	e.Called(displayMessage)
+	if !e.isLooseMock {
+		e.Called(displayMessage)
+	}
+
 	return true
 }
 
@@ -279,14 +296,54 @@ type variablesStruct struct {
 	ABool   bool   `mapstructure:"aBool" json:"aBool" yaml:"aBool"`
 }
 
-func createSimpleTerraformWithDefaultSettings(projectName string) (Terraform, *executorMock) {
-	executor := &executorMock{}
-
-	return New(executor, projectName, "1234", "3214",
+func createSimpleTerraformWithDefaultSettings(executorMock *executorMock, projectName string) Terraform {
+	return New(executorMock, projectName, "1234", "3214",
 		"westeurope", "testrg", "storeaccount",
 		// important to keep the current directory configured, since some tests rely on this
 		// location to verify that expected directories / files are created
 		filepath.Join("."),
 		DefaultBackendStorageSettings,
-		DefaultDeploymentSettings), executor
+		DefaultDeploymentSettings)
+}
+
+func deleteDirectoryIfExists(dirPath string) error {
+	_, err := os.Stat(dirPath)
+	if os.IsNotExist(err) {
+		fmt.Printf("Directory does not exist: %v\n", dirPath)
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	// Directory exists, so attempt to delete it
+	err = os.RemoveAll(dirPath)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Directory deleted: %v\n", dirPath)
+	return nil
+}
+
+func assertPlanFilesPresence(t *testing.T, jsonFile bool, txtFile bool, hasNoChangesFile bool) {
+	_, err := os.Stat(filepath.Join(".plans", projectName+".deploy.tfplan.json"))
+	if jsonFile {
+		assert.NoError(t, err)
+	} else {
+		assert.Error(t, err)
+	}
+
+	_, err = os.Stat(filepath.Join(".plans", projectName+".deploy.tfplan.txt"))
+	if txtFile {
+		assert.NoError(t, err)
+	} else {
+		assert.Error(t, err)
+	}
+
+	_, err = os.Stat(filepath.Join(".plans", projectName+".deploy.tfplan.plan-has-no-changes"))
+	if hasNoChangesFile {
+		assert.NoError(t, err)
+	} else {
+		assert.Error(t, err)
+	}
 }

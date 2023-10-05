@@ -69,8 +69,13 @@ err = tf.DeployFlow(viper.GetBool(cli_flags.PlanOnly), viper.GetBool(cli_flags.U
 ## Terraform plan and detecting changes in CI/CD
 
 Terraform recipe automatically persists the plans in the .plans directory, in the same place where you specified that your terraform 
-sources are located. Additionally, to the plan file in terraform format, text and json representations of the same plan file are persisted
-as well. These can easily be used in CI/CD for advanced use cases like automatic approval on no terraform changes. For this purpose, 
+sources are located. Additionally, to the plan file in terraform format, these files will also be created:
+
+* additional terraform plan formats (check the dedicated section below)
+* a file indicating if the plan contains no changes (*.deploy.plan-has-no-changes). In case of changes, there will be no file created.
+  Note: such file is only be created for the deploy flow(s), destroy will never generate such file, even on actually no changes for destroy.
+
+These can be used in CI/CD for use cases like automatic approval on no terraform changes.  If you don't want to rely on the existence of such *plan-has-no-changes* file, 
 take a look at the plan_analyzer object and its IsDeployPlanDirty / IsDestroyPlanDirty methods, which following the example above, could be used as:
 
 ```go 
