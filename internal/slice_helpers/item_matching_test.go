@@ -1,4 +1,4 @@
-package slices
+package slice_helpers
 
 import (
 	"github.com/stretchr/testify/assert"

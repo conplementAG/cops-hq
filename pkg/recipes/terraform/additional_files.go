@@ -56,8 +56,8 @@ func (tf *terraformWrapper) persistAnalysisResultOnDisk(terraformRelativePlanFil
 	}
 
 	if !isPlanDirty {
-		// to persist the plan in other file formats, we need to convert the terraformRelativePlanFilePath to a path
-		// resolvable from where we are running at the moment (e.g. cmd/example-cli).
+		// we need to convert the terraformRelativePlanFilePath to a path resolvable from where we are running at the
+		//moment (e.g. cmd/example-cli).
 		planFullFilePath := filepath.Join(tf.terraformDirectory, terraformRelativePlanFilePath)
 
 		noChangesMarker, err := os.Create(planFullFilePath + ".plan-has-no-changes")
