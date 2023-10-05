@@ -3,10 +3,10 @@
 ## Local Development with a "client" project
 
 If you want to directly work on both cops-hq and your IaC project, without having the need to publish cops-hq changes to upstream, 
-a `go.work` file can be used (in the root of your project):
+a `go.work` file can be used (in the root of your project, go version is not really relevant as long as >= cops-hq version):
 
 ``` 
-go 1.18
+go 1.20
 
 use (
    .

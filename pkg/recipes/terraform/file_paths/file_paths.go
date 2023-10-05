@@ -22,6 +22,12 @@ func GetLocalTerraformRelativePlanFilePath(projectName string, terraformDirector
 		return "", internal.ReturnErrorOrPanic(err)
 	}
 
+	// terraform file paths are always relative to terraform path set on -chdir, which we set to root where the sources are located
+	return filepath.Join(PlansDirectory, GetPlanFileName(projectName, getForDestroyPlan)), nil
+}
+
+// GetPlanFileName return the Terraform plan file name
+func GetPlanFileName(projectName string, getForDestroyPlan bool) string {
 	var planFileName string
 
 	if !getForDestroyPlan {
@@ -30,6 +36,5 @@ func GetLocalTerraformRelativePlanFilePath(projectName string, terraformDirector
 		planFileName = projectName + ".destroy.tfplan"
 	}
 
-	// terraform file paths are always relative to terraform path set on -chdir, which we set to root where the sources are located
-	return filepath.Join(PlansDirectory, planFileName), nil
+	return planFileName
 }
