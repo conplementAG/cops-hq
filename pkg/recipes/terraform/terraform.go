@@ -7,7 +7,7 @@ import (
 	"github.com/conplementag/cops-hq/v2/internal"
 	"github.com/conplementag/cops-hq/v2/internal/cmdutil"
 	"github.com/conplementag/cops-hq/v2/internal/file_handling"
-	"github.com/conplementag/cops-hq/v2/internal/slices"
+	"github.com/conplementag/cops-hq/v2/internal/slice_helpers"
 	"github.com/conplementag/cops-hq/v2/pkg/commands"
 	"github.com/conplementag/cops-hq/v2/pkg/recipes/terraform/file_paths"
 	"github.com/sirupsen/logrus"
@@ -297,7 +297,7 @@ func (tf *terraformWrapper) addStorageAccountNetworkRules() error {
 		return internal.ReturnErrorOrPanic(err)
 	}
 
-	addIpAddresses, removeIpAddresses := slices.FindItemsToAddAndRemove(existingIpAddresses, tf.storageSettings.AllowedIpAddresses)
+	addIpAddresses, removeIpAddresses := slice_helpers.FindItemsToAddAndRemove(existingIpAddresses, tf.storageSettings.AllowedIpAddresses)
 
 	// add new rules
 	for _, ipAddress := range addIpAddresses {
