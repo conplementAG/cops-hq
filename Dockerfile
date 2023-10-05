@@ -1,65 +1,66 @@
-FROM golang:1.20.4-bullseye
+FROM golang:1.21.1-bullseye
 
 RUN apt-get update && \
-    apt-get install lsb-release -y
+    apt-get install lsb-release unzip -y
 
 RUN go version
 
 RUN apt-get update
 
 ################## Tooling prerequisites  ######################
-ARG AZURE_CLI_VERSION=2.49.0
-RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" > /etc/apt/sources.list.d/azure-cli.list
-RUN curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-RUN apt-get install apt-transport-https
-RUN apt-get update && apt-get install -y azure-cli=${AZURE_CLI_VERSION}-1~bullseye
+ARG AZURE_CLI_VERSION=2.52.0
+RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" > /etc/apt/sources.list.d/azure-cli.list && \
+    curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    apt-get install apt-transport-https  && \
+    apt-get update && apt-get install -y azure-cli=${AZURE_CLI_VERSION}-1~bullseye  && \
+    az version
 
-# Install terraform
+# terraform
 ARG TERRAFORM_VERSION=1.4.0
-RUN curl -L https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip --output terraform.zip
-RUN apt-get install unzip
-RUN unzip terraform.zip
-RUN mv terraform /usr/local/bin
+RUN curl -L https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip --output terraform.zip && \
+    unzip terraform.zip && \
+    mv terraform /usr/local/bin && \
+    terraform version
 
 # k8s CLI
 # You must use a kubectl version that is within one minor version difference of your cluster.
 # For example, a v1.24 client can communicate with v1.23, v1.24, and v1.25 control planes.
-ARG KUBECTL_VERSION=v1.25.7
-RUN curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl
-RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-RUN kubectl version --client=true
+ARG KUBECTL_VERSION=v1.26.8
+RUN curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl  && \
+    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl  && \
+    kubectl version --client=true -o=json
 
 # kubelogin CLI
-ARG KUBELOGIN_VERSION=v0.0.29
-ARG KUBELOGIN_SHA256=550bc8e82efe665a97deabd041be357f8db9f6764139fb0ad6a014910e9a8b26
-RUN curl -LO https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip
-RUN echo "${KUBELOGIN_SHA256} kubelogin-linux-amd64.zip" | sha256sum -c
-RUN unzip kubelogin-linux-amd64.zip -d kubelogin
-RUN chmod +x kubelogin
-RUN mv kubelogin/bin/linux_amd64/kubelogin /usr/local/bin
-RUN kubelogin --version
+ARG KUBELOGIN_VERSION=v0.0.32
+ARG KUBELOGIN_SHA256=01b78e97f37c7c11b3a5a9268d2054f497e1ea35a88fcdef50475ccfa0d4df3c
+RUN curl -LO https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip  && \
+    echo "${KUBELOGIN_SHA256} kubelogin-linux-amd64.zip" | sha256sum -c && \
+    unzip kubelogin-linux-amd64.zip -d kubelogin && \
+    chmod +x kubelogin && \
+    mv kubelogin/bin/linux_amd64/kubelogin /usr/local/bin && \
+    kubelogin --version
 
-# Helm
-ENV HELM_VERSION v3.12.0
-RUN curl -LO https://get.helm.sh/helm-${HELM_VERSION}-linux-386.tar.gz
-RUN tar xvzf helm-${HELM_VERSION}-linux-386.tar.gz
-RUN mv linux-386/helm $GOPATH/bin
-RUN helm version
+# helm
+ARG HELM_VERSION=3.12.3
+RUN curl -L  https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz --output helm.tar.gz && \
+    tar xvzf helm.tar.gz && \
+    mv linux-amd64/helm /usr/local/bin && \
+    helm version
 
 # copsctl
-ENV COPSCTL_VERSION 0.10.0
-RUN curl -LO https://github.com/conplementAG/copsctl/releases/download/v${COPSCTL_VERSION}/copsctl_${COPSCTL_VERSION}_Linux_x86_64.tar.gz
-RUN tar xvzf copsctl_${COPSCTL_VERSION}_Linux_x86_64.tar.gz
-RUN mv copsctl $GOPATH/bin
-RUN copsctl --version
+ARG COPSCTL_VERSION=0.10.0
+RUN curl -LO https://github.com/conplementAG/copsctl/releases/download/v${COPSCTL_VERSION}/copsctl_${COPSCTL_VERSION}_Linux_x86_64.tar.gz && \
+    tar xvzf copsctl_${COPSCTL_VERSION}_Linux_x86_64.tar.gz && \
+    mv copsctl $GOPATH/bin && \
+    copsctl --version
 
-# sops for configuration management
-ARG SOPS_VERSION=3.7.3
-RUN curl -LO https://github.com/mozilla/sops/releases/download/v${SOPS_VERSION}/sops-v${SOPS_VERSION}.linux
-RUN mv sops-v${SOPS_VERSION}.linux $GOPATH/bin
-RUN chmod +x $GOPATH/bin/sops-v${SOPS_VERSION}.linux
-RUN mv $GOPATH/bin/sops-v${SOPS_VERSION}.linux $GOPATH/bin/sops # rename the file
-RUN sops --version
+# sops
+ARG SOPS_VERSION=v3.7.3
+RUN curl -LO https://github.com/mozilla/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux && \
+    mv sops-${SOPS_VERSION}.linux sops && \
+    chmod +x sops && \
+    mv sops /usr/local/bin && \
+    sops --version
 
 ######################  Compile  ##########################
 # to have something to compile, we will use the example-infra CLI in cmd/example-infra directory. This also makes this
