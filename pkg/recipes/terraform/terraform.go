@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"github.com/conplementag/cops-hq/v2/internal"
 	"github.com/conplementag/cops-hq/v2/internal/cmdutil"
+	"github.com/conplementag/cops-hq/v2/internal/file_handling"
+	"github.com/conplementag/cops-hq/v2/internal/slices"
 	"github.com/conplementag/cops-hq/v2/pkg/commands"
+	"github.com/conplementag/cops-hq/v2/pkg/recipes/terraform/file_paths"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/exp/slices"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -295,21 +297,27 @@ func (tf *terraformWrapper) addStorageAccountNetworkRules() error {
 		return internal.ReturnErrorOrPanic(err)
 	}
 
-	addIpAddresses, removeIpAddresses := findItemsToAddAndRemove(existingIpAddresses, tf.storageSettings.AllowedIpAddresses)
+	addIpAddresses, removeIpAddresses := slices.FindItemsToAddAndRemove(existingIpAddresses, tf.storageSettings.AllowedIpAddresses)
 
 	// add new rules
 	for _, ipAddress := range addIpAddresses {
-		tf.addOrRemoveStorageAccountNetworkRule("add", ipAddress)
+		err = tf.addOrRemoveStorageAccountNetworkRule("add", ipAddress)
+		if err != nil {
+			return internal.ReturnErrorOrPanic(err)
+		}
 	}
 
 	// remove rules
 	for _, ipAddress := range removeIpAddresses {
-		tf.addOrRemoveStorageAccountNetworkRule("remove", ipAddress)
+		err = tf.addOrRemoveStorageAccountNetworkRule("remove", ipAddress)
+		if err != nil {
+			return internal.ReturnErrorOrPanic(err)
+		}
 	}
 
 	// ensure rules are applied to allow further processing
 	retryErrorText := "network rules not equal"
-	cmdutil.ExecuteFunctionWithRetry(
+	err = cmdutil.ExecuteFunctionWithRetry(
 		func() error {
 			currentAllowedIpAddresses, _ := tf.determineCurrentAllowedIpAddresses()
 			if reflect.DeepEqual(currentAllowedIpAddresses, tf.storageSettings.AllowedIpAddresses) {
@@ -318,18 +326,21 @@ func (tf *terraformWrapper) addStorageAccountNetworkRules() error {
 				return errors.New(retryErrorText)
 			}
 		}, 3)
+	if err != nil {
+		return internal.ReturnErrorOrPanic(err)
+	}
 
 	return nil
 }
 
-func (tf *terraformWrapper) addOrRemoveStorageAccountNetworkRule(method, value string) {
+func (tf *terraformWrapper) addOrRemoveStorageAccountNetworkRule(method, value string) error {
 	cmd := "az storage account network-rule " + method +
 		" --resource-group " + tf.resourceGroupName +
 		" --account-name " + tf.stateStorageAccountName + " " +
 		" --ip-address " + value
 
 	_, err := tf.executor.Execute(cmd)
-	internal.ReturnErrorOrPanic(err)
+	return internal.ReturnErrorOrPanic(err)
 }
 
 func (tf *terraformWrapper) determineCurrentAllowedIpAddresses() ([]string, error) {
@@ -352,22 +363,6 @@ func (tf *terraformWrapper) determineCurrentAllowedIpAddresses() ([]string, erro
 	}
 
 	return currentAllowedIpAddressesMapped, nil
-}
-
-func findItemsToAddAndRemove(current, expected []string) (add, remove []string) {
-	for _, item := range current {
-		if !slices.Contains(expected, item) {
-			remove = append(remove, item)
-		}
-	}
-
-	for _, item := range expected {
-		if !slices.Contains(current, item) {
-			add = append(add, item)
-		}
-	}
-
-	return add, remove
 }
 
 func (tf *terraformWrapper) guardAgainstUnsetVariables() error {
@@ -399,19 +394,26 @@ func (tf *terraformWrapper) plan(isDestroy bool) (string, error) {
 
 	if isDestroy {
 		tfCommand += " -destroy"
-		localTerraformRelativePlanFilePath, err = GetLocalTerraformRelativePlanFilePath(tf.projectName, tf.terraformDirectory, true)
+		localTerraformRelativePlanFilePath, err = file_paths.GetLocalTerraformRelativePlanFilePath(tf.projectName, tf.terraformDirectory, true)
 		if err != nil {
 			return "", internal.ReturnErrorOrPanic(err)
 		}
 
 		tfCommand += " -out=" + localTerraformRelativePlanFilePath
 	} else {
-		localTerraformRelativePlanFilePath, err = GetLocalTerraformRelativePlanFilePath(tf.projectName, tf.terraformDirectory, false)
+		localTerraformRelativePlanFilePath, err = file_paths.GetLocalTerraformRelativePlanFilePath(tf.projectName, tf.terraformDirectory, false)
 		if err != nil {
 			return "", internal.ReturnErrorOrPanic(err)
 		}
 
 		tfCommand += " -out=" + localTerraformRelativePlanFilePath
+	}
+
+	// before creating a new plan, make sure all files for this project are removed
+	directory, file := filepath.Split(localTerraformRelativePlanFilePath)
+	err = file_handling.DeleteFilesStartingWith(file, directory)
+	if err != nil {
+		return "", internal.ReturnErrorOrPanic(err)
 	}
 
 	plaintextPlanOutput, err := tf.executor.Execute(tfCommand)
@@ -424,47 +426,12 @@ func (tf *terraformWrapper) plan(isDestroy bool) (string, error) {
 		return "", internal.ReturnErrorOrPanic(err)
 	}
 
+	err = tf.persistAnalysisResultOnDisk(localTerraformRelativePlanFilePath)
+	if err != nil {
+		return "", internal.ReturnErrorOrPanic(err)
+	}
+
 	return plaintextPlanOutput, nil
-}
-
-// persistPlanInAdditionalFormatsOnDisk - we also persist the plan output to disk in both human-readable and json formats,
-// which can be later be processed, without requiring terraform init & terraform show separately to achieve the same result.
-func (tf *terraformWrapper) persistPlanInAdditionalFormatsOnDisk(planAsPlaintext string, terraformRelativePlanFilePath string) error {
-	// to persist the plan in other file formats, we need to convert the terraformRelativePlanFilePath to a path
-	// resolvable from where we are running at the moment (e.g. cmd/example-cli).
-	planFullFilePath := filepath.Join(tf.terraformDirectory, terraformRelativePlanFilePath)
-
-	// 1. human-readable form we already have from planOutput, so we just persist it
-	textFile, err := os.Create(planFullFilePath + ".txt")
-	defer textFile.Close()
-	if err != nil {
-		return err
-	}
-
-	_, err = textFile.WriteString(planAsPlaintext)
-	if err != nil {
-		return err
-	}
-
-	// 2. json form we need to get with an extra terraform call. Since init is already done, this will work
-	// also, we use the terraformRelativePlanFilePath since this is a terraform command, initialized with -chdir
-	jsonPlanOutput, err := tf.executor.Execute("terraform -chdir=" + tf.terraformDirectory + " show -json " + terraformRelativePlanFilePath)
-	if err != nil {
-		return err
-	}
-
-	jsonFile, err := os.Create(planFullFilePath + ".json")
-	defer jsonFile.Close()
-	if err != nil {
-		return err
-	}
-
-	_, err = jsonFile.WriteString(jsonPlanOutput)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (tf *terraformWrapper) applyFlow(isDestroy bool, planOnly bool, useExistingPlan bool, autoApprove bool) error {
@@ -552,7 +519,7 @@ func (tf *terraformWrapper) forceApply(isDestroy bool) error {
 
 	if isDestroy {
 		tfCommand += " -destroy"
-		path, err := GetLocalTerraformRelativePlanFilePath(tf.projectName, tf.terraformDirectory, true)
+		path, err := file_paths.GetLocalTerraformRelativePlanFilePath(tf.projectName, tf.terraformDirectory, true)
 
 		if err != nil {
 			return internal.ReturnErrorOrPanic(err)
@@ -560,7 +527,7 @@ func (tf *terraformWrapper) forceApply(isDestroy bool) error {
 
 		tfCommand += " \"" + path + "\""
 	} else {
-		path, err := GetLocalTerraformRelativePlanFilePath(tf.projectName, tf.terraformDirectory, false)
+		path, err := file_paths.GetLocalTerraformRelativePlanFilePath(tf.projectName, tf.terraformDirectory, false)
 
 		if err != nil {
 			return internal.ReturnErrorOrPanic(err)

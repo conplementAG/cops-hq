@@ -1,4 +1,4 @@
-package terraform
+package file_paths
 
 import (
 	"github.com/conplementag/cops-hq/v2/internal"
@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-var plansDirectory = ".plans"
+var PlansDirectory = ".plans"
 
 // GetLocalTerraformRelativePlanFilePath gets the plan file path, relative to the given terraform directory. Output of this method
 // is usually used with terraform commands, which already have the root directory set with -chdir
@@ -16,7 +16,7 @@ func GetLocalTerraformRelativePlanFilePath(projectName string, terraformDirector
 	// so that if the directory is mounted somewhere (like in Dockerfile / CD process), it will only have access to
 	// the plan files, and not the whole local state cache (.e.g mounting the directory above would also expose the
 	// contents of .terraform directory, and all the terraform files as well).
-	fullPlansDirectoryPath := filepath.Join(terraformDirectory, plansDirectory)
+	fullPlansDirectoryPath := filepath.Join(terraformDirectory, PlansDirectory)
 	err := os.MkdirAll(fullPlansDirectoryPath, os.ModePerm)
 	if err != nil {
 		return "", internal.ReturnErrorOrPanic(err)
@@ -31,5 +31,5 @@ func GetLocalTerraformRelativePlanFilePath(projectName string, terraformDirector
 	}
 
 	// terraform file paths are always relative to terraform path set on -chdir, which we set to root where the sources are located
-	return filepath.Join(plansDirectory, planFileName), nil
+	return filepath.Join(PlansDirectory, planFileName), nil
 }

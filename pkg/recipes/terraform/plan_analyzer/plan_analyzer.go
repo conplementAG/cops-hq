@@ -3,7 +3,7 @@ package plan_analyzer
 import (
 	"errors"
 	"github.com/conplementag/cops-hq/v2/internal"
-	"github.com/conplementag/cops-hq/v2/pkg/recipes/terraform"
+	"github.com/conplementag/cops-hq/v2/pkg/recipes/terraform/file_paths"
 	"os"
 	"path/filepath"
 	"strings"
@@ -44,7 +44,7 @@ func (pa *planAnalyzer) IsDestroyPlanDirty() (bool, error) {
 // the JSON file would mean checking each resource for required action, which is also very format dependent (and could easily break
 // with new terraform versions).
 func (pa *planAnalyzer) isPlanDirty(checkForDestroy bool) (bool, error) {
-	localTerraformRelativePlanFilePath, err := terraform.GetLocalTerraformRelativePlanFilePath(pa.projectName, pa.terraformDirectory, checkForDestroy)
+	localTerraformRelativePlanFilePath, err := file_paths.GetLocalTerraformRelativePlanFilePath(pa.projectName, pa.terraformDirectory, checkForDestroy)
 
 	if err != nil {
 		return true, err
