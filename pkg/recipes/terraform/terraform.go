@@ -410,8 +410,9 @@ func (tf *terraformWrapper) plan(isDestroy bool) (string, error) {
 	}
 
 	// before creating a new plan, make sure all files for this project are removed
-	directory, file := filepath.Split(localTerraformRelativePlanFilePath)
-	err = file_handling.DeleteFilesStartingWith(file, directory)
+	err = file_handling.DeleteFilesStartingWith(
+		file_paths.GetPlanFileName(tf.projectName, isDestroy),
+		filepath.Join(tf.terraformDirectory, file_paths.PlansDirectory))
 	if err != nil {
 		return "", internal.ReturnErrorOrPanic(err)
 	}
