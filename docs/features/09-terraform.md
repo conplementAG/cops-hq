@@ -72,7 +72,7 @@ Terraform recipe automatically persists the plans in the .plans directory, in th
 sources are located. Additionally, to the plan file in terraform format, these files will also be created:
 
 * additional terraform plan formats (check the dedicated section below)
-* a file indicating if the plan contains no changes (*.deploy.plan-has-no-changes). In case of changes, there will be no file created.
+* a file indicating if the plan contains no changes (*.deploy.tfplan.plan-has-no-changes). In case of changes, there will be no file created.
   Note: such file is only be created for the deploy flow(s), destroy will never generate such file, even on actually no changes for destroy.
 
 These can be used in CI/CD for use cases like automatic approval on no terraform changes.  If you don't want to rely on the existence of such *plan-has-no-changes* file, 
