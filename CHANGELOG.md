@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.13.0](https://github.com/conplementAG/cops-hq/compare/v2.12.0...v2.13.0) (2023-10-06)
+
+
+### Features
+
+* go 1.21, dependencies updates ([f794183](https://github.com/conplementAG/cops-hq/commit/f7941839b81ac351d6ad41fcabb9cffe3ea00d64))
+* **terraform:** persist file to indicate plan changes ([f4a55e3](https://github.com/conplementAG/cops-hq/commit/f4a55e3f1c4f7abbbfe764521c3ee4942d3c748b))
+
+
+### Bug Fixes
+
+* **terraform:** plan cleanup for relative file paths ([7f57b57](https://github.com/conplementAG/cops-hq/commit/7f57b57b0b1418b89d10bd7a9edbde116ca9b103))
+
 ## [2.12.0](https://github.com/conplementAG/cops-hq/compare/v2.11.0...v2.12.0) (2023-09-25)
 
 
