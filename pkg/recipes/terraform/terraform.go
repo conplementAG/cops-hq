@@ -427,7 +427,7 @@ func (tf *terraformWrapper) plan(isDestroy bool) (string, error) {
 		return "", internal.ReturnErrorOrPanic(err)
 	}
 
-	err = tf.persistAnalysisResultOnDisk(localTerraformRelativePlanFilePath)
+	err = tf.persistAnalysisResultOnDisk(localTerraformRelativePlanFilePath, isDestroy)
 	if err != nil {
 		return "", internal.ReturnErrorOrPanic(err)
 	}
