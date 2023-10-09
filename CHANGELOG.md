@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.13.1](https://github.com/conplementAG/cops-hq/compare/v2.13.0...v2.13.1) (2023-10-09)
+
+
+### Bug Fixes
+
+* **docu:** adapt name of plan analyze file in terraform recipe ([d500267](https://github.com/conplementAG/cops-hq/commit/d5002677ac3a2d17c9609cdf9f95f7563198a268))
+* **tfrecipe:** do not analyze plan in destory flow ([2c42e94](https://github.com/conplementAG/cops-hq/commit/2c42e94700038397372b20ad0a02b6cd54cd4007))
+
 ## [2.13.0](https://github.com/conplementAG/cops-hq/compare/v2.12.0...v2.13.0) (2023-10-06)
 
 
