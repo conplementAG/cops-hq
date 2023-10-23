@@ -25,4 +25,6 @@ const (
 	UserAssignedIdentity   AzureResourceType = "uai"
 	LogAnalyticsWorkspace  AzureResourceType = "law"
 	NetworkSecurityGroup   AzureResourceType = "nsg"
+	CosmosDB               AzureResourceType = "cdb"
+	AzureCacheForRedis     AzureResourceType = "acfr"
 )
