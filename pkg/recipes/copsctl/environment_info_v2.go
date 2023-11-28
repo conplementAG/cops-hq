@@ -7,19 +7,22 @@ import (
 
 // EnvironmentInfoV2 object is a wrapper over the info environment response in version 2.
 type EnvironmentInfoV2 struct {
-	Version                        string               `json:"version"`
-	Description                    string               `json:"description"`
-	SubscriptionId                 string               `json:"subscription_id"`
-	TenantId                       string               `json:"tenant_id"`
-	EgressStaticOutboundIpsEnabled bool                 `json:"egress_static_outbound_ips_enabled"`
-	EgressStaticOutboundIps        []string             `json:"egress_static_outbound_ips"`
-	TechnicalAccountName           string               `json:"technical_account_name"`
-	TechnicalAccountNamespace      string               `json:"technical_account_namespace"`
-	CoreOpsMonitoringAndLogging    string               `json:"coreops_monitoring_and_logging"`
-	LogAnalyticsWorkspace          string               `json:"log_analytics_workspace"`
-	NetworkingBlue                 Networking           `json:"networking_blue"`
-	NetworkingGreen                Networking           `json:"networking_green"`
-	ApplicationDnsZones            []ApplicationDnsZone `json:"application_dns_zones"`
+	Version                              string               `json:"version"`
+	Description                          string               `json:"description"`
+	SubscriptionId                       string               `json:"subscription_id"`
+	TenantId                             string               `json:"tenant_id"`
+	EgressStaticOutboundIpsEnabled       bool                 `json:"egress_static_outbound_ips_enabled"`
+	EgressStaticOutboundIps              []string             `json:"egress_static_outbound_ips"`
+	TechnicalAccountName                 string               `json:"technical_account_name"`
+	TechnicalAccountNamespace            string               `json:"technical_account_namespace"`
+	CoreOpsMonitoringAndLogging          string               `json:"coreops_monitoring_and_logging"`
+	SecondaryCoreOpsMonitoringAndLogging string               `json:"secondary_coreops_monitoring_and_logging"`
+	LogAnalyticsWorkspace                string               `json:"log_analytics_workspace"`
+	NetworkingBlue                       Networking           `json:"networking_blue"`
+	NetworkingGreen                      Networking           `json:"networking_green"`
+	ApplicationDnsZones                  []ApplicationDnsZone `json:"application_dns_zones"`
+	BaseDomain                           string               `json:"base_domain"`
+	SecondaryBaseDomain                  string               `json:"secondary_base_domain"`
 }
 
 type Networking struct {

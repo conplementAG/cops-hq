@@ -4,5 +4,6 @@ package copsctl
 type ClusterInfoV1 struct {
 	Version       string `json:"version"`
 	Description   string `json:"description"`
+	Identifier    string `json:"identifier"`
 	OidcIssuerUrl string `json:"oidc_issuer_url"`
 }
