@@ -44,6 +44,8 @@ var namingConventions = []namingConvention{
 	{resources.UserAssignedIdentity, 3, 90, true, true, true, CaseInsensitive},
 	{resources.NetworkSecurityGroup, 3, 80, true, true, true, CaseInsensitive},
 	{resources.LogAnalyticsWorkspace, 3, 90, false, true, true, CaseInsensitive},
+	{resources.LoadBalancer, 1, 80, true, true, true, CaseInsensitive},
+	{resources.VirtualMachineScalSetLinux, 1, 64, true, false, false, CaseInsensitive},
 }
 
 func findNamingConvention(resourceType resources.AzureResourceType) namingConvention {
