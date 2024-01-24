@@ -78,6 +78,11 @@ type Terraform interface {
 	// GetVariablesFileName returns the file name in which the terraform variables will be stored. This name is convention based
 	// on the currently set project parameter while creating the terraform wrapper instance
 	GetVariablesFileName() string
+
+	// Output returns the terraform provided output if any
+	// Parameters are:
+	// 		parameterName will restrict output to single output parameter and output the parameter in raw mode. If not set all available output is given
+	Output(parameterName *string) (string, error)
 }
 
 type terraformWrapper struct {
@@ -289,6 +294,19 @@ func (tf *terraformWrapper) GetDeploymentSettings() *DeploymentSettings {
 
 func (tf *terraformWrapper) GetVariablesFileName() string {
 	return tf.projectName + ".tfvars"
+}
+
+func (tf *terraformWrapper) Output(parameterName *string) (string, error) {
+
+	tfCommand := "terraform" +
+		" -chdir=" + tf.terraformDirectory +
+		" output"
+
+	if parameterName != nil {
+		tfCommand += " -raw " + *parameterName
+	}
+
+	return tf.executor.Execute(tfCommand)
 }
 
 func (tf *terraformWrapper) addStorageAccountNetworkRules() error {
