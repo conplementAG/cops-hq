@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.14.0](https://github.com/conplementAG/cops-hq/compare/v2.13.1...v2.14.0) (2024-01-29)
+
+
+### Features
+
+* **info:** add new info properties in cluster and environment info ([2a0276e](https://github.com/conplementAG/cops-hq/commit/2a0276e8485a4c2360ca46634313ed0fb9c3149d))
+* **naming:** extend naming service with new resource types ([81b4c49](https://github.com/conplementAG/cops-hq/commit/81b4c4922894a0e48883bb2146d1d7f594f125fb))
+* **tf:** extent terraform recipe to allow output tf output variables ([4cc0164](https://github.com/conplementAG/cops-hq/commit/4cc01648d038413542ff7c70f72e82e2f7ccd7e6))
+
 ## [2.13.1](https://github.com/conplementAG/cops-hq/compare/v2.13.0...v2.13.1) (2023-10-09)
 
 
