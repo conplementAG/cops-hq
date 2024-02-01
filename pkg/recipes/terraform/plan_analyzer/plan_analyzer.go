@@ -66,7 +66,7 @@ func (pa *planAnalyzer) isPlanDirty(checkForDestroy bool) (bool, error) {
 		strings.Contains(string(contents), "To perform exactly these actions, run the following command to apply") {
 		isDirty = true
 	} else {
-		return true, errors.New("we could not determine if the plan was dirty or not, because expected strings for " +
+		return true, errors.New("[CopsHq][PlanAnalyzer] could not determine if the plan was dirty or not, because expected strings for " +
 			"both checks were not found in the plan text file")
 	}
 
