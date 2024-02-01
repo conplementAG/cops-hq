@@ -343,7 +343,7 @@ func (tf *terraformWrapper) addStorageAccountNetworkRules() error {
 			} else {
 				return errors.New(retryErrorText)
 			}
-		}, 3)
+		}, tf.storageSettings.ContainerCreateRetryCount)
 	if err != nil {
 		return internal.ReturnErrorOrPanic(err)
 	}
