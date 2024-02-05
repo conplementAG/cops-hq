@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.14.1](https://github.com/conplementAG/cops-hq/compare/v2.14.0...v2.14.1) (2024-02-05)
+
+
+### Bug Fixes
+
+* **terraform:** add prefix to plan analyzer error ([02be651](https://github.com/conplementAG/cops-hq/commit/02be6510086da099af2d358bef76d0eba3ecb44a))
+* **terraform:** use storageSettings retry count for network rules ([e84061a](https://github.com/conplementAG/cops-hq/commit/e84061a6eb5341fb94e003314fe7509f7905f9bf))
+
 ## [2.14.0](https://github.com/conplementAG/cops-hq/compare/v2.13.1...v2.14.0) (2024-01-29)
 
 
