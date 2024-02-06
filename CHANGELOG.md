@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.14.2](https://github.com/conplementAG/cops-hq/compare/v2.14.1...v2.14.2) (2024-02-06)
+
+
+### Bug Fixes
+
+* **terraform-recipe:** use retry logic with execute function ([cec9fa7](https://github.com/conplementAG/cops-hq/commit/cec9fa7aee7d656be4d8bd8ff8c77242963dbc59))
+* **util:** adapt error handling in case of retry functions ([b9b26a2](https://github.com/conplementAG/cops-hq/commit/b9b26a2872db40044aa059fe4e76e59cfc6d0322))
+
 ## [2.14.1](https://github.com/conplementAG/cops-hq/compare/v2.14.0...v2.14.1) (2024-02-05)
 
 
