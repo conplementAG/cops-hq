@@ -187,13 +187,13 @@ func (tf *terraformWrapper) Init() error {
 	storageAccountKey = trimLinebreakSuffixes(storageAccountKey)
 
 	logrus.Info("Creating the remote state blob container named " + tf.storageSettings.BlobContainerName + "...")
-	err = cmdutil.ExecuteFunctionWithRetry(func() error {
-		_, executorError := tf.executor.ExecuteSilent("az storage container create" +
-			" --account-name " + tf.stateStorageAccountName +
-			" --account-key " + storageAccountKey +
-			" --name " + tf.storageSettings.BlobContainerName)
-		return executorError
-	}, tf.storageSettings.ContainerCreateRetryCount)
+	err = cmdutil.ExecuteWithRetry(
+		tf.executor.ExecuteSilent,
+		"az storage container create"+
+			" --account-name "+tf.stateStorageAccountName+
+			" --account-key "+storageAccountKey+
+			" --name "+tf.storageSettings.BlobContainerName,
+		tf.storageSettings.ContainerCreateRetryCount)
 
 	if err != nil {
 		return internal.ReturnErrorOrPanic(err)

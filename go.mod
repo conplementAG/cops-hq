@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/ahmetb/go-linq/v3 v3.2.0
-	github.com/avast/retry-go/v4 v4.5.0
+	github.com/avast/retry-go/v4 v4.5.1
 	github.com/briandowns/spinner v1.23.0
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/google/uuid v1.3.1
