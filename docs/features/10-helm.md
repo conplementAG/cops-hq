@@ -15,7 +15,7 @@ provide a map of strings to set variables.
 
 // Login/Connect to your kubernetes cluster, where you want to deploy to.
 
-// First create a new helm instance and set the global parameters.
+// First create a new helm instance, optionally configure the deployment settings.
 h := helm.New(s.executor, "my-namespace", "my-chartname", filepath.Join(copshq.ProjectBasePath, "helm"))
 
 // Next step is normally to set variables for your helm deployment.

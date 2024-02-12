@@ -1,6 +1,7 @@
 package helm
 
 import (
+	"errors"
 	"fmt"
 	"github.com/conplementag/cops-hq/v2/internal"
 	"github.com/conplementag/cops-hq/v2/pkg/commands"
@@ -30,9 +31,10 @@ type Helm interface {
 type helmWrapper struct {
 	executor commands.Executor
 
-	namespace     string
-	chartName     string
-	helmDirectory string
+	namespace          string
+	chartName          string
+	helmDirectory      string
+	deploymentSettings DeploymentSettings
 
 	variablesSet bool
 }
@@ -61,14 +63,39 @@ func (h *helmWrapper) SetVariables(helmVariables map[string]interface{}) error {
 }
 
 func (h *helmWrapper) Deploy() error {
-	helmCmd := fmt.Sprintf(fmt.Sprintf("helm upgrade --namespace %s --install %s %s -f %s", h.namespace, h.chartName, h.helmDirectory,
-		h.getValuesFilePath()))
+	if h.deploymentSettings.WaitForJobs && !h.deploymentSettings.Wait {
+		return errors.New("[CopsHq][Helm] deployment setting 'WaitForJobs' could not be enabled without enabled 'Wait' flag")
+	}
+
+	helmCmd := fmt.Sprintf(fmt.Sprintf("helm upgrade --namespace %s --install %s %s -f %s --timeout %s", h.namespace, h.chartName, h.helmDirectory,
+		h.getValuesFilePath(), h.deploymentSettings.Timeout))
 
 	if h.variablesSet {
 		helmCmd = fmt.Sprintf("%s -f %s", helmCmd, h.getValuesOverrideFilePath())
 	}
 
-	_, err := h.executor.Execute(helmCmd)
+	if h.deploymentSettings.Debug {
+		helmCmd = fmt.Sprintf("%s --debug", helmCmd)
+	}
+
+	if h.deploymentSettings.DryRun {
+		helmCmd = fmt.Sprintf("%s --dry-run", helmCmd)
+	}
+
+	if h.deploymentSettings.Wait {
+		helmCmd = fmt.Sprintf("%s --wait", helmCmd)
+	}
+
+	if h.deploymentSettings.WaitForJobs {
+		helmCmd = fmt.Sprintf("%s --wait-for-jobs", helmCmd)
+	}
+
+	var err error
+	if h.deploymentSettings.Wait {
+		_, err = h.executor.ExecuteWithProgressInfo(helmCmd)
+	} else {
+		_, err = h.executor.Execute(helmCmd)
+	}
 
 	if err != nil {
 		return internal.ReturnErrorOrPanic(err)
