@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 type executorMock struct {
@@ -66,7 +67,7 @@ func Test_DeployExecutesExpectedCommandWithOverrideValues(t *testing.T) {
 	h, executorMock := createSimpleHelmWithDefaultSettings("project")
 	// helm upgrade with one value file is expected
 	executorMock.On("Execute", mock.MatchedBy(func(command string) bool {
-		return strings.Contains(command, "helm upgrade") && strings.Contains(command, "values.yaml") && strings.Contains(command, "values.override.yaml")
+		return strings.Contains(command, "helm upgrade") && strings.Contains(command, "values.yaml") && strings.Contains(command, "values.override.yaml") && strings.Contains(command, "--timeout 5m0s")
 	})).Once()
 
 	helmVariables := make(map[string]interface{})
@@ -105,6 +106,25 @@ func Test_DeployExecutesExpectedCommandWithoutOverrideValues(t *testing.T) {
 	executorMock.AssertExpectations(t)
 }
 
+func Test_DeployExecutesExpectedCommandWithWaitAndTimeout(t *testing.T) {
+	var deploymentSettings = DefaultDeploymentSettings
+	deploymentSettings.Wait = true
+	deploymentSettings.Timeout = 2 * time.Minute
+	h, executorMock := createWithDeploymentSettings("project", deploymentSettings)
+	// helm upgrade with wait and timeout value is expected
+	executorMock.On("ExecuteWithProgressInfo", mock.MatchedBy(func(command string) bool {
+		return strings.Contains(command, "helm upgrade") && strings.Contains(command, "--wait") && strings.Contains(command, "--timeout 2m0s")
+	})).Once()
+
+	// Act
+	err := h.Deploy()
+
+	// Assert
+	assert.NoError(t, err)
+
+	executorMock.AssertExpectations(t)
+}
+
 func Test_GetVariablesOverrideFileNameReturnsSomething(t *testing.T) {
 	h, executorMock := createSimpleHelmWithDefaultSettings("project")
 	// helm upgrade with one value file is expected
@@ -124,15 +144,26 @@ func (e *executorMock) Execute(command string) (string, error) {
 	return "success", nil
 }
 
+func (e *executorMock) ExecuteWithProgressInfo(command string) (string, error) {
+	e.Called(command)
+	return "success", nil
+}
+
 func createSimpleHelmWithDefaultSettings(projectName string) (Helm, *executorMock) {
 	executor := &executorMock{}
 
 	return New(executor, projectName+"test", projectName+"test", filepath.Join(".")), executor
 }
 
+func createWithDeploymentSettings(projectName string, settings DeploymentSettings) (Helm, *executorMock) {
+	executor := &executorMock{}
+
+	return NewWithSettings(executor, projectName+"test", projectName+"test", filepath.Join("."), settings), executor
+}
+
 func existsFile(fileName string) bool {
-	_, error := os.Stat(fileName)
-	if os.IsNotExist(error) {
+	_, err := os.Stat(fileName)
+	if os.IsNotExist(err) {
 		return false
 	} else {
 		return true
