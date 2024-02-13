@@ -29,4 +29,6 @@ const (
 	AzureCacheForRedis         AzureResourceType = "acfr"
 	LoadBalancer               AzureResourceType = "lb"
 	VirtualMachineScalSetLinux AzureResourceType = "vmss"
+	EventGridNamespace         AzureResourceType = "egns"
+	EventgridTopicSpace        AzureResourceType = "egts"
 )
