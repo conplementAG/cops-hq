@@ -75,6 +75,12 @@ func Test_GenerateResourceName(t *testing.T) {
 		{"long resource name test key vault", "acme-front-b-test-weu-dev-sqlmi", nil,
 			args{"front", "test", "b", patterns.Normal, resources.SqlManagedInstance},
 		},
+		{"eventgrid namespace has invalid char", "", NewNamingError("Invalid char in name 'acme-front-b-test%name-weu-dev-egns' used"),
+			args{"front", "test%name", "b", patterns.Normal, resources.EventGridNamespace}},
+		{"eventgrid namespace - to long", "", NewNamingError("Max length of 50 chars for name 'acme-front-b-bnuNNUp91QVMsnkwCAdkAcHadVBjH01oXrECzqXEFTKRjkQ9id-weu-dev-egns' exceeded"),
+			args{"front", "bnuNNUp91QVMsnkwCAdkAcHadVBjH01oXrECzqXEFTKRjkQ9id", "b", patterns.Normal, resources.EventGridNamespace}},
+		{"eventgrid topicspace has invalid char", "", NewNamingError("Invalid char in name 'acme-front-b-test%name-weu-dev-egns' used"),
+			args{"front", "test%name", "b", patterns.Normal, resources.EventGridNamespace}},
 	}
 
 	for _, tt := range tests {
