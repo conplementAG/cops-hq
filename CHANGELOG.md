@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.16.0](https://github.com/conplementAG/cops-hq/compare/v2.15.0...v2.16.0) (2024-02-13)
+
+
+### Features
+
+* **azure-resource-type:** add eventgrid namespace and topicspace resources ([869c6eb](https://github.com/conplementAG/cops-hq/commit/869c6eb7ddfd1362fccdfc3385235bc0352dd44b))
+
 ## [2.15.0](https://github.com/conplementAG/cops-hq/compare/v2.14.2...v2.15.0) (2024-02-13)
 
 
