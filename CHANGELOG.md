@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.15.0](https://github.com/conplementAG/cops-hq/compare/v2.14.2...v2.15.0) (2024-02-13)
+
+
+### Features
+
+* **helm-receipe:** make deployment more configurable ([c3fe4e7](https://github.com/conplementAG/cops-hq/commit/c3fe4e79817c57b01c2cc622e27713f6cfa41c44))
+
 ## [2.14.2](https://github.com/conplementAG/cops-hq/compare/v2.14.1...v2.14.2) (2024-02-06)
 
 
