@@ -48,7 +48,12 @@ func (s *sopsWrapper) RegenerateMacValues(filePath string) error {
 					if exitCode == 51 {
 						logrus.Infof("Regenerating sops MAC for: %s\n", path)
 
-						err := os.Setenv("EDITOR", "vim -es +\"norm Go\" +\":wq\"")
+						vimCommand, err := getVimCommand()
+						if err != nil {
+							return err
+						}
+
+						err = os.Setenv("EDITOR", vimCommand+" -es +\"norm Go\" +\":wq\"")
 						if err != nil {
 							return err
 						}
@@ -73,4 +78,16 @@ func (s *sopsWrapper) RegenerateMacValues(filePath string) error {
 	}
 
 	return nil
+}
+
+func getVimCommand() (string, error) {
+	_, err := exec.LookPath("vim")
+	if err != nil {
+		_, errVi := exec.LookPath("vi")
+		if errVi != nil {
+			return "", fmt.Errorf("neither vim nor vi could be found - if you are a windows user, please install vim")
+		}
+		return "vi", nil
+	}
+	return "vim", nil
 }
