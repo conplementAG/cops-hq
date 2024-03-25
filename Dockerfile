@@ -8,7 +8,7 @@ RUN go version
 RUN apt-get update
 
 ################## Tooling prerequisites  ######################
-ARG AZURE_CLI_VERSION=2.54.0
+ARG AZURE_CLI_VERSION=2.56.0
 RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" > /etc/apt/sources.list.d/azure-cli.list && \
     curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     apt-get install apt-transport-https  && \
@@ -31,8 +31,8 @@ RUN curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubect
     kubectl version --client=true -o=json
 
 # kubelogin CLI
-ARG KUBELOGIN_VERSION=v0.0.33
-ARG KUBELOGIN_SHA256=58ea5fc24bdd6c7faf4f4c9ef298244fc70e82076e720425a9d043dc57e94599
+ARG KUBELOGIN_VERSION=v0.1.0
+ARG KUBELOGIN_SHA256=be6247bed2a901b986c7edf2b106618480eb60aa3a47708149f0c62e58ebbab9
 RUN curl -LO https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip  && \
     echo "${KUBELOGIN_SHA256} kubelogin-linux-amd64.zip" | sha256sum -c && \
     unzip kubelogin-linux-amd64.zip -d kubelogin && \
@@ -48,7 +48,7 @@ RUN curl -L  https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz --outp
     helm version
 
 # copsctl
-ARG COPSCTL_VERSION=0.11.0
+ARG COPSCTL_VERSION=0.12.1
 RUN curl -LO https://github.com/conplementAG/copsctl/releases/download/v${COPSCTL_VERSION}/copsctl_${COPSCTL_VERSION}_Linux_x86_64.tar.gz && \
     tar xvzf copsctl_${COPSCTL_VERSION}_Linux_x86_64.tar.gz && \
     mv copsctl $GOPATH/bin && \
