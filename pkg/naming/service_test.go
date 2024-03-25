@@ -81,6 +81,10 @@ func Test_GenerateResourceName(t *testing.T) {
 			args{"front", "bnuNNUp91QVMsnkwCAdkAcHadVBjH01oXrECzqXEFTKRjkQ9id", "b", patterns.Normal, resources.EventGridNamespace}},
 		{"eventgrid topicspace has invalid char", "", NewNamingError("Invalid char in name 'acme-front-b-test%name-weu-dev-egns' used"),
 			args{"front", "test%name", "b", patterns.Normal, resources.EventGridNamespace}},
+		{"storage backup vault name has invalid char", "", NewNamingError("Invalid char in name 'acme-front-b-test%name-weu-dev-sbv' used"),
+			args{"front", "test%name", "b", patterns.Normal, resources.StorageBackupVault}},
+		{"storage backup vault name - to long", "", NewNamingError("Max length of 50 chars for name 'acme-front-b-bnuNNUp91QVMsnkwCAdkAcHadVBjH01oXrECzqXEFTKRjkQ9id-weu-dev-sbv' exceeded"),
+			args{"front", "bnuNNUp91QVMsnkwCAdkAcHadVBjH01oXrECzqXEFTKRjkQ9id", "b", patterns.Normal, resources.StorageBackupVault}},
 	}
 
 	for _, tt := range tests {
