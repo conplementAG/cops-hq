@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.17.0](https://github.com/conplementAG/cops-hq/compare/v2.16.0...v2.17.0) (2024-03-25)
+
+
+### Features
+
+* **dependencies:** update ([d6adafd](https://github.com/conplementAG/cops-hq/commit/d6adafd047e647d18c8923311002ae7113a7034d))
+
 ## [2.16.0](https://github.com/conplementAG/cops-hq/compare/v2.15.0...v2.16.0) (2024-02-13)
 
 
