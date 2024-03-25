@@ -31,4 +31,5 @@ const (
 	VirtualMachineScalSetLinux AzureResourceType = "vmss"
 	EventGridNamespace         AzureResourceType = "egns"
 	EventgridTopicSpace        AzureResourceType = "egts"
+	StorageBackupVault         AzureResourceType = "sbv"
 )

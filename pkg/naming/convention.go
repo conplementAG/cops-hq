@@ -48,6 +48,7 @@ var namingConventions = []namingConvention{
 	{resources.VirtualMachineScalSetLinux, 1, 64, true, false, false, CaseInsensitive},
 	{resources.EventGridNamespace, 3, 50, true, true, false, CaseInsensitive},
 	{resources.EventgridTopicSpace, 3, 50, true, true, false, CaseInsensitive},
+	{resources.StorageBackupVault, 2, 50, true, true, false, CaseInsensitive},
 }
 
 func findNamingConvention(resourceType resources.AzureResourceType) namingConvention {
