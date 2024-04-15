@@ -252,7 +252,9 @@ func (e *executor) execute(cmd *exec.Cmd, silent bool, loud bool) (output string
 	var compositeError error
 
 	if commandError != nil {
-		compositeError = fmt.Errorf("%w; Stderr stream: "+stderrCollector.String(), commandError)
+		compositeError = fmt.Errorf("%w; "+
+			"Stderr stream: "+stderrCollector.String()+", "+
+			"Stdout stream: "+stdoutCollector.String(), commandError)
 	}
 
 	return cleanedStringOutput, internal.ReturnErrorOrPanic(compositeError)
