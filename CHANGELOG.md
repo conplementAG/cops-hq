@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.18.0](https://github.com/conplementAG/cops-hq/compare/v2.17.0...v2.18.0) (2024-04-15)
+
+
+### Features
+
+* **executor:** include stdout in case of errors ([7fd110f](https://github.com/conplementAG/cops-hq/commit/7fd110f813e000fd84f1edf7776fa2acd2628c24))
+
 ## [2.17.0](https://github.com/conplementAG/cops-hq/compare/v2.16.0...v2.17.0) (2024-03-25)
 
 
