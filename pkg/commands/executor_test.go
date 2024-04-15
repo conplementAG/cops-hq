@@ -76,7 +76,15 @@ func (s *ExecutorTestSuite) Test_SuccessfulCommandReturnNoErrors() {
 func (s *ExecutorTestSuite) Test_CommandStdErrIsNotCollectedForTheOutput() {
 	out, err := s.exec.Execute("ls this-file-does-not-exist")
 	s.Error(err)
+	s.Contains(err.Error(), "No such file")
 	s.NotContains(out, "No such file")
+}
+
+func (s *ExecutorTestSuite) Test_CollectsBothStdErrAndStdOutOnError() {
+	_, err := s.exec.Execute("bash -c \"{ echo 'This is standard output'; echo 'This is standard error' >&2; ls this-file-does-not-exist; }\"")
+	s.Error(err)
+	s.Contains(err.Error(), "This is standard output")
+	s.Contains(err.Error(), "This is standard error")
 }
 
 func (s *ExecutorTestSuite) Test_Integration_ParsingComplexTypeFromCommandsIsPossible() {
