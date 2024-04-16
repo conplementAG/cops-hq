@@ -11,14 +11,22 @@ import (
 	"strings"
 )
 
+// expected min versions should be maintained individual dependent to the dependency
+// azurecli -> can be set to latest version
+// terraform -> releases should be checked for breaking changes. latest version not required. settled release should be preferred
+// helm -> releases should be checked for breaking changes. latest version not required. settled release should be preferred
+// kubectl -> should follow the guidelines of kubectl. You must use a kubectl version that is within one minor version difference of your cops cluster. For example, a v1.24 client can communicate with v1.23, v1.24, and v1.25 control planes.
+// kubelogin -> can be set to latest version
+// copsctl -> can be set to latest version
+// sops -> should be kept current. Must match to azurecli version!
 const (
-	ExpectedMinAzureCliVersion  = "2.56.0"
-	ExpectedMinTerraformVersion = "1.4.0"
-	ExpectedMinHelmVersion      = "3.11.3"
-	ExpectedMinKubectlVersion   = "1.26.15"
-	ExpectedMinKubeloginVersion = "0.1.0"
-	ExpectedMinCopsctlVersion   = "0.12.1"
-	ExpectedMinSopsVersion      = "3.7.3"
+	ExpectedMinAzureCliVersion  = "2.59.0" // 04/2024
+	ExpectedMinTerraformVersion = "1.6.0"  // 10/2023
+	ExpectedMinHelmVersion      = "3.13.0" // 09/2023
+	ExpectedMinKubectlVersion   = "1.27.8" // 11/2023
+	ExpectedMinKubeloginVersion = "0.1.1"  // 02/2024
+	ExpectedMinCopsctlVersion   = "0.12.3" // 04/2024
+	ExpectedMinSopsVersion      = "3.7.3"  // 10/2023
 )
 
 func (hq *hqContainer) CheckToolingDependencies() error {
