@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.19.0](https://github.com/conplementAG/cops-hq/compare/v2.18.0...v2.19.0) (2024-04-17)
+
+
+### Features
+
+* **housekeeping:** upgrade go dependencies ([c5c596f](https://github.com/conplementAG/cops-hq/commit/c5c596ff7afbea2c905336c106bb1fabaf5e82ba))
+
 ## [2.18.0](https://github.com/conplementAG/cops-hq/compare/v2.17.0...v2.18.0) (2024-04-15)
 
 
