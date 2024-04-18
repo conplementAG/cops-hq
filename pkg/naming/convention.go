@@ -49,6 +49,7 @@ var namingConventions = []namingConvention{
 	{resources.EventGridNamespace, 3, 50, true, true, false, CaseInsensitive},
 	{resources.EventgridTopicSpace, 3, 50, true, true, false, CaseInsensitive},
 	{resources.StorageBackupVault, 2, 50, true, true, false, CaseInsensitive},
+	{resources.DataFactory, 3, 63, true, true, false, CaseInsensitive},
 }
 
 func findNamingConvention(resourceType resources.AzureResourceType) namingConvention {
