@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.21.0](https://github.com/conplementAG/cops-hq/compare/v2.20.0...v2.21.0) (2024-04-18)
+
+
+### Features
+
+* **naming:** extend naming service for azure data factory ([1a0fb7c](https://github.com/conplementAG/cops-hq/commit/1a0fb7c2f8892883613f3592b64bcafa3d788d7d))
+
 ## [2.20.0](https://github.com/conplementAG/cops-hq/compare/v2.19.0...v2.20.0) (2024-04-18)
 
 
