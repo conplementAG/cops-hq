@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.20.0](https://github.com/conplementAG/cops-hq/compare/v2.19.0...v2.20.0) (2024-04-18)
+
+
+### Features
+
+* **terraform:** plan analysis on output variable change only ([9295565](https://github.com/conplementAG/cops-hq/commit/929556535737a3976d39242a2dea992edfaf207c))
+
 ## [2.19.0](https://github.com/conplementAG/cops-hq/compare/v2.18.0...v2.19.0) (2024-04-17)
 
 
