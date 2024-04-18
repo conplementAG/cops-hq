@@ -59,11 +59,16 @@ func (pa *planAnalyzer) isPlanDirty(checkForDestroy bool) (bool, error) {
 	// in the context of terraform plans, true is here a much better default value to prevent accidental changes due to bugs in this code
 	var isDirty = true
 
+	// NOTE: this whole code will be refactored to the new terraform binary return values
 	if strings.Contains(string(contents), "Your infrastructure matches the configuration.") &&
 		strings.Contains(string(contents), "found no differences, so no changes are needed") {
 		isDirty = false
 	} else if strings.Contains(string(contents), "Terraform will perform the following actions") &&
 		strings.Contains(string(contents), "To perform exactly these actions, run the following command to apply") {
+		isDirty = true
+	} else if strings.Contains(string(contents), "You can apply this plan to save these new output values to the Terraform") &&
+		strings.Contains(string(contents), "without changing any real infrastructure") {
+		// this case handles terraform changes in output variables only
 		isDirty = true
 	} else {
 		return true, errors.New("[CopsHq][PlanAnalyzer] could not determine if the plan was dirty or not, because expected strings for " +
