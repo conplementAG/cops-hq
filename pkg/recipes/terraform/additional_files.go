@@ -1,7 +1,6 @@
 package terraform
 
 import (
-	"github.com/conplementag/cops-hq/v2/pkg/recipes/terraform/plan_analyzer"
 	"os"
 	"path/filepath"
 )
@@ -47,17 +46,10 @@ func (tf *terraformWrapper) persistPlanInAdditionalFormatsOnDisk(planAsPlaintext
 }
 
 // persistAnalysisResultOnDisk - we also run the plan analyzer and persist the result as a file, in case plan contains no changes.
-func (tf *terraformWrapper) persistAnalysisResultOnDisk(terraformRelativePlanFilePath string, isDestroy bool) error {
+func (tf *terraformWrapper) persistAnalysisResultOnDisk(terraformRelativePlanFilePath string, isDestroy bool, isPlanDirty bool) error {
 	if isDestroy {
 		// we do not create analyze files for destroy - there are always changes expected
 		return nil
-	}
-
-	analyzer := plan_analyzer.New(tf.projectName, tf.terraformDirectory)
-
-	isPlanDirty, err := analyzer.IsDeployPlanDirty()
-	if err != nil {
-		return err
 	}
 
 	if !isPlanDirty {

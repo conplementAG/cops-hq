@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -263,9 +264,9 @@ func (e *executorMock) Execute(command string) (string, error) {
 		e.Called(command)
 	}
 
-	if strings.Contains(command, "plan") {
+	if strings.Contains(command, " plan ") {
 		if e.planHasChanges {
-			return "Terraform will perform the following actions ... To perform exactly these actions, run the following command to apply", nil
+			return "Terraform will perform the following actions ... To perform exactly these actions, run the following command to apply", exec.Command("bash", "-c", "exit 2").Run()
 		} else {
 			return "Your infrastructure matches the configuration. ... found no differences, so no changes are needed", nil
 		}

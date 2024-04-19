@@ -406,7 +406,8 @@ func (tf *terraformWrapper) plan(isDestroy bool) (string, error) {
 	tfCommand := "terraform" +
 		" -chdir=" + tf.terraformDirectory +
 		" plan -input=false " +
-		" -var-file=" + tf.GetVariablesFileName()
+		" -var-file=" + tf.GetVariablesFileName() +
+		" -detailed-exitcode"
 
 	var localTerraformRelativePlanFilePath string
 
@@ -436,7 +437,19 @@ func (tf *terraformWrapper) plan(isDestroy bool) (string, error) {
 	}
 
 	plaintextPlanOutput, err := tf.executor.Execute(tfCommand)
-	if err != nil {
+	// terraform plan with -detailed-exitcode results in the following exit codes
+	// 0 = Succeeded with empty diff (no changes)
+	// 1 = Error
+	// 2 = Succeeded with non-empty diff (changes present)
+	var planIsDirty bool
+	switch getExitCode(err) {
+	case 0:
+		planIsDirty = false
+		break
+	case 2:
+		planIsDirty = true
+		break
+	default:
 		return "", internal.ReturnErrorOrPanic(err)
 	}
 
@@ -445,7 +458,7 @@ func (tf *terraformWrapper) plan(isDestroy bool) (string, error) {
 		return "", internal.ReturnErrorOrPanic(err)
 	}
 
-	err = tf.persistAnalysisResultOnDisk(localTerraformRelativePlanFilePath, isDestroy)
+	err = tf.persistAnalysisResultOnDisk(localTerraformRelativePlanFilePath, isDestroy, planIsDirty)
 	if err != nil {
 		return "", internal.ReturnErrorOrPanic(err)
 	}
@@ -566,4 +579,17 @@ func (tf *terraformWrapper) forceApply(isDestroy bool) error {
 
 func trimLinebreakSuffixes(storageAccountKey string) string {
 	return strings.TrimRight(storageAccountKey, "\r\n")
+}
+
+func getExitCode(err error) int {
+	if err == nil {
+		return 0
+	}
+
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) {
+		return exitErr.ExitCode()
+	}
+
+	return 1
 }
