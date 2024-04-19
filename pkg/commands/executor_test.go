@@ -2,9 +2,11 @@ package commands
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/conplementag/cops-hq/v2/internal/testing_utils"
 	"github.com/conplementag/cops-hq/v2/pkg/logging"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"io"
 	"os"
@@ -85,6 +87,15 @@ func (s *ExecutorTestSuite) Test_CollectsBothStdErrAndStdOutOnError() {
 	s.Error(err)
 	s.Contains(err.Error(), "This is standard output")
 	s.Contains(err.Error(), "This is standard error")
+}
+
+func (s *ExecutorTestSuite) Test_ErrorHasExitErrorWrapped() {
+	_, err := s.exec.Execute("bash -c \"exit 5\"")
+
+	var exitErr *exec.ExitError
+	errors.As(err, &exitErr)
+
+	assert.Equal(s.T(), 5, exitErr.ExitCode())
 }
 
 func (s *ExecutorTestSuite) Test_Integration_ParsingComplexTypeFromCommandsIsPossible() {
