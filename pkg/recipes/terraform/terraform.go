@@ -442,15 +442,17 @@ func (tf *terraformWrapper) plan(isDestroy bool) (string, error) {
 	// 1 = Error
 	// 2 = Succeeded with non-empty diff (changes present)
 	var planIsDirty bool
-	switch getExitCode(err) {
+	switch exitCode := getExitCode(err); exitCode {
 	case 0:
 		planIsDirty = false
 		break
+	case 1:
+		return "", internal.ReturnErrorOrPanic(err)
 	case 2:
 		planIsDirty = true
 		break
 	default:
-		return "", internal.ReturnErrorOrPanic(err)
+		return "", internal.ReturnErrorOrPanic(fmt.Errorf("unexpected exit code %d in terraform plan command %w", exitCode, err))
 	}
 
 	err = tf.persistPlanInAdditionalFormatsOnDisk(plaintextPlanOutput, localTerraformRelativePlanFilePath)
