@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.22.0](https://github.com/conplementAG/cops-hq/compare/v2.21.0...v2.22.0) (2024-04-23)
+
+
+### Features
+
+* **terraform:** explicit error for unknown exit code in terraform plan ([eba0de4](https://github.com/conplementAG/cops-hq/commit/eba0de453a846e19a45913b16b85efe8e0fa3153))
+* **terraform:** use terraform for plan analyzing ([1b2838c](https://github.com/conplementAG/cops-hq/commit/1b2838cdee4b28347cc284c16328f49c15ac3920))
+
 ## [2.21.0](https://github.com/conplementAG/cops-hq/compare/v2.20.0...v2.21.0) (2024-04-18)
 
 
