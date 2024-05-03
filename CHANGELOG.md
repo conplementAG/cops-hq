@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.23.0](https://github.com/conplementAG/cops-hq/compare/v2.22.0...v2.23.0) (2024-05-03)
+
+
+### Features
+
+* **plan analyzer:** bring back plan analyzer ([88d3e0a](https://github.com/conplementAG/cops-hq/commit/88d3e0a1c7013d561f9c8dbd7aa58a658979c93c))
+
 ## [2.22.0](https://github.com/conplementAG/cops-hq/compare/v2.21.0...v2.22.0) (2024-04-23)
 
 
