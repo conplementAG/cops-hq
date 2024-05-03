@@ -11,6 +11,15 @@ var PlansDirectory = ".plans"
 // GetLocalTerraformRelativePlanFilePath gets the plan file path, relative to the given terraform directory. Output of this method
 // is usually used with terraform commands, which already have the root directory set with -chdir
 func GetLocalTerraformRelativePlanFilePath(projectName string, terraformDirectory string, getForDestroyPlan bool) (string, error) {
+	return getLocalTerraformRelativePath(projectName, terraformDirectory, getForDestroyPlan, GetPlanFileName)
+}
+
+// GetLocalTerraformRelativePlanStateFilePath gets the plan state file path, relative to the given terraform directory.
+func GetLocalTerraformRelativePlanStateFilePath(projectName string, terraformDirectory string) (string, error) {
+	return getLocalTerraformRelativePath(projectName, terraformDirectory, false, GetPlanStateFileName)
+}
+
+func getLocalTerraformRelativePath(projectName string, terraformDirectory string, getForDestroyPlan bool, fileNameFunction func(projectName string, getForDestroy bool) string) (string, error) {
 	// This is the place where plans directory is always ensured it exists.
 	// Saving the plan to separate directory that terraform directory (which would be the default normal choice),
 	// so that if the directory is mounted somewhere (like in Dockerfile / CD process), it will only have access to
@@ -23,7 +32,7 @@ func GetLocalTerraformRelativePlanFilePath(projectName string, terraformDirector
 	}
 
 	// terraform file paths are always relative to terraform path set on -chdir, which we set to root where the sources are located
-	return filepath.Join(PlansDirectory, GetPlanFileName(projectName, getForDestroyPlan)), nil
+	return filepath.Join(PlansDirectory, fileNameFunction(projectName, getForDestroyPlan)), nil
 }
 
 // GetPlanFileName return the Terraform plan file name
@@ -37,4 +46,12 @@ func GetPlanFileName(projectName string, getForDestroyPlan bool) string {
 	}
 
 	return planFileName
+}
+
+func GetPlanStateFileName(projectName string, getForDestroyPlan bool) string {
+	if getForDestroyPlan {
+		panic("destroy plan does not contain plan state file")
+	}
+
+	return GetPlanFileName(projectName, false) + ".plan-has-no-changes"
 }
