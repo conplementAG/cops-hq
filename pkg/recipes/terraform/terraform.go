@@ -9,6 +9,7 @@ import (
 	"github.com/conplementag/cops-hq/v2/internal/file_handling"
 	"github.com/conplementag/cops-hq/v2/internal/slice_helpers"
 	"github.com/conplementag/cops-hq/v2/pkg/commands"
+	"github.com/conplementag/cops-hq/v2/pkg/error_handling"
 	"github.com/conplementag/cops-hq/v2/pkg/recipes/terraform/file_paths"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -435,6 +436,14 @@ func (tf *terraformWrapper) plan(isDestroy bool) (string, error) {
 	if err != nil {
 		return "", internal.ReturnErrorOrPanic(err)
 	}
+
+	// disable global setting panic on error to allow terraform plan with
+	// detailed-exitcode for plan analyzing
+	panicOnError := error_handling.PanicOnAnyError
+	error_handling.PanicOnAnyError = false
+	defer func(panicOnError bool) {
+		error_handling.PanicOnAnyError = panicOnError
+	}(panicOnError)
 
 	plaintextPlanOutput, err := tf.executor.Execute(tfCommand)
 	// terraform plan with -detailed-exitcode results in the following exit codes
