@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.23.1](https://github.com/conplementAG/cops-hq/compare/v2.23.0...v2.23.1) (2024-05-17)
+
+
+### Bug Fixes
+
+* **tf:** disable global fatal setting temporary in terraform plan ([c4dfc21](https://github.com/conplementAG/cops-hq/commit/c4dfc21605a0ff56e2e06ce03d1864e24abb4647))
+
 ## [2.23.0](https://github.com/conplementAG/cops-hq/compare/v2.22.0...v2.23.0) (2024-05-03)
 
 
