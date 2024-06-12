@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.24.0](https://github.com/conplementAG/cops-hq/compare/v2.23.1...v2.24.0) (2024-06-12)
+
+
+### Features
+
+* **naming:** add elastic search resource type and conventions ([cce6f39](https://github.com/conplementAG/cops-hq/commit/cce6f39677c9db4fd2eb7bc888fc96a42371919c))
+
 ## [2.23.1](https://github.com/conplementAG/cops-hq/compare/v2.23.0...v2.23.1) (2024-05-17)
 
 
