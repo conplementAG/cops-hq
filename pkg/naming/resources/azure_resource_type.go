@@ -32,5 +32,6 @@ const (
 	EventGridNamespace         AzureResourceType = "egns"
 	EventgridTopicSpace        AzureResourceType = "egts"
 	StorageBackupVault         AzureResourceType = "sbv"
-	DataFactory         	   AzureResourceType = "df"
+	DataFactory                AzureResourceType = "df"
+	ElasticSearch              AzureResourceType = "es"
 )
