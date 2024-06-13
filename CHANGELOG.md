@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.25.0](https://github.com/conplementAG/cops-hq/compare/v2.24.0...v2.25.0) (2024-06-13)
+
+
+### Features
+
+* **naming:** add azure service bus resource type and conventions ([aefffc0](https://github.com/conplementAG/cops-hq/commit/aefffc0f90240af7c9f299cdb511e5e4febe09fb))
+
 ## [2.24.0](https://github.com/conplementAG/cops-hq/compare/v2.23.1...v2.24.0) (2024-06-12)
 
 
