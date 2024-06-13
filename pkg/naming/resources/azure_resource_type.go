@@ -34,4 +34,5 @@ const (
 	StorageBackupVault         AzureResourceType = "sbv"
 	DataFactory                AzureResourceType = "df"
 	ElasticSearch              AzureResourceType = "es"
+	ServicebusNamespace        AzureResourceType = "sbus"
 )

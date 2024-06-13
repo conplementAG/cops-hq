@@ -19,6 +19,7 @@ type namingConvention struct {
 	Case         caseSensitivity
 }
 
+// https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules
 var namingConventions = []namingConvention{
 	{resources.ResourceGroup, 3, 90, true, true, true, CaseInsensitive},
 	{resources.SqlServer, 3, 63, true, true, false, LowerCase},
@@ -51,6 +52,7 @@ var namingConventions = []namingConvention{
 	{resources.StorageBackupVault, 2, 50, true, true, false, CaseInsensitive},
 	{resources.DataFactory, 3, 63, true, true, false, CaseInsensitive},
 	{resources.ElasticSearch, 3, 90, true, true, false, CaseInsensitive},
+	{resources.ServicebusNamespace, 6, 50, true, true, false, CaseInsensitive},
 }
 
 func findNamingConvention(resourceType resources.AzureResourceType) namingConvention {
