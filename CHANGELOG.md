@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.25.1](https://github.com/conplementAG/cops-hq/compare/v2.25.0...v2.25.1) (2024-09-26)
+
+
+### Bug Fixes
+
+* **login:** use "-p=secret" format for service-principal login ([126297a](https://github.com/conplementAG/cops-hq/commit/126297a965e4db34def37b311b178cc691d0a133))
+
 ## [2.25.0](https://github.com/conplementAG/cops-hq/compare/v2.24.0...v2.25.0) (2024-06-13)
 
 
