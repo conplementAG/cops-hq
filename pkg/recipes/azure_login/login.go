@@ -79,7 +79,8 @@ func (l *Login) interactiveLogin() error {
 
 func (l *Login) servicePrincipalLogin(servicePrincipal string, secret string, tenant string) error {
 	// First, we log into the Azure CLI
-	commandText := "az login -u " + servicePrincipal + " -p " + secret + " -t " + tenant + " --service-principal"
+	// see https://learn.microsoft.com/en-us/cli/azure/reference-index?view=azure-cli-latest#az-login hints for secrets starting with "-"
+	commandText := "az login -u " + servicePrincipal + " -p=" + secret + " -t " + tenant + " --service-principal"
 	_, err := l.executor.ExecuteSilent(commandText)
 
 	// Then, we also need to set the env variables required for Terraform if working with service principals
@@ -96,7 +97,7 @@ func (l *Login) servicePrincipalLogin(servicePrincipal string, secret string, te
 }
 
 func (l *Login) isUserAlreadyLoggedIn() (bool, error) {
-	// since we actually rely on errors to test if user is logged in, we will shortly supress the executor panics
+	// since we actually rely on errors to test if user is logged in, we will shortly suppress the executor panics
 	previousPanicSetting := error_handling.PanicOnAnyError
 	error_handling.PanicOnAnyError = false
 
