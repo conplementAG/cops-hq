@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.27.0](https://github.com/conplementAG/cops-hq/compare/v2.26.0...v2.27.0) (2024-09-30)
+
+
+### Features
+
+* **check-dependencies:** update min requirements ([69ff24e](https://github.com/conplementAG/cops-hq/commit/69ff24ea3934820d72922d73973c8c9c138dd32d))
+* **Dockerfile:** enforce usage of linux base image for consistent builds ([5b26bdd](https://github.com/conplementAG/cops-hq/commit/5b26bdddd757be5141b68167738c96414a8461dd))
+
 ## [2.26.0](https://github.com/conplementAG/cops-hq/compare/v2.25.1...v2.26.0) (2024-09-30)
 
 
