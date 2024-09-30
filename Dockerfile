@@ -1,4 +1,4 @@
-FROM golang:1.22.2-bullseye
+FROM golang:1.23.1-bullseye
 
 RUN apt-get update && \
     apt-get install lsb-release unzip -y
@@ -10,7 +10,7 @@ RUN apt-get update
 ################## Tooling prerequisites  ######################
 # Azure Cli
 # https://github.com/Azure/azure-cli/releases
-ARG AZURE_CLI_VERSION=2.59.0
+ARG AZURE_CLI_VERSION=2.64.0
 RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" > /etc/apt/sources.list.d/azure-cli.list && \
     curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     apt-get install apt-transport-https  && \
@@ -19,7 +19,7 @@ RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb
 
 # terraform
 # https://releases.hashicorp.com/terraform/
-ARG TERRAFORM_VERSION=1.7.5
+ARG TERRAFORM_VERSION=1.9.6
 RUN curl -L https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip --output terraform.zip && \
     unzip terraform.zip && \
     mv terraform /usr/local/bin && \
@@ -28,14 +28,14 @@ RUN curl -L https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraf
 # k8s CLI
 # You must use a kubectl version that is within one minor version difference of your cluster.
 # For example, a v1.24 client can communicate with v1.23, v1.24, and v1.25 control planes.
-ARG KUBECTL_VERSION=v1.28.5
+ARG KUBECTL_VERSION=v1.31.1
 RUN curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl  && \
     install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl  && \
     kubectl version --client=true -o=json
 
 # kubelogin CLI
-ARG KUBELOGIN_VERSION=v0.1.1
-ARG KUBELOGIN_SHA256=51938ead06738bce6bb8fa4418fe043a5106a7d8bad037a65b57170c4f3fba0e
+ARG KUBELOGIN_VERSION=v0.1.4
+ARG KUBELOGIN_SHA256=cda67158030669963f19abe7c47edbc941d842d18790c599e444998cbab6aae7
 RUN curl -LO https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip  && \
     echo "${KUBELOGIN_SHA256} kubelogin-linux-amd64.zip" | sha256sum -c && \
     unzip kubelogin-linux-amd64.zip -d kubelogin && \
@@ -44,7 +44,7 @@ RUN curl -LO https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VE
     kubelogin --version
 
 # helm
-ARG HELM_VERSION=3.14.4
+ARG HELM_VERSION=3.16.1
 RUN curl -L  https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz --output helm.tar.gz && \
     tar xvzf helm.tar.gz && \
     mv linux-amd64/helm /usr/local/bin && \
@@ -58,8 +58,8 @@ RUN curl -LO https://github.com/conplementAG/copsctl/releases/download/v${COPSCT
     copsctl --version
 
 # sops
-ARG SOPS_VERSION=v3.8.1
-ARG SOPS_SHA256=d6bf07fb61972127c9e0d622523124c2d81caf9f7971fb123228961021811697
+ARG SOPS_VERSION=v3.9.0
+ARG SOPS_SHA256=0d65660fbe785647ff4f1764d7f69edf598f79d6d79ebbef4a501909b6ff6b82
 RUN curl -LO https://github.com/mozilla/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux.amd64 && \
     echo "${SOPS_SHA256} sops-${SOPS_VERSION}.linux.amd64" | sha256sum -c && \
     mv sops-${SOPS_VERSION}.linux.amd64 sops && \
@@ -90,3 +90,4 @@ RUN go test ./...
 # set back to command line tool root, because this is from where we could execute the commands in the future
 WORKDIR /src/cmd/example-infra
 CMD [ "/bin/bash" ]
+
