@@ -1,4 +1,9 @@
-FROM golang:1.23.1-bullseye
+# using --platform to force AMD64 architecture, even as this will produce a warning, for following reasons:
+#  - MacOS users using M* processors will probably get issues due to pulling ARM architecture images per default
+#  - we would pass the linux/amd64 as the build variable to remove the warning, but since this here is a "boilerplate" 
+#    image, it is meant to be copy pasted in the projects, where teams can still adjust the image and use the ${BUILDPLATFORM}
+#    variable. Check https://docs.docker.com/reference/build-checks/from-platform-flag-const-disallowed/ for reference.
+FROM --platform=linux/amd64 golang:1.23.1-bullseye
 
 RUN apt-get update && \
     apt-get install lsb-release unzip -y
