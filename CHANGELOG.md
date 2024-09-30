@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.26.0](https://github.com/conplementAG/cops-hq/compare/v2.25.1...v2.26.0) (2024-09-30)
+
+
+### Features
+
+* quaterly upgrade ([aa46b43](https://github.com/conplementAG/cops-hq/commit/aa46b438b884ce5cd41b41cfa9cc2a0f037199d5))
+
 ## [2.25.1](https://github.com/conplementAG/cops-hq/compare/v2.25.0...v2.25.1) (2024-09-26)
 
 
