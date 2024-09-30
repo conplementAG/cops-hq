@@ -3,7 +3,7 @@ package hq
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Masterminds/semver/v3"
+	semver "github.com/Masterminds/semver/v3"
 	"github.com/conplementag/cops-hq/v2/internal"
 	"github.com/conplementag/cops-hq/v2/pkg/error_handling"
 	"github.com/sirupsen/logrus"
@@ -18,15 +18,15 @@ import (
 // kubectl -> should follow the guidelines of kubectl. You must use a kubectl version that is within one minor version difference of your cops cluster. For example, a v1.24 client can communicate with v1.23, v1.24, and v1.25 control planes.
 // kubelogin -> can be set to latest version
 // copsctl -> can be set to latest version
-// sops -> should be kept current. Must match to azurecli version!
+// sops -> can be set to latest version
 const (
-	ExpectedMinAzureCliVersion  = "2.59.0" // 04/2024
-	ExpectedMinTerraformVersion = "1.6.0"  // 10/2023
-	ExpectedMinHelmVersion      = "3.13.0" // 09/2023
-	ExpectedMinKubectlVersion   = "1.27.8" // 11/2023
-	ExpectedMinKubeloginVersion = "0.1.1"  // 02/2024
-	ExpectedMinCopsctlVersion   = "0.12.3" // 04/2024
-	ExpectedMinSopsVersion      = "3.7.3"  // 10/2023
+	ExpectedMinAzureCliVersion  = "2.64.0" // 10/2024
+	ExpectedMinTerraformVersion = "1.8.0"  // 10/2024 - even as 1.9 is the latest, we can use the safe 1.8 version
+	ExpectedMinHelmVersion      = "3.15.0" // 10/2024
+	ExpectedMinKubectlVersion   = "1.29.9" // 10/2024
+	ExpectedMinKubeloginVersion = "0.1.4"  // 10/2024
+	ExpectedMinCopsctlVersion   = "0.12.3" // 10/2024
+	ExpectedMinSopsVersion      = "3.9.0"  // 10/2024
 )
 
 func (hq *hqContainer) CheckToolingDependencies() error {
