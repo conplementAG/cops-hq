@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.28.0](https://github.com/conplementAG/cops-hq/compare/v2.27.0...v2.28.0) (2024-12-16)
+
+
+### Features
+
+* update all go dependencies ([cd35203](https://github.com/conplementAG/cops-hq/commit/cd352032149c370d20ab7fe709e527aac3831dc2))
+
 ## [2.27.0](https://github.com/conplementAG/cops-hq/compare/v2.26.0...v2.27.0) (2024-09-30)
 
 
