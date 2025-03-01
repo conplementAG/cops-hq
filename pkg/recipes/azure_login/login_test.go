@@ -3,19 +3,68 @@ package azure_login
 import (
 	"encoding/json"
 	"errors"
-	"github.com/conplementag/cops-hq/v2/pkg/commands"
-	"github.com/stretchr/testify/mock"
 	"strings"
 	"testing"
+
+	"github.com/conplementag/cops-hq/v2/pkg/commands"
+	"github.com/stretchr/testify/mock"
 )
 
 func Test_TriggersServicePrincipalLogin_WhenIdProvided(t *testing.T) {
 	// Arrange
 	executor := &loginExecutorMock{}
-	azureLogin := NewWithParams(executor, "abcd", "secret", "tenantId")
+	azureLogin := NewWithParams(executor, "abcd", "secret", "tenantId", "", false)
 
 	executor.On("ExecuteSilent", mock.MatchedBy(func(command string) bool {
 		return strings.Contains(command, "--service-principal") && strings.Contains(command, "abcd")
+	}))
+
+	// Act
+	azureLogin.Login()
+
+	// Assert
+	executor.AssertExpectations(t)
+}
+
+func Test_TriggersUserAssignedManagedIdentityLogin_WhenClientIdAndFlagProvided(t *testing.T) {
+	// Arrange
+	executor := &loginExecutorMock{}
+	azureLogin := NewWithParams(executor, "abcd", "secret", "tenantId", "umi-clientid", true)
+
+	executor.On("Execute", mock.MatchedBy(func(command string) bool {
+		return command == "az login --identity --username umi-clientid"
+	}))
+
+	// Act
+	azureLogin.Login()
+
+	// Assert
+	executor.AssertExpectations(t)
+}
+
+func Test_TriggersSystemAssignedManagedIdentityLogin_WhenOnlyFlagProvided(t *testing.T) {
+	// Arrange
+	executor := &loginExecutorMock{}
+	azureLogin := NewWithParams(executor, "abcd", "secret", "tenantId", "", true)
+
+	executor.On("Execute", mock.MatchedBy(func(command string) bool {
+		return command == "az login --identity"
+	}))
+
+	// Act
+	azureLogin.Login()
+
+	// Assert
+	executor.AssertExpectations(t)
+}
+
+func Test_TriggersServicePrincipalLogin_WhenIdProvidedAndUamIdProvidedButMiFlagNotProvided(t *testing.T) {
+	// Arrange
+	executor := &loginExecutorMock{}
+	azureLogin := NewWithParams(executor, "abcd", "secret", "tenantId", "umi-clientid", false)
+
+	executor.On("ExecuteSilent", mock.MatchedBy(func(command string) bool {
+		return strings.Contains(command, "--service-principal") && strings.Contains(command, "abcd") && !strings.Contains(command, "--identity")
 	}))
 
 	// Act
@@ -90,6 +139,8 @@ func (e *loginExecutorMock) Execute(command string) (string, error) {
 		} else {
 			return "not logged in", errors.New("not logged int")
 		}
+	} else if strings.Contains(command, "--identity") {
+		return "logged in with managed identity", nil
 	}
 
 	return "unknown command for the Execute mock called, but let's return successfully anyways", nil
