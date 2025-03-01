@@ -4,25 +4,44 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/conplementag/cops-hq/v2/internal"
 	"github.com/conplementag/cops-hq/v2/pkg/commands"
 	"github.com/conplementag/cops-hq/v2/pkg/error_handling"
 	"github.com/sirupsen/logrus"
-	"os"
-	"strings"
 )
 
 type Login struct {
-	servicePrincipalId     string
-	servicePrincipalSecret string
-	tenant                 string
-	executor               commands.Executor
+	servicePrincipalId                  string
+	servicePrincipalSecret              string
+	userAssignedManagedIdentityClientId string
+	useManagedIdentity                  bool
+	tenant                              string
+	executor                            commands.Executor
 }
 
 // Login logs the currently configured user in AzureCLI and Terraform. If configured with service principal, it will
 // attempt a non-interactive login, otherwise a normal user login will be started.
 func (l *Login) Login() error {
-	if l.useServicePrincipalLogin() {
+	if l.useUserAssignedManagedIdentityLogin() {
+		if l.tenant == "" {
+			return errors.New("tenant must be given, when using user assigned managed identity")
+		}
+
+		logrus.Info("Login as user assigned managed identity: " + l.userAssignedManagedIdentityClientId)
+		err := l.userAssignedManagedIdentityLogin(l.userAssignedManagedIdentityClientId, l.tenant)
+		return internal.ReturnErrorOrPanic(err)
+	} else if l.useSystemAssignedManagedIdentityLogin() {
+		if l.tenant == "" {
+			return errors.New("tenant must be given, when using system assigned managed identity")
+		}
+
+		logrus.Info("Login as system assigned managed identity")
+		err := l.systemAssignedManagedIdentityLogin(l.tenant)
+		return internal.ReturnErrorOrPanic(err)
+	} else if l.useServicePrincipalLogin() {
 		if l.servicePrincipalSecret == "" {
 			return internal.ReturnErrorOrPanic(errors.New("service principal secret must be given, when using service principal credentials"))
 		}
@@ -68,6 +87,14 @@ func (l *Login) SetSubscription(subscriptionId string) error {
 	return nil
 }
 
+func (l *Login) useSystemAssignedManagedIdentityLogin() bool {
+	return l.useManagedIdentity && l.userAssignedManagedIdentityClientId == ""
+}
+
+func (l *Login) useUserAssignedManagedIdentityLogin() bool {
+	return l.useManagedIdentity && l.userAssignedManagedIdentityClientId != ""
+}
+
 func (l *Login) useServicePrincipalLogin() bool {
 	return l.servicePrincipalId != ""
 }
@@ -91,6 +118,43 @@ func (l *Login) servicePrincipalLogin(servicePrincipal string, secret string, te
 	if err != nil || err1 != nil || err2 != nil || err3 != nil {
 		return internal.ReturnErrorOrPanic(fmt.Errorf("errors while logging in via azure service principal: %v %v %v %v",
 			err, err1, err2, err3))
+	}
+
+	return nil
+}
+
+func (l *Login) userAssignedManagedIdentityLogin(userAssignedManagedIdentityClientId string, tenant string) error {
+	// First, we log into the Azure CLI
+	// see https://learn.microsoft.com/en-us/cli/azure/reference-index?view=azure-cli-latest#az-login hints for secrets starting with "-"
+	commandText := "az login --identity --username " + userAssignedManagedIdentityClientId
+	_, err := l.executor.Execute(commandText)
+
+	// Then, we also need to set the env variables required for Terraform if working with user assigned managed identities
+	err1 := os.Setenv("ARM_CLIENT_ID", userAssignedManagedIdentityClientId)
+	err2 := os.Setenv("ARM_USE_MSI", "true")
+	err3 := os.Setenv("ARM_TENANT_ID", tenant)
+
+	if err != nil || err1 != nil || err2 != nil || err3 != nil {
+		return internal.ReturnErrorOrPanic(fmt.Errorf("errors while logging in via user assigned managed identity: %v %v %v %v",
+			err, err1, err2, err3))
+	}
+
+	return nil
+}
+
+func (l *Login) systemAssignedManagedIdentityLogin(tenant string) error {
+	// First, we log into the Azure CLI
+	// see https://learn.microsoft.com/en-us/cli/azure/reference-index?view=azure-cli-latest#az-login hints for secrets starting with "-"
+	commandText := "az login --identity"
+	_, err := l.executor.Execute(commandText)
+
+	// Then, we also need to set the env variables required for Terraform if working with system assigned managed identities
+	err1 := os.Setenv("ARM_USE_MSI", "true")
+	err2 := os.Setenv("ARM_TENANT_ID", tenant)
+
+	if err != nil || err1 != nil || err2 != nil {
+		return internal.ReturnErrorOrPanic(fmt.Errorf("errors while logging in via system assigned managed identity: %v %v %v",
+			err, err1, err2))
 	}
 
 	return nil
