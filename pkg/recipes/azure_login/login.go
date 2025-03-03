@@ -22,8 +22,13 @@ type Login struct {
 	executor                            commands.Executor
 }
 
-// Login logs the currently configured user in AzureCLI and Terraform. If configured with service principal, it will
-// attempt a non-interactive login, otherwise a normal user login will be started.
+// Login logs the currently configured user in AzureCLI and Terraform
+//
+// Attempts the login in the following order if configured:
+//   - user assigned managed identity
+//   - system assigned managed identity
+//   - service principal
+//   - normal user login
 func (l *Login) Login() error {
 	if l.useUserAssignedManagedIdentityLogin() {
 		if l.tenant == "" {
