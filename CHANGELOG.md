@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.29.0](https://github.com/conplementAG/cops-hq/compare/v2.28.0...v2.29.0) (2025-03-03)
+
+
+### Features
+
+* **login:** add support for user- and system assigned managed identity for azure login ([49c4522](https://github.com/conplementAG/cops-hq/commit/49c4522bf2db7cf1aa86ce536717984bbe42b12b))
+* **login:** adds managed identity login to readme ([5fc4dd8](https://github.com/conplementAG/cops-hq/commit/5fc4dd856ee39e92b54986ab707c361383422fb0))
+* **login:** adds managed identity logins to Login function documentation ([085adfc](https://github.com/conplementAG/cops-hq/commit/085adfcb04c9923b7bea9dc25fd7d8c3cff19cda))
+
 ## [2.28.0](https://github.com/conplementAG/cops-hq/compare/v2.27.0...v2.28.0) (2024-12-16)
 
 
