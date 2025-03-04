@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.30.0](https://github.com/conplementAG/cops-hq/compare/v2.29.0...v2.30.0) (2025-03-04)
+
+
+### Features
+
+* **login:** add separate flag for managed identity tenant id ([8a24454](https://github.com/conplementAG/cops-hq/commit/8a244541760435be3afb905a4a247a1358b41c02))
+
 ## [2.29.0](https://github.com/conplementAG/cops-hq/compare/v2.28.0...v2.29.0) (2025-03-03)
 
 
