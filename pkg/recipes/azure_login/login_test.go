@@ -3,49 +3,66 @@ package azure_login
 import (
 	"encoding/json"
 	"errors"
+	"os"
 	"strings"
 	"testing"
 
 	"github.com/conplementag/cops-hq/v2/pkg/commands"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 func Test_TriggersServicePrincipalLogin_WhenIdProvided(t *testing.T) {
 	// Arrange
+	t.Cleanup(func() {
+		os.Unsetenv("ARM_TENANT_ID")
+		os.Unsetenv("ARM_CLIENT_ID")
+		os.Unsetenv("ARM_CLIENT_SECRET")
+		os.Unsetenv("ARM_USE_MSI")
+	})
 	executor := &loginExecutorMock{}
-	azureLogin := NewWithParams(executor, "abcd", "secret", "tenantId", "", false)
+	azureLogin := NewWithParams(executor, "sp-client-id", "sp-client-secret", "sp-tenantId", "", "", false)
 
 	executor.On("ExecuteSilent", mock.MatchedBy(func(command string) bool {
-		return strings.Contains(command, "--service-principal") && strings.Contains(command, "abcd")
+		return strings.Contains(command, "--service-principal") && strings.Contains(command, "sp-client-id")
 	}))
 
 	// Act
 	azureLogin.Login()
 
 	// Assert
+	assert.Equal(t, os.Getenv("ARM_TENANT_ID"), "sp-tenantId")
+	assert.Equal(t, os.Getenv("ARM_CLIENT_ID"), "sp-client-id")
+	assert.Equal(t, os.Getenv("ARM_CLIENT_SECRET"), "sp-client-secret")
+	assert.Equal(t, os.Getenv("ARM_USE_MSI"), "")
 	executor.AssertExpectations(t)
 }
 
 func Test_TriggersUserAssignedManagedIdentityLogin_WhenClientIdAndFlagProvided(t *testing.T) {
 	// Arrange
+	CleanUpAfter(t)
 	executor := &loginExecutorMock{}
-	azureLogin := NewWithParams(executor, "abcd", "secret", "tenantId", "umi-clientid", true)
+	azureLogin := NewWithParams(executor, "sp-client-id", "secret", "sp-tenantId", "umi-clientid", "mi-tenantId", true)
 
 	executor.On("Execute", mock.MatchedBy(func(command string) bool {
-		return command == "az login --identity --username umi-clientid"
+		return command == "az login --identity --client-id umi-clientid"
 	}))
 
 	// Act
 	azureLogin.Login()
 
 	// Assert
+	assert.Equal(t, os.Getenv("ARM_TENANT_ID"), "mi-tenantId")
+	assert.Equal(t, os.Getenv("ARM_CLIENT_ID"), "umi-clientid")
+	assert.Equal(t, os.Getenv("ARM_USE_MSI"), "true")
 	executor.AssertExpectations(t)
 }
 
 func Test_TriggersSystemAssignedManagedIdentityLogin_WhenOnlyFlagProvided(t *testing.T) {
 	// Arrange
+	CleanUpAfter(t)
 	executor := &loginExecutorMock{}
-	azureLogin := NewWithParams(executor, "abcd", "secret", "tenantId", "", true)
+	azureLogin := NewWithParams(executor, "sp-client-id", "sp-client-secret", "sp-tenantId", "", "mi-tenantId", true)
 
 	executor.On("Execute", mock.MatchedBy(func(command string) bool {
 		return command == "az login --identity"
@@ -55,27 +72,36 @@ func Test_TriggersSystemAssignedManagedIdentityLogin_WhenOnlyFlagProvided(t *tes
 	azureLogin.Login()
 
 	// Assert
+	assert.Equal(t, os.Getenv("ARM_TENANT_ID"), "mi-tenantId")
+	assert.Equal(t, os.Getenv("ARM_CLIENT_ID"), "")
+	assert.Equal(t, os.Getenv("ARM_USE_MSI"), "true")
 	executor.AssertExpectations(t)
 }
 
 func Test_TriggersServicePrincipalLogin_WhenIdProvidedAndUamIdProvidedButMiFlagNotProvided(t *testing.T) {
 	// Arrange
+	CleanUpAfter(t)
 	executor := &loginExecutorMock{}
-	azureLogin := NewWithParams(executor, "abcd", "secret", "tenantId", "umi-clientid", false)
+	azureLogin := NewWithParams(executor, "sp-client-id", "sp-client-secret", "sp-tenantId", "umi-clientid", "mi-tenantId", false)
 
 	executor.On("ExecuteSilent", mock.MatchedBy(func(command string) bool {
-		return strings.Contains(command, "--service-principal") && strings.Contains(command, "abcd") && !strings.Contains(command, "--identity")
+		return strings.Contains(command, "--service-principal") && strings.Contains(command, "sp-client-id") && !strings.Contains(command, "--identity")
 	}))
 
 	// Act
 	azureLogin.Login()
 
 	// Assert
+	assert.Equal(t, os.Getenv("ARM_TENANT_ID"), "sp-tenantId")
+	assert.Equal(t, os.Getenv("ARM_CLIENT_ID"), "sp-client-id")
+	assert.Equal(t, os.Getenv("ARM_CLIENT_SECRET"), "sp-client-secret")
+	assert.Equal(t, os.Getenv("ARM_USE_MSI"), "")
 	executor.AssertExpectations(t)
 }
 
 func Test_TriggersNoLogin_WhenUserAlreadyLoggedIn(t *testing.T) {
 	// Arrange
+	CleanUpAfter(t)
 	executor := &loginExecutorMock{}
 	executor.userLoggedIn = true
 
@@ -94,6 +120,7 @@ func Test_TriggersNoLogin_WhenUserAlreadyLoggedIn(t *testing.T) {
 
 func Test_TriggersUserLogin_WhenNoCredentialsProvidedAndNotLoggedIn(t *testing.T) {
 	// Arrange
+	CleanUpAfter(t)
 	executor := &loginExecutorMock{}
 	executor.userLoggedIn = false
 
@@ -114,6 +141,15 @@ func Test_TriggersUserLogin_WhenNoCredentialsProvidedAndNotLoggedIn(t *testing.T
 
 	// Assert
 	executor.AssertExpectations(t)
+}
+
+func CleanUpAfter(t *testing.T) {
+	t.Cleanup(func() {
+		os.Unsetenv("ARM_TENANT_ID")
+		os.Unsetenv("ARM_CLIENT_ID")
+		os.Unsetenv("ARM_CLIENT_SECRET")
+		os.Unsetenv("ARM_USE_MSI")
+	})
 }
 
 type loginExecutorMock struct {

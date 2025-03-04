@@ -16,9 +16,10 @@ import (
 type Login struct {
 	servicePrincipalId                  string
 	servicePrincipalSecret              string
+	servicePrincipalTenantId            string
 	userAssignedManagedIdentityClientId string
+	managedIdentityTenantId             string
 	useManagedIdentity                  bool
-	tenant                              string
 	executor                            commands.Executor
 }
 
@@ -31,32 +32,32 @@ type Login struct {
 //   - normal user login
 func (l *Login) Login() error {
 	if l.useUserAssignedManagedIdentityLogin() {
-		if l.tenant == "" {
+		if l.managedIdentityTenantId == "" {
 			return errors.New("tenant must be given, when using user assigned managed identity")
 		}
 
 		logrus.Info("Login as user assigned managed identity: " + l.userAssignedManagedIdentityClientId)
-		err := l.userAssignedManagedIdentityLogin(l.userAssignedManagedIdentityClientId, l.tenant)
+		err := l.userAssignedManagedIdentityLogin(l.userAssignedManagedIdentityClientId, l.managedIdentityTenantId)
 		return internal.ReturnErrorOrPanic(err)
 	} else if l.useSystemAssignedManagedIdentityLogin() {
-		if l.tenant == "" {
+		if l.managedIdentityTenantId == "" {
 			return errors.New("tenant must be given, when using system assigned managed identity")
 		}
 
 		logrus.Info("Login as system assigned managed identity")
-		err := l.systemAssignedManagedIdentityLogin(l.tenant)
+		err := l.systemAssignedManagedIdentityLogin(l.managedIdentityTenantId)
 		return internal.ReturnErrorOrPanic(err)
 	} else if l.useServicePrincipalLogin() {
 		if l.servicePrincipalSecret == "" {
 			return internal.ReturnErrorOrPanic(errors.New("service principal secret must be given, when using service principal credentials"))
 		}
 
-		if l.tenant == "" {
+		if l.servicePrincipalTenantId == "" {
 			return errors.New("tenant must be given, when using service principal credentials")
 		}
 
 		logrus.Info("Login as service-principal: " + l.servicePrincipalId)
-		err := l.servicePrincipalLogin(l.servicePrincipalId, l.servicePrincipalSecret, l.tenant)
+		err := l.servicePrincipalLogin(l.servicePrincipalId, l.servicePrincipalSecret, l.servicePrincipalTenantId)
 		return internal.ReturnErrorOrPanic(err)
 	} else {
 		loggedIn, err := l.isUserAlreadyLoggedIn()
@@ -131,7 +132,7 @@ func (l *Login) servicePrincipalLogin(servicePrincipal string, secret string, te
 func (l *Login) userAssignedManagedIdentityLogin(userAssignedManagedIdentityClientId string, tenant string) error {
 	// First, we log into the Azure CLI
 	// see https://learn.microsoft.com/en-us/cli/azure/reference-index?view=azure-cli-latest#az-login hints for secrets starting with "-"
-	commandText := "az login --identity --username " + userAssignedManagedIdentityClientId
+	commandText := "az login --identity --client-id " + userAssignedManagedIdentityClientId
 	_, err := l.executor.Execute(commandText)
 
 	// Then, we also need to set the env variables required for Terraform if working with user assigned managed identities
