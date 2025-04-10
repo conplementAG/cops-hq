@@ -67,8 +67,7 @@ func (h *helmWrapper) Deploy() error {
 		return errors.New("[CopsHq][Helm] deployment setting 'WaitForJobs' could not be enabled without enabled 'Wait' flag")
 	}
 
-	helmCmd := fmt.Sprintf(fmt.Sprintf("helm upgrade --namespace %s --install %s %s -f %s --timeout %s", h.namespace, h.chartName, h.helmDirectory,
-		h.getValuesFilePath(), h.deploymentSettings.Timeout))
+	helmCmd := fmt.Sprintf("helm upgrade --namespace %s --install %s %s -f %s --timeout %s", h.namespace, h.chartName, h.helmDirectory, h.getValuesFilePath(), h.deploymentSettings.Timeout)
 
 	if h.variablesSet {
 		helmCmd = fmt.Sprintf("%s -f %s", helmCmd, h.getValuesOverrideFilePath())
