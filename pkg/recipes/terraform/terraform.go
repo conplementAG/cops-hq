@@ -4,6 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"reflect"
+	"strings"
+
 	"github.com/conplementag/cops-hq/v2/internal"
 	"github.com/conplementag/cops-hq/v2/internal/cmdutil"
 	"github.com/conplementag/cops-hq/v2/internal/file_handling"
@@ -12,11 +18,6 @@ import (
 	"github.com/conplementag/cops-hq/v2/pkg/error_handling"
 	"github.com/conplementag/cops-hq/v2/pkg/recipes/terraform/file_paths"
 	"github.com/sirupsen/logrus"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"reflect"
-	"strings"
 )
 
 // Terraform is a wrapper around common terraform functionality used in IaC projects with Azure. In includes remote state
@@ -84,6 +85,11 @@ type Terraform interface {
 	// Parameters are:
 	// 		parameterName will restrict output to single output parameter and output the parameter in raw mode. If not set all available output is given
 	Output(parameterName *string) (string, error)
+
+	// OutputAsJson returns the terraform provided output as json string
+	//
+	// CAUTION: Returns sensitive values in plain text
+	OutputAsJson() (string, error)
 }
 
 type terraformWrapper struct {
@@ -308,6 +314,16 @@ func (tf *terraformWrapper) Output(parameterName *string) (string, error) {
 	}
 
 	return tf.executor.Execute(tfCommand)
+}
+
+func (tf *terraformWrapper) OutputAsJson() (string, error) {
+
+	tfCommand := "terraform" +
+		" -chdir=" + tf.terraformDirectory +
+		" output" +
+		" -json"
+
+	return tf.executor.ExecuteSilent(tfCommand)
 }
 
 func (tf *terraformWrapper) addStorageAccountNetworkRules() error {
