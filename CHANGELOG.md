@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.32.0](https://github.com/conplementAG/cops-hq/compare/v2.31.0...v2.32.0) (2025-04-17)
+
+
+### Features
+
+* **terraform-recipe:** extent terraform recipe to retrieve all tf output values as json ([d5c4d8a](https://github.com/conplementAG/cops-hq/commit/d5c4d8a0f1426fe5fac443e728e6f983383471a1))
+
 ## [2.31.0](https://github.com/conplementAG/cops-hq/compare/v2.30.0...v2.31.0) (2025-04-11)
 
 
