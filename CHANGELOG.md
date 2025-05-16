@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.33.0](https://github.com/conplementAG/cops-hq/compare/v2.32.0...v2.33.0) (2025-05-16)
+
+
+### Features
+
+* **naming:** added app reg / claims mapping ([585f470](https://github.com/conplementAG/cops-hq/commit/585f47035a8180f53b56d9435a2b6d04500a0d9d))
+
 ## [2.32.0](https://github.com/conplementAG/cops-hq/compare/v2.31.0...v2.32.0) (2025-04-17)
 
 
