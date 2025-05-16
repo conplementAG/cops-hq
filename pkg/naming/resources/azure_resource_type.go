@@ -35,4 +35,7 @@ const (
 	DataFactory                AzureResourceType = "df"
 	ElasticSearch              AzureResourceType = "es"
 	ServicebusNamespace        AzureResourceType = "sbus"
+	AppRegistration               AzureResourceType = "app"
+	ClaimsMappingPolicy           AzureResourceType = "cmp"
+	CustomAuthenticationExtension AzureResourceType = "authext"
 )

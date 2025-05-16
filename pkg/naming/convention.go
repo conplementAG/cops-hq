@@ -53,6 +53,9 @@ var namingConventions = []namingConvention{
 	{resources.DataFactory, 3, 63, true, true, false, CaseInsensitive},
 	{resources.ElasticSearch, 3, 90, true, true, false, CaseInsensitive},
 	{resources.ServicebusNamespace, 6, 50, true, true, false, CaseInsensitive},
+	{resources.AppRegistration, 3, 120, true, true, true, CaseInsensitive},
+	{resources.ClaimsMappingPolicy, 3, 120, true, true, true, CaseInsensitive},
+	{resources.CustomAuthenticationExtension, 3, 120, true, true, true, CaseInsensitive},
 }
 
 func findNamingConvention(resourceType resources.AzureResourceType) namingConvention {
