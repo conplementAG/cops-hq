@@ -2,11 +2,12 @@ package naming
 
 import (
 	"fmt"
-	"github.com/ahmetb/go-linq/v3"
-	"github.com/conplementag/cops-hq/v2/pkg/naming/resources"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/ahmetb/go-linq/v3"
+	"github.com/conplementag/cops-hq/v2/pkg/naming/resources"
 )
 
 type namingConvention struct {
@@ -56,6 +57,11 @@ var namingConventions = []namingConvention{
 	{resources.AppRegistration, 3, 120, true, true, true, CaseInsensitive},
 	{resources.ClaimsMappingPolicy, 3, 120, true, true, true, CaseInsensitive},
 	{resources.CustomAuthenticationExtension, 3, 120, true, true, true, CaseInsensitive},
+	{resources.WindowsVirtualMachine, 1, 15, true, true, false, CaseInsensitive},
+	{resources.LinuxVirtualMachine, 1, 64, true, true, false, CaseInsensitive},
+	{resources.NetworkInterfaceCard, 2, 64, true, true, true, CaseInsensitive},
+	{resources.AppServicePlan, 1, 60, true, true, false, CaseInsensitive},
+	{resources.AppService, 2, 43, true, true, false, CaseInsensitive},
 }
 
 func findNamingConvention(resourceType resources.AzureResourceType) namingConvention {
