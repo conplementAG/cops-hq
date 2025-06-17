@@ -38,4 +38,9 @@ const (
 	AppRegistration               AzureResourceType = "app"
 	ClaimsMappingPolicy           AzureResourceType = "cmp"
 	CustomAuthenticationExtension AzureResourceType = "authext"
+	VirtualMachineLinux           AzureResourceType = "vml"
+	VirtualMachineWindows         AzureResourceType = "vmw"
+	NetworkInterfaceCard          AzureResourceType = "nic"
+	AppServicePlan                AzureResourceType = "asp"
+	AppService                    AzureResourceType = "as"
 )
