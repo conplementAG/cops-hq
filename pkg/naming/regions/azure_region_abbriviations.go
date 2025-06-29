@@ -2,18 +2,20 @@ package regions
 
 import (
 	"errors"
+
 	"github.com/sirupsen/logrus"
 )
 
 var azureRegionAbbreviations = map[string]string{
 	// naming convention is region code (e.g. n as in north, one letter) and country code (e.g. eu as in europe, two letter)
-	"northeurope":   "neu",
-	"westeurope":    "weu",
-	"francecentral": "cfr",
-	"eastus":        "eus",
-	"westus":        "wus",
-	"centralus":     "cus",
-	"canadaeast":    "eca",
+	"northeurope":        "neu",
+	"westeurope":         "weu",
+	"francecentral":      "cfr",
+	"eastus":             "eus",
+	"westus":             "wus",
+	"centralus":          "cus",
+	"canadaeast":         "eca",
+	"germanywestcentral": "gwc",
 }
 
 func GetAbbreviatedRegion(region string) string {
