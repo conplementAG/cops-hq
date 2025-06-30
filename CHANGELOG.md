@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.34.0](https://github.com/conplementAG/cops-hq/compare/v2.33.0...v2.34.0) (2025-06-30)
+
+
+### Features
+
+* **naming:** extend conventions, add germany west ([f4e2d27](https://github.com/conplementAG/cops-hq/commit/f4e2d27a5ee7bb1c5e86c82babecc0c5d5b40324))
+
 ## [2.33.0](https://github.com/conplementAG/cops-hq/compare/v2.32.0...v2.33.0) (2025-05-16)
 
 
