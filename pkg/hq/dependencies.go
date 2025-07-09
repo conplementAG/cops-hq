@@ -3,12 +3,13 @@ package hq
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
+	"strings"
+
 	semver "github.com/Masterminds/semver/v3"
 	"github.com/conplementag/cops-hq/v2/internal"
 	"github.com/conplementag/cops-hq/v2/pkg/error_handling"
 	"github.com/sirupsen/logrus"
-	"regexp"
-	"strings"
 )
 
 // expected min versions should be maintained individual dependent to the dependency
@@ -20,13 +21,13 @@ import (
 // copsctl -> can be set to latest version
 // sops -> can be set to latest version
 const (
-	ExpectedMinAzureCliVersion  = "2.71.0" // 04/2025
-	ExpectedMinTerraformVersion = "1.8.0"  // 10/2024 - even as 1.9 is the latest, we can use the safe 1.8 version
-	ExpectedMinHelmVersion      = "3.15.0" // 10/2024
-	ExpectedMinKubectlVersion   = "1.31.6" // 04/2025
-	ExpectedMinKubeloginVersion = "0.2.7"  // 04/2025
+	ExpectedMinAzureCliVersion  = "2.75.0" // 07/2025
+	ExpectedMinTerraformVersion = "1.11.0" // 07/2025 - allow previous version
+	ExpectedMinHelmVersion      = "3.17.0" // 07/2025 - allow previous version
+	ExpectedMinKubectlVersion   = "1.31.6" // 07/2025
+	ExpectedMinKubeloginVersion = "0.2.9"  // 07/2025
 	ExpectedMinCopsctlVersion   = "0.14.0" // 04/2025
-	ExpectedMinSopsVersion      = "3.10.1" // 04/2025
+	ExpectedMinSopsVersion      = "3.10.2" // 07/2025
 )
 
 func (hq *hqContainer) CheckToolingDependencies() error {
