@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.35.0](https://github.com/conplementAG/cops-hq/compare/v2.34.0...v2.35.0) (2025-07-15)
+
+
+### Features
+
+* quarterly upgrades ([36bb103](https://github.com/conplementAG/cops-hq/commit/36bb1032bd41dc8d027f53fced7da231f3b71324))
+
 ## [2.34.0](https://github.com/conplementAG/cops-hq/compare/v2.33.0...v2.34.0) (2025-06-30)
 
 
