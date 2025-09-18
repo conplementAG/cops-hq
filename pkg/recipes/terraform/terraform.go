@@ -181,6 +181,20 @@ func (tf *terraformWrapper) Init() error {
 		return internal.ReturnErrorOrPanic(err)
 	}
 
+	fileSharePropertiesCmd := exec.Command("az", "storage", "account", "file-service-properties", "update",
+		"--account-name", tf.stateStorageAccountName,
+		"--resource-group", tf.resourceGroupName,
+		"--versions", "SMB3.1.1",
+		"--auth-methods", "Kerberos",
+		"--kerb-ticket-encryption", "AES-256",
+		"--channel-encryption", "AES-256-GCM")
+
+	_, err = tf.executor.ExecuteCmd(fileSharePropertiesCmd)
+
+	if err != nil {
+		return internal.ReturnErrorOrPanic(err)
+	}
+
 	logrus.Info("Reading the storage account key, which will be give to terraform to initialize the remote state...")
 	storageAccountKey, err := tf.executor.ExecuteSilent("az storage account keys list" +
 		" --resource-group " + tf.resourceGroupName +
