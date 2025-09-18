@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.36.0](https://github.com/conplementAG/cops-hq/compare/v2.35.0...v2.36.0) (2025-09-18)
+
+
+### Features
+
+* **tf:** configure smb file share for tf storage ([c1b5ede](https://github.com/conplementAG/cops-hq/commit/c1b5ede5875c183a6b394aafa4a44765d55ada14))
+
 ## [2.35.0](https://github.com/conplementAG/cops-hq/compare/v2.34.0...v2.35.0) (2025-07-15)
 
 
