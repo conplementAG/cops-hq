@@ -181,6 +181,16 @@ func (tf *terraformWrapper) Init() error {
 		return internal.ReturnErrorOrPanic(err)
 	}
 
+	defaultPortalAccessCmd := exec.Command("az", "storage", "account", "update",
+		"--name", tf.stateStorageAccountName,
+		"--resource-group", tf.resourceGroupName,
+		"--set", "defaultToOAuthAuthentication=true")
+
+	_, err = tf.executor.ExecuteCmd(defaultPortalAccessCmd)
+	if err != nil {
+		return internal.ReturnErrorOrPanic(err)
+	}
+
 	fileSharePropertiesCmd := exec.Command("az", "storage", "account", "file-service-properties", "update",
 		"--account-name", tf.stateStorageAccountName,
 		"--resource-group", tf.resourceGroupName,
@@ -190,7 +200,6 @@ func (tf *terraformWrapper) Init() error {
 		"--channel-encryption", "AES-256-GCM")
 
 	_, err = tf.executor.ExecuteCmd(fileSharePropertiesCmd)
-
 	if err != nil {
 		return internal.ReturnErrorOrPanic(err)
 	}
