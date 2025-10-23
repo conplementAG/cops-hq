@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.38.0](https://github.com/conplementAG/cops-hq/compare/v2.37.0...v2.38.0) (2025-10-23)
+
+
+### Features
+
+* **tf:** configure storage account default portal access ([e348252](https://github.com/conplementAG/cops-hq/commit/e3482527b54fbd2ad58a94d698ab8ff7e07d3287))
+
 ## [2.37.0](https://github.com/conplementAG/cops-hq/compare/v2.36.0...v2.37.0) (2025-10-07)
 
 
