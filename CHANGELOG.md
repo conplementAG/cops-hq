@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.38.1](https://github.com/conplementAG/cops-hq/compare/v2.38.0...v2.38.1) (2025-10-30)
+
+
+### Bug Fixes
+
+* add naming convention for AzureCacheForRedis resource type ([b3587e9](https://github.com/conplementAG/cops-hq/commit/b3587e93b705f4df75b5555d5168e5cbe5211229))
+
 ## [2.38.0](https://github.com/conplementAG/cops-hq/compare/v2.37.0...v2.38.0) (2025-10-23)
 
 
