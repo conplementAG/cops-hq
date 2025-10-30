@@ -46,6 +46,7 @@ var namingConventions = []namingConvention{
 	{resources.UserAssignedIdentity, 3, 90, true, true, true, CaseInsensitive},
 	{resources.NetworkSecurityGroup, 3, 80, true, true, true, CaseInsensitive},
 	{resources.LogAnalyticsWorkspace, 3, 90, false, true, true, CaseInsensitive},
+	{resources.AzureCacheForRedis, 1, 63, true, true, false, CaseInsensitive},
 	{resources.LoadBalancer, 1, 80, true, true, true, CaseInsensitive},
 	{resources.VirtualMachineScaleSetLinux, 1, 64, true, false, false, CaseInsensitive},
 	{resources.EventGridNamespace, 3, 50, true, true, false, CaseInsensitive},
