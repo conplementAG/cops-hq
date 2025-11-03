@@ -27,6 +27,7 @@ const (
 	NetworkSecurityGroup          AzureResourceType = "nsg"
 	CosmosDB                      AzureResourceType = "cdb"
 	AzureCacheForRedis            AzureResourceType = "acfr"
+	AzureManagedRedis             AzureResourceType = "amr"
 	LoadBalancer                  AzureResourceType = "lb"
 	VirtualMachineScaleSetLinux   AzureResourceType = "vmss"
 	EventGridNamespace            AzureResourceType = "egns"
