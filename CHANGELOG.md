@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.39.0](https://github.com/conplementAG/cops-hq/compare/v2.38.1...v2.39.0) (2025-11-04)
+
+
+### Features
+
+* add Azure Managed Redis resource type ([bc8d18d](https://github.com/conplementAG/cops-hq/commit/bc8d18dbe49d70168b64e9108378098f6d1bcaa8))
+
 ## [2.38.1](https://github.com/conplementAG/cops-hq/compare/v2.38.0...v2.38.1) (2025-10-30)
 
 
