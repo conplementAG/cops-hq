@@ -2,7 +2,8 @@ package copsctl
 
 import (
 	"errors"
-	"github.com/ahmetb/go-linq/v3"
+
+	"github.com/ahmetb/go-linq/v4"
 )
 
 // EnvironmentInfoV2 object is a wrapper over the info environment response in version 2.

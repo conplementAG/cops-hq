@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ahmetb/go-linq/v3"
+	"github.com/ahmetb/go-linq/v4"
 	"github.com/conplementag/cops-hq/v2/pkg/naming/resources"
 )
 

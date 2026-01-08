@@ -1,12 +1,13 @@
 package naming
 
 import (
-	"github.com/ahmetb/go-linq/v3"
+	"strings"
+
+	"github.com/ahmetb/go-linq/v4"
 	"github.com/conplementag/cops-hq/v2/internal"
 	"github.com/conplementag/cops-hq/v2/pkg/naming/patterns"
 	"github.com/conplementag/cops-hq/v2/pkg/naming/regions"
 	"github.com/conplementag/cops-hq/v2/pkg/naming/resources"
-	"strings"
 )
 
 type Service struct {
