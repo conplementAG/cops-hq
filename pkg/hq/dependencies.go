@@ -21,13 +21,13 @@ import (
 // copsctl -> can be set to latest version
 // sops -> can be set to latest version
 const (
-	ExpectedMinAzureCliVersion  = "2.76.0" // 10/2025  latest version 2.77.0 has issues https://github.com/Azure/azure-cli/issues/32045
-	ExpectedMinTerraformVersion = "1.12.0" // 10/2025 - allow previous version
-	ExpectedMinHelmVersion      = "3.18.0" // 10/2025 - allow previous version
-	ExpectedMinKubectlVersion   = "1.32.0" // 10/2025
-	ExpectedMinKubeloginVersion = "0.2.10" // 10/2025
-	ExpectedMinCopsctlVersion   = "0.15.0" // 10/2025
-	ExpectedMinSopsVersion      = "3.11.0" // 10/2025
+	ExpectedMinAzureCliVersion  = "2.81.0" // 01/2026
+	ExpectedMinTerraformVersion = "1.13.0" // 01/2026 - allow previous version
+	ExpectedMinHelmVersion      = "3.18.0" // 01/2026 - allow previous version
+	ExpectedMinKubectlVersion   = "1.33.0" // 01/2026
+	ExpectedMinKubeloginVersion = "0.2.12" // 01/2026
+	ExpectedMinCopsctlVersion   = "0.16.0" // 01/2026
+	ExpectedMinSopsVersion      = "3.11.0" // 01/2026
 )
 
 func (hq *hqContainer) CheckToolingDependencies() error {

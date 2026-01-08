@@ -3,14 +3,16 @@ package terraform
 import (
 	"errors"
 	"fmt"
-	"github.com/conplementag/cops-hq/v2/pkg/commands"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/conplementag/cops-hq/v2/pkg/commands"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 const projectName = "test"
@@ -266,7 +268,14 @@ func (e *executorMock) Execute(command string) (string, error) {
 
 	if strings.Contains(command, " plan ") {
 		if e.planHasChanges {
-			return "Terraform will perform the following actions ... To perform exactly these actions, run the following command to apply", exec.Command("bash", "-c", "exit 2").Run()
+			// Simulate terraform plan exit code 2 (changes present) - cross-platform compatible
+			var cmd *exec.Cmd
+			if runtime.GOOS == "windows" {
+				cmd = exec.Command("cmd", "/c", "exit 2")
+			} else {
+				cmd = exec.Command("sh", "-c", "exit 2")
+			}
+			return "Terraform will perform the following actions ... To perform exactly these actions, run the following command to apply", cmd.Run()
 		} else {
 			return "Your infrastructure matches the configuration. ... found no differences, so no changes are needed", nil
 		}

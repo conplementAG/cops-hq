@@ -1,11 +1,12 @@
 package cmdutil
 
 import (
-	"github.com/avast/retry-go/v4"
-	"github.com/conplementag/cops-hq/v2/pkg/error_handling"
-	"github.com/sirupsen/logrus"
 	"os/exec"
 	"time"
+
+	"github.com/avast/retry-go/v5"
+	"github.com/conplementag/cops-hq/v2/pkg/error_handling"
+	"github.com/sirupsen/logrus"
 )
 
 // ExecuteFunctionWithRetry - reruns a function in case of error and logs error
@@ -20,14 +21,13 @@ func ExecuteFunctionWithRetry(function func() error, maxAttempts uint) error {
 		error_handling.PanicOnAnyError = false
 	}
 
-	return retry.Do(function,
+	return retry.New(
 		retry.Delay(time.Second),
 		retry.DelayType(retry.BackOffDelay),
 		retry.OnRetry(func(n uint, err error) {
-			logrus.Infof("Retry %d - happend because of %s", n+1, err)
+			logrus.Infof("Retry %d - happened because of %s", n+1, err)
 		}),
-		retry.Attempts(maxAttempts),
-	)
+		retry.Attempts(maxAttempts)).Do(function)
 }
 
 // ExecuteWithRetry reruns a function in case of error and logs error

@@ -1,9 +1,11 @@
+# syntax=docker/dockerfile:1
+# check=skip=FromPlatformFlagConstDisallowed
 # using --platform to force AMD64 architecture, even as this will produce a warning, for following reasons:
 #  - MacOS users using M* processors will probably get issues due to pulling ARM architecture images per default
 #  - we would pass the linux/amd64 as the build variable to remove the warning, but since this here is a "boilerplate" 
 #    image, it is meant to be copy pasted in the projects, where teams can still adjust the image and use the ${BUILDPLATFORM}
 #    variable. Check https://docs.docker.com/reference/build-checks/from-platform-flag-const-disallowed/ for reference.
-FROM --platform=linux/amd64 golang:1.24.6-bullseye
+FROM --platform=linux/amd64 golang:1.25.5-bookworm
 
 RUN apt-get update && \
     apt-get install lsb-release unzip -y
@@ -15,17 +17,16 @@ RUN apt-get update
 ################## Tooling prerequisites  ######################
 # Azure Cli
 # https://github.com/Azure/azure-cli/releases
-# 2.77.0 has issues https://github.com/Azure/azure-cli/issues/32045
-ARG AZURE_CLI_VERSION=2.76.0
+ARG AZURE_CLI_VERSION=2.81.0
 RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" > /etc/apt/sources.list.d/azure-cli.list && \
     curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     apt-get install apt-transport-https  && \
-    apt-get update && apt-get install -y azure-cli=${AZURE_CLI_VERSION}-1~bullseye  && \
+    apt-get update && apt-get install -y azure-cli=${AZURE_CLI_VERSION}-1~bookworm  && \
     az version
 
 # terraform
 # https://releases.hashicorp.com/terraform/
-ARG TERRAFORM_VERSION=1.13.3
+ARG TERRAFORM_VERSION=1.14.3
 RUN curl -L https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip --output terraform.zip && \
     unzip terraform.zip && \
     mv terraform /usr/local/bin && \
@@ -34,14 +35,14 @@ RUN curl -L https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraf
 # k8s CLI
 # You must use a kubectl version that is within one minor version difference of your cluster.
 # For example, a v1.24 client can communicate with v1.23, v1.24, and v1.25 control planes.
-ARG KUBECTL_VERSION=v1.33.5
+ARG KUBECTL_VERSION=v1.33.6
 RUN curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl  && \
     install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl  && \
     kubectl version --client=true -o=json
 
 # kubelogin CLI
-ARG KUBELOGIN_VERSION=v0.2.10
-ARG KUBELOGIN_SHA256=d765147460b8719b34cb35e8bc6d9d7c3b8f53bd1a1b9f1e70069e22bd1b6c03
+ARG KUBELOGIN_VERSION=v0.2.14
+ARG KUBELOGIN_SHA256=0c204b94f74a609ccbb0354b84acacf5f26a25d5cae15e68272487c7119fec6d
 RUN curl -LO https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip  && \
     echo "${KUBELOGIN_SHA256} kubelogin-linux-amd64.zip" | sha256sum -c && \
     unzip kubelogin-linux-amd64.zip -d kubelogin && \
@@ -50,14 +51,15 @@ RUN curl -LO https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VE
     kubelogin --version
 
 # helm
-ARG HELM_VERSION=3.19.0
+ARG HELM_VERSION=4.0.4
 RUN curl -L  https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz --output helm.tar.gz && \
     tar xvzf helm.tar.gz && \
     mv linux-amd64/helm /usr/local/bin && \
     helm version
 
 # copsctl
-ARG COPSCTL_VERSION=0.15.0
+ARG COPSCTL_VERSION=0.16.0
+# it's ok that this version is behind one or two minor version of the latest release, because this is just an example dockerfile
 RUN curl -LO https://github.com/conplementAG/copsctl/releases/download/v${COPSCTL_VERSION}/copsctl_Linux_x86_64.tar.gz && \
     tar xvzf copsctl_Linux_x86_64.tar.gz && \
     mv copsctl $GOPATH/bin && \
@@ -96,4 +98,3 @@ RUN go test ./...
 # set back to command line tool root, because this is from where we could execute the commands in the future
 WORKDIR /src/cmd/example-infra
 CMD [ "/bin/bash" ]
-

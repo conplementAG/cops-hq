@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -40,18 +41,34 @@ func TestChattyTestSuite(t *testing.T) {
 }
 
 func (s *ExecutorTestSuite) Test_ExecuteNormalCommand() {
-	s.exec.Execute("ls -la")
+	// Use cross-platform command
+	if runtime.GOOS == "windows" {
+		s.exec.Execute("dir")
+	} else {
+		s.exec.Execute("ls -la")
+	}
 }
 
 func (s *ExecutorTestSuite) Test_ReturnsCommandStdoutOutput() {
-	out, _ := s.exec.Execute("echo test")
-	s.Equal("test", out)
+	var cmd string
+	if runtime.GOOS == "windows" {
+		cmd = "cmd /c echo test"
+	} else {
+		cmd = "echo test"
+	}
+	out, _ := s.exec.Execute(cmd)
+	s.Equal("test", strings.TrimSpace(out))
 }
 
 func (s *ExecutorTestSuite) Test_OsExecCommandsAreCorrectlyExecuted() {
-	cmd := exec.Command("echo", "test")
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		cmd = exec.Command("cmd", "/c", "echo test")
+	} else {
+		cmd = exec.Command("echo", "test")
+	}
 	out, _ := s.exec.ExecuteCmd(cmd)
-	s.Equal("test", out)
+	s.Equal("test", strings.TrimSpace(out))
 }
 
 func (s *ExecutorTestSuite) Test_NotFoundCommandsFailWithErrorsAndNoOutput() {
@@ -62,7 +79,12 @@ func (s *ExecutorTestSuite) Test_NotFoundCommandsFailWithErrorsAndNoOutput() {
 }
 
 func (s *ExecutorTestSuite) Test_ExecuteCommandInTTYMode() {
-	s.exec.ExecuteTTY("ls -la") // simply run the command, confirm it does not fail
+	// Use cross-platform command - simply run the command, confirm it does not fail
+	if runtime.GOOS == "windows" {
+		s.exec.ExecuteTTY("dir")
+	} else {
+		s.exec.ExecuteTTY("ls -la")
+	}
 }
 
 // func (s *ExecutorTestSuite) Test_ExecuteCommandWithArgumentsWithSpacesAndQuotations() {
@@ -72,7 +94,13 @@ func (s *ExecutorTestSuite) Test_ExecuteCommandInTTYMode() {
 // }
 
 func (s *ExecutorTestSuite) Test_SuccessfulCommandReturnNoErrors() {
-	_, err := s.exec.Execute("echo test")
+	var cmd string
+	if runtime.GOOS == "windows" {
+		cmd = "cmd /c echo test"
+	} else {
+		cmd = "echo test"
+	}
+	_, err := s.exec.Execute(cmd)
 	s.NoError(err)
 }
 
@@ -84,14 +112,27 @@ func (s *ExecutorTestSuite) Test_SuccessfulCommandReturnNoErrors() {
 // }
 
 func (s *ExecutorTestSuite) Test_CollectsBothStdErrAndStdOutOnError() {
-	_, err := s.exec.Execute("bash -c \"{ echo 'This is standard output'; echo 'This is standard error' >&2; ls this-file-does-not-exist; }\"")
+	var cmd string
+	if runtime.GOOS == "windows" {
+		// Windows: Use PowerShell or cmd to produce stdout, stderr, and error
+		cmd = "cmd /c \"echo This is standard output && echo This is standard error 1>&2 && dir this-file-does-not-exist\""
+	} else {
+		cmd = "bash -c \"{ echo 'This is standard output'; echo 'This is standard error' >&2; ls this-file-does-not-exist; }\""
+	}
+	_, err := s.exec.Execute(cmd)
 	s.Error(err)
 	s.Contains(err.Error(), "This is standard output")
 	s.Contains(err.Error(), "This is standard error")
 }
 
 func (s *ExecutorTestSuite) Test_ErrorHasExitErrorWrapped() {
-	_, err := s.exec.Execute("bash -c \"exit 5\"")
+	var cmd string
+	if runtime.GOOS == "windows" {
+		cmd = "cmd /c \"exit 5\""
+	} else {
+		cmd = "bash -c \"exit 5\""
+	}
+	_, err := s.exec.Execute(cmd)
 
 	var exitErr *exec.ExitError
 	errors.As(err, &exitErr)
@@ -163,5 +204,9 @@ func (s *ExecutorTestSuite) Test_AskUserToConfirmWithKeyword() {
 func Test_QuietExecutorWorksAsWell(t *testing.T) {
 	logger := logging.Init(testLogFileName)
 	e := NewQuiet(testLogFileName, logger)
-	e.Execute("ls -la")
+	if runtime.GOOS == "windows" {
+		e.Execute("dir")
+	} else {
+		e.Execute("ls -la")
+	}
 }
