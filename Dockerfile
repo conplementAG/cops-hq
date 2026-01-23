@@ -17,7 +17,7 @@ RUN apt-get update
 ################## Tooling prerequisites  ######################
 # Azure Cli
 # https://github.com/Azure/azure-cli/releases
-ARG AZURE_CLI_VERSION=2.81.0
+ARG AZURE_CLI_VERSION=2.80.0
 RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" > /etc/apt/sources.list.d/azure-cli.list && \
     curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     apt-get install apt-transport-https  && \
