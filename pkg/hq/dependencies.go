@@ -21,7 +21,7 @@ import (
 // copsctl -> can be set to latest version
 // sops -> can be set to latest version
 const (
-	ExpectedMinAzureCliVersion  = "2.81.0" // 01/2026
+	ExpectedMinAzureCliVersion  = "2.80.0" // 01/2026 - note: winget does not offer the very latest version yet
 	ExpectedMinTerraformVersion = "1.13.0" // 01/2026 - allow previous version
 	ExpectedMinHelmVersion      = "3.18.0" // 01/2026 - allow previous version
 	ExpectedMinKubectlVersion   = "1.33.0" // 01/2026
