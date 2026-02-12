@@ -108,11 +108,19 @@ func (h *helmWrapper) GetVariablesOverrideFileName() string {
 }
 
 func (h *helmWrapper) getValuesFilePath() string {
-	return filepath.Join(h.helmDirectory, getVariablesFileName())
+	if( h.deploymentSettings.OverrideValuePath != "" ) {
+		return filepath.Join(h.deploymentSettings.OverrideValuePath, getVariablesFileName())
+	} else {
+		return filepath.Join(h.helmDirectory, getVariablesFileName())
+	}
 }
 
 func (h *helmWrapper) getValuesOverrideFilePath() string {
-	return filepath.Join(h.helmDirectory, h.GetVariablesOverrideFileName())
+	if( h.deploymentSettings.OverrideValuePath != "" ) {
+		return filepath.Join(h.deploymentSettings.OverrideValuePath, h.GetVariablesOverrideFileName())
+	} else {
+		return filepath.Join(h.helmDirectory, h.GetVariablesOverrideFileName())
+	}
 }
 
 func getVariablesFileName() string {

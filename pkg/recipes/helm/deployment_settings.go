@@ -13,6 +13,8 @@ type DeploymentSettings struct {
 	WaitForJobs bool
 	// time to wait for any individual Kubernetes operation (like Jobs for hooks)
 	Timeout time.Duration
+	// Override path to values.yaml/values.override.yaml
+	OverrideValuePath string
 }
 
 var DefaultDeploymentSettings = DeploymentSettings{
@@ -21,4 +23,5 @@ var DefaultDeploymentSettings = DeploymentSettings{
 	Wait:        false,
 	WaitForJobs: false,
 	Timeout:     5 * time.Minute,
+	OverrideValuePath: "",
 }
