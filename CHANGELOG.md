@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.41.0](https://github.com/conplementAG/cops-hq/compare/v2.40.1...v2.41.0) (2026-02-13)
+
+
+### Features
+
+* allow to override path for helm values.yaml and override files ([1e90d9e](https://github.com/conplementAG/cops-hq/commit/1e90d9e9ebf61cfb058a4cae225885245bc879c8))
+
 ## [2.40.1](https://github.com/conplementAG/cops-hq/compare/v2.40.0...v2.40.1) (2026-01-23)
 
 
