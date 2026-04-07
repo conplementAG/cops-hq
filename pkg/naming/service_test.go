@@ -1,10 +1,11 @@
 package naming
 
 import (
+	"testing"
+
 	"github.com/conplementag/cops-hq/v2/pkg/naming/patterns"
 	"github.com/conplementag/cops-hq/v2/pkg/naming/resources"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func Test_GenerateResourceName(t *testing.T) {
@@ -85,6 +86,22 @@ func Test_GenerateResourceName(t *testing.T) {
 			args{"front", "test%name", "b", patterns.Normal, resources.StorageBackupVault}},
 		{"storage backup vault name - to long", "", NewNamingError("Max length of 50 chars for name 'acme-front-b-bnuNNUp91QVMsnkwCAdkAcHadVBjH01oXrECzqXEFTKRjkQ9id-weu-dev-sbv' exceeded"),
 			args{"front", "bnuNNUp91QVMsnkwCAdkAcHadVBjH01oXrECzqXEFTKRjkQ9id", "b", patterns.Normal, resources.StorageBackupVault}},
+		{"postgres server lowercase", "acme-front-b-test-weu-dev-psqls", nil,
+			args{"front", "test", "b", patterns.Normal, resources.PostgresServer}},
+		{"postgres server enforces lowercase", "acme-front-b-thename-weu-dev-psqls", nil,
+			args{"front", "TheName", "b", patterns.Normal, resources.PostgresServer}},
+		{"postgres database", "acme-front-b-test-weu-dev-psqldb", nil,
+			args{"front", "test", "b", patterns.Normal, resources.PostgresDatabase}},
+		{"postgres database enforces lowercase", "acme-front-b-thename-weu-dev-psqldb", nil,
+			args{"front", "TheName", "b", patterns.Normal, resources.PostgresDatabase}},
+		{"postgres server has invalid char", "", NewNamingError("Invalid char in name 'acme-front-b-test%name-weu-dev-psqls' used"),
+			args{"front", "test%name", "b", patterns.Normal, resources.PostgresServer}},
+		{"postgres server - too long", "", NewNamingError("Max length of 63 chars for name 'acme-front-b-bnunnup91qvmsnkwcadkachadvbjh01oxreczqxeftkrjkq9id-weu-dev-psqls' exceeded"),
+			args{"front", "bnuNNUp91QVMsnkwCAdkAcHadVBjH01oXrECzqXEFTKRjkQ9id", "b", patterns.Normal, resources.PostgresServer}},
+		{"postgres database has invalid char", "", NewNamingError("Invalid char in name 'acme-front-b-test%name-weu-dev-psqldb' used"),
+			args{"front", "test%name", "b", patterns.Normal, resources.PostgresDatabase}},
+		{"postgres database - too long", "", NewNamingError("Max length of 63 chars for name 'acme-front-b-bnunnup91qvmsnkwcadkachadvbjh01oxreczqxeftkrjkq9id-weu-dev-psqldb' exceeded"),
+			args{"front", "bnuNNUp91QVMsnkwCAdkAcHadVBjH01oXrECzqXEFTKRjkQ9id", "b", patterns.Normal, resources.PostgresDatabase}},
 	}
 
 	for _, tt := range tests {
