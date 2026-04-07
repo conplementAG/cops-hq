@@ -21,13 +21,13 @@ import (
 // copsctl -> can be set to latest version
 // sops -> can be set to latest version
 const (
-	ExpectedMinAzureCliVersion  = "2.80.0" // 01/2026 - note: winget does not offer the very latest version yet
-	ExpectedMinTerraformVersion = "1.13.0" // 01/2026 - allow previous version
-	ExpectedMinHelmVersion      = "3.18.0" // 01/2026 - allow previous version
-	ExpectedMinKubectlVersion   = "1.33.0" // 01/2026
-	ExpectedMinKubeloginVersion = "0.2.12" // 01/2026
-	ExpectedMinCopsctlVersion   = "0.16.0" // 01/2026
-	ExpectedMinSopsVersion      = "3.11.0" // 01/2026
+	ExpectedMinAzureCliVersion  = "2.84.0" // 04/2026 - note: winget does not offer the very latest version yet
+	ExpectedMinTerraformVersion = "1.14.0" // 04/2026 - allow previous version
+	ExpectedMinHelmVersion      = "3.20.0" // 04/2026 - allow previous version
+	ExpectedMinKubectlVersion   = "1.33.6" // 04/2026
+	ExpectedMinKubeloginVersion = "0.2.13" // 04/2026
+	ExpectedMinCopsctlVersion   = "0.19.0" // 04/2026
+	ExpectedMinSopsVersion      = "3.12.1" // 04/2026
 )
 
 func (hq *hqContainer) CheckToolingDependencies() error {
@@ -252,7 +252,7 @@ func (hq *hqContainer) checkVim() error {
 	error_handling.PanicOnAnyError = false
 
 	// Result is ignored, because we simply need to check if installed, which should return no errors.
-	// Checking for correct version like for other dependencies is not required here.
+	// Checking for the correct version like for other dependencies is not required here.
 	_, err := hq.Executor.Execute("vim --version")
 
 	error_handling.PanicOnAnyError = previousPanicSetting
