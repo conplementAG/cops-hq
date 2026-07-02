@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.43.0](https://github.com/conplementAG/cops-hq/compare/v2.42.0...v2.43.0) (2026-07-02)
+
+
+### Features
+
+* **tf:** add new parameter "blobPublicAccess" and "crossTenantReplication" ([8a0202b](https://github.com/conplementAG/cops-hq/commit/8a0202b28f536b8e047d2f7ee988e9a4e4f03bca))
+
 ## [2.42.0](https://github.com/conplementAG/cops-hq/compare/v2.41.0...v2.42.0) (2026-04-07)
 
 
