@@ -168,6 +168,20 @@ func (tf *terraformWrapper) Init() error {
 		storageAccountCreateCmd.Args = append(storageAccountCreateCmd.Args, "--require-infrastructure-encryption") // infra encryption will add another layer of encryption at rest
 	}
 
+	// set public access + cross-tenant replication explicitly so guardrail policies that require
+	// these to be false are satisfied (the create is a full PUT, so omitting them is not enough)
+	blobPublicAccess := "false"
+	if tf.storageSettings.AllowBlobPublicAccess {
+		blobPublicAccess = "true"
+	}
+	crossTenantReplication := "false"
+	if tf.storageSettings.AllowCrossTenantReplication {
+		crossTenantReplication = "true"
+	}
+	storageAccountCreateCmd.Args = append(storageAccountCreateCmd.Args,
+		"--allow-blob-public-access", blobPublicAccess,
+		"--allow-cross-tenant-replication", crossTenantReplication)
+
 	// using ExecuteCmd to skip the escaping logic of "Execute"
 	// the --tags argument does not follow the usual --argument value semantics (value(s) contain equal (=) sign and could also contain spaces)
 	_, err := tf.executor.ExecuteCmd(storageAccountCreateCmd)

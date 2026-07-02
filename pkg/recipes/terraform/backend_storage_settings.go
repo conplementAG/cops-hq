@@ -10,8 +10,10 @@ type BackendStorageSettings struct {
 	// List of IPs or CIDRs to be added to network accesslist. Networking restrictions are applied when first IP or CIDR given
 	// Small address ranges using "/31" or "/32" prefix sizes are not supported.
 	// These ranges should be configured using individual IP address rules without prefix specified.
-	AllowedIpAddresses        []string
-	ContainerCreateRetryCount uint
+	AllowedIpAddresses          []string
+	ContainerCreateRetryCount   uint
+	AllowBlobPublicAccess       bool
+	AllowCrossTenantReplication bool
 }
 
 var DefaultBackendStorageSettings = BackendStorageSettings{
@@ -22,4 +24,6 @@ var DefaultBackendStorageSettings = BackendStorageSettings{
 	BlobContainerKey:                "terraform.tfstate",
 	AllowedIpAddresses:              []string{},
 	ContainerCreateRetryCount:       10,
+	AllowBlobPublicAccess:           false,
+	AllowCrossTenantReplication:     false,
 }
