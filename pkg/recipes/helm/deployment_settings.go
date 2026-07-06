@@ -11,6 +11,8 @@ type DeploymentSettings struct {
 	Wait bool
 	// if set, will wait until all Jobs have been completed before marking the release as successful.
 	WaitForJobs bool
+	// if set, will force conflicts during server-side apply to take ownership of resources managed by other field managers.
+	ForceConflicts bool
 	// time to wait for any individual Kubernetes operation (like Jobs for hooks)
 	Timeout time.Duration
 	// Override path to values.yaml/values.override.yaml
@@ -18,10 +20,11 @@ type DeploymentSettings struct {
 }
 
 var DefaultDeploymentSettings = DeploymentSettings{
-	Debug:       false,
-	DryRun:      false,
-	Wait:        false,
-	WaitForJobs: false,
-	Timeout:     5 * time.Minute,
+	Debug:             false,
+	DryRun:            false,
+	Wait:              false,
+	WaitForJobs:       false,
+	ForceConflicts:    false,
+	Timeout:           5 * time.Minute,
 	OverrideValuePath: "",
 }
