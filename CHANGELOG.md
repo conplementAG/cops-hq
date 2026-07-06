@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.44.0](https://github.com/conplementAG/cops-hq/compare/v2.43.0...v2.44.0) (2026-07-06)
+
+
+### Features
+
+* **helm:** add flag to allow force getting ownership ([f241044](https://github.com/conplementAG/cops-hq/commit/f241044060fe67b33464fb89cb2477b79e15eeed))
+
 ## [2.43.0](https://github.com/conplementAG/cops-hq/compare/v2.42.0...v2.43.0) (2026-07-02)
 
 
