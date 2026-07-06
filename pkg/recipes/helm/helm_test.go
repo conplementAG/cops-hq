@@ -125,6 +125,24 @@ func Test_DeployExecutesExpectedCommandWithWaitAndTimeout(t *testing.T) {
 	executorMock.AssertExpectations(t)
 }
 
+func Test_DeployExecutesExpectedCommandWithForceConflicts(t *testing.T) {
+	var deploymentSettings = DefaultDeploymentSettings
+	deploymentSettings.ForceConflicts = true
+	h, executorMock := createWithDeploymentSettings("project", deploymentSettings)
+	// helm upgrade with force-conflicts flag is expected
+	executorMock.On("Execute", mock.MatchedBy(func(command string) bool {
+		return strings.Contains(command, "helm upgrade") && strings.Contains(command, "--force-conflicts")
+	})).Once()
+
+	// Act
+	err := h.Deploy()
+
+	// Assert
+	assert.NoError(t, err)
+
+	executorMock.AssertExpectations(t)
+}
+
 func Test_GetVariablesOverrideFileNameReturnsSomething(t *testing.T) {
 	h, executorMock := createSimpleHelmWithDefaultSettings("project")
 	// helm upgrade with one value file is expected

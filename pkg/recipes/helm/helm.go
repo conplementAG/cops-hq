@@ -89,6 +89,10 @@ func (h *helmWrapper) Deploy() error {
 		helmCmd = fmt.Sprintf("%s --wait-for-jobs", helmCmd)
 	}
 
+	if h.deploymentSettings.ForceConflicts {
+		helmCmd = fmt.Sprintf("%s --force-conflicts", helmCmd)
+	}
+
 	var err error
 	if h.deploymentSettings.Wait {
 		_, err = h.executor.ExecuteWithProgressInfo(helmCmd)
