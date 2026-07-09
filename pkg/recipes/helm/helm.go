@@ -90,7 +90,7 @@ func (h *helmWrapper) Deploy() error {
 	}
 
 	if h.deploymentSettings.ForceConflicts {
-		helmCmd = fmt.Sprintf("%s --force-conflicts", helmCmd)
+		helmCmd = fmt.Sprintf("%s --force-conflicts --server-side true", helmCmd)
 	}
 
 	var err error

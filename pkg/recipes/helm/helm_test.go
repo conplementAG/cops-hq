@@ -131,7 +131,7 @@ func Test_DeployExecutesExpectedCommandWithForceConflicts(t *testing.T) {
 	h, executorMock := createWithDeploymentSettings("project", deploymentSettings)
 	// helm upgrade with force-conflicts flag is expected
 	executorMock.On("Execute", mock.MatchedBy(func(command string) bool {
-		return strings.Contains(command, "helm upgrade") && strings.Contains(command, "--force-conflicts")
+		return strings.Contains(command, "helm upgrade") && strings.Contains(command, "--force-conflicts") && strings.Contains(command, "--server-side true")
 	})).Once()
 
 	// Act
