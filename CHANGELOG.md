@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.45.0](https://github.com/conplementAG/cops-hq/compare/v2.44.1...v2.45.0) (2026-07-09)
+
+
+### Features
+
+* **naming:** add signalr to naming convention ([2c12482](https://github.com/conplementAG/cops-hq/commit/2c12482ca5a7a5b1226c6f5381b62ca14c64b460))
+
 ## [2.44.1](https://github.com/conplementAG/cops-hq/compare/v2.44.0...v2.44.1) (2026-07-09)
 
 
