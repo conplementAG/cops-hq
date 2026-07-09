@@ -46,4 +46,5 @@ const (
 	NetworkInterfaceCard          AzureResourceType = "nic"
 	AppServicePlan                AzureResourceType = "asp"
 	AppService                    AzureResourceType = "as"
+	SignalR                       AzureResourceType = "sigr"
 )

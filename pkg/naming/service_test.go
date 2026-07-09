@@ -102,6 +102,12 @@ func Test_GenerateResourceName(t *testing.T) {
 			args{"front", "test%name", "b", patterns.Normal, resources.PostgresDatabase}},
 		{"postgres database - too long", "", NewNamingError("Max length of 63 chars for name 'acme-front-b-bnunnup91qvmsnkwcadkachadvbjh01oxreczqxeftkrjkq9id-weu-dev-psqldb' exceeded"),
 			args{"front", "bnuNNUp91QVMsnkwCAdkAcHadVBjH01oXrECzqXEFTKRjkQ9id", "b", patterns.Normal, resources.PostgresDatabase}},
+		{"signalr", "acme-front-b-test-weu-dev-sigr", nil,
+			args{"front", "test", "b", patterns.Normal, resources.SignalR}},
+		{"signalr has invalid char", "", NewNamingError("Invalid char in name 'acme-front-b-test%name-weu-dev-sigr' used"),
+			args{"front", "test%name", "b", patterns.Normal, resources.SignalR}},
+		{"signalr - too long", "", NewNamingError("Max length of 63 chars for name 'acme-front-b-bnuNNUp91QVMsnkwCAdkAcHadVBjH01oXrECzqXEFTKRjkQ9id-weu-dev-sigr' exceeded"),
+			args{"front", "bnuNNUp91QVMsnkwCAdkAcHadVBjH01oXrECzqXEFTKRjkQ9id", "b", patterns.Normal, resources.SignalR}},
 	}
 
 	for _, tt := range tests {

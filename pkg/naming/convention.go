@@ -66,6 +66,7 @@ var namingConventions = []namingConvention{
 	{resources.NetworkInterfaceCard, 2, 64, true, true, true, CaseInsensitive},
 	{resources.AppServicePlan, 1, 60, true, true, false, CaseInsensitive},
 	{resources.AppService, 2, 43, true, true, false, CaseInsensitive},
+	{resources.SignalR, 3, 63, true, true, false, CaseInsensitive},
 }
 
 func findNamingConvention(resourceType resources.AzureResourceType) namingConvention {
