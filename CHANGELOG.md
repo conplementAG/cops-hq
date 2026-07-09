@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.44.1](https://github.com/conplementAG/cops-hq/compare/v2.44.0...v2.44.1) (2026-07-09)
+
+
+### Bug Fixes
+
+* **helm:** add  "--server-side true" in helm when --force-conflicts is used ([8533814](https://github.com/conplementAG/cops-hq/commit/8533814dff63b6f2364aabb975a3a3bb34568f01))
+
 ## [2.44.0](https://github.com/conplementAG/cops-hq/compare/v2.43.0...v2.44.0) (2026-07-06)
 
 
