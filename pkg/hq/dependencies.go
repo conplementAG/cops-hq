@@ -21,13 +21,13 @@ import (
 // copsctl -> can be set to latest version
 // sops -> can be set to latest version
 const (
-	ExpectedMinAzureCliVersion  = "2.84.0" // 04/2026 - note: winget does not offer the very latest version yet
-	ExpectedMinTerraformVersion = "1.14.0" // 04/2026 - allow previous version
-	ExpectedMinHelmVersion      = "3.20.0" // 04/2026 - allow previous version
-	ExpectedMinKubectlVersion   = "1.33.6" // 04/2026
-	ExpectedMinKubeloginVersion = "0.2.13" // 04/2026
-	ExpectedMinCopsctlVersion   = "0.19.0" // 04/2026
-	ExpectedMinSopsVersion      = "3.12.1" // 04/2026
+	ExpectedMinAzureCliVersion  = "2.88.0" // 07/2026
+	ExpectedMinTerraformVersion = "1.14.0" // 07/2026 - allow previous minor
+	ExpectedMinHelmVersion      = "3.21.0" // 07/2026 - allow previous major, helm 4 has breaking changes
+	ExpectedMinKubectlVersion   = "1.34.7" // 07/2026 - allow previous minor
+	ExpectedMinKubeloginVersion = "0.2.13" // 07/2026 - latest versions not available via winget
+	ExpectedMinCopsctlVersion   = "0.21.0" // 07/2026
+	ExpectedMinSopsVersion      = "3.13.0" // 07/2026
 )
 
 func (hq *hqContainer) CheckToolingDependencies() error {
