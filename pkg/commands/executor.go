@@ -241,8 +241,8 @@ func (e *executor) execute(cmd *exec.Cmd, silent bool, loud bool) (output string
 		multiWritingSteps.Done()
 	}()
 
-	commandError := cmd.Wait()
 	multiWritingSteps.Wait()
+	commandError := cmd.Wait()
 
 	// some consoles always append a \n at the end, but this is safe to be removed
 	cleanedStringOutput := strings.TrimSuffix(stdoutCollector.String(), "\n")
