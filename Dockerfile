@@ -5,7 +5,7 @@
 #  - we would pass the linux/amd64 as the build variable to remove the warning, but since this here is a "boilerplate" 
 #    image, it is meant to be copy pasted in the projects, where teams can still adjust the image and use the ${BUILDPLATFORM}
 #    variable. Check https://docs.docker.com/reference/build-checks/from-platform-flag-const-disallowed/ for reference.
-FROM --platform=linux/amd64 golang:1.26.5-bookworm
+FROM --platform=linux/amd64 golang:1.27.2-bookworm
 
 RUN apt-get update && \
     apt-get install lsb-release unzip -y
@@ -17,7 +17,7 @@ RUN apt-get update
 ################## Tooling prerequisites  ######################
 # Azure Cli
 # https://github.com/Azure/azure-cli/releases
-ARG AZURE_CLI_VERSION=2.88.0
+ARG AZURE_CLI_VERSION=2.91.0
 RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" > /etc/apt/sources.list.d/azure-cli.list && \
     curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     apt-get install apt-transport-https  && \
@@ -26,7 +26,7 @@ RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb
 
 # terraform
 # https://releases.hashicorp.com/terraform/
-ARG TERRAFORM_VERSION=1.15.8
+ARG TERRAFORM_VERSION=1.16.5
 RUN curl -L https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip --output terraform.zip && \
     unzip terraform.zip && \
     mv terraform /usr/local/bin && \
@@ -35,14 +35,14 @@ RUN curl -L https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraf
 # k8s CLI
 # You must use a kubectl version that is within one minor version difference of your cluster.
 # For example, a v1.24 client can communicate with v1.23, v1.24, and v1.25 control planes.
-ARG KUBECTL_VERSION=v1.35.5
+ARG KUBECTL_VERSION=v1.36.5
 RUN curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl  && \
     install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl  && \
     kubectl version --client=true -o=json
 
 # kubelogin CLI
-ARG KUBELOGIN_VERSION=v0.2.19
-ARG KUBELOGIN_SHA256=ebaeff02aa899c5cae6a2b954b64fc02738185319df2570f7dc053451efa4b2f
+ARG KUBELOGIN_VERSION=v0.2.21
+ARG KUBELOGIN_SHA256=934a2a9618e018cb9fbeb14f3e4c28416fdae815df7706df91500e41d234eb66
 RUN curl -LO https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip  && \
     echo "${KUBELOGIN_SHA256} kubelogin-linux-amd64.zip" | sha256sum -c && \
     unzip kubelogin-linux-amd64.zip -d kubelogin && \
@@ -51,7 +51,7 @@ RUN curl -LO https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VE
     kubelogin --version
 
 # helm
-ARG HELM_VERSION=4.2.3
+ARG HELM_VERSION=4.2.4
 RUN curl -L  https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz --output helm.tar.gz && \
     tar xvzf helm.tar.gz && \
     mv linux-amd64/helm /usr/local/bin && \
@@ -66,8 +66,8 @@ RUN curl -LO https://github.com/conplementAG/copsctl/releases/download/v${COPSCT
     copsctl --version
 
 # sops
-ARG SOPS_VERSION=v3.13.2
-ARG SOPS_SHA256=154dfe4cd70554bdd82b98e4cd4acf191d43d01ead6f00a73477aa44c4ac42ef
+ARG SOPS_VERSION=v3.13.3
+ARG SOPS_SHA256=e5bec3346a873ae91d871550f3e698c1aad962aff462a080e40f25fde17fef6b
 RUN curl -LO https://github.com/getsops/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux.amd64 && \
     echo "${SOPS_SHA256} sops-${SOPS_VERSION}.linux.amd64" | sha256sum -c && \
     mv sops-${SOPS_VERSION}.linux.amd64 sops && \
